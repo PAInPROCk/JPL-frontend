@@ -1,0 +1,12 @@
+.allteams-bg{
+    background-image: url('/public/assets/images/stadium bg 4096x2867.jpg');
+    background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  height: 100vh;                        /* Full height */
+  width: 100vw;                         /* Full width */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;  
+}
