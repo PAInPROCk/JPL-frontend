@@ -2,7 +2,7 @@ import React from 'react';
 import Navbar from '../components/Navbar';
 import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
-
+import './Home.css';
 
 
 
@@ -19,12 +19,13 @@ const Home = () => {
   };
 
   return (
-    <div className="container mt-5">
-      <Navbar />
+    <>
+    <Navbar/>
+    <div className="container d-flex p-2 mt-0 home-bg">
+      
       <div className="card" style={{width: '18rem'}}>
         <img src="/assets/images/football-team_16848377.png" className="card-img-top" alt="..." />
         <div className="card-body">
-          <h5 className="card-title"></h5>
           <p className="card-text">
             
           </p>
@@ -35,7 +36,7 @@ const Home = () => {
       <div className="card" style={{width: '18rem'}}>
         <img src="/assets/images/auction_563673.png" className="card-img-top" alt="..." />
         <div className="card-body">
-          <h5 className="card-title"></h5>
+          
           <p className="card-text">
             
           </p>
@@ -46,7 +47,6 @@ const Home = () => {
       <div className="card" style={{width: '18rem'}}>
         <img src="/assets/images/PLAyer.png" className="card-img-top" alt="..." />
         <div className="card-body">
-          <h5 className="card-title"></h5>
           <p className="card-text">
             
           </p>
@@ -55,6 +55,7 @@ const Home = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 

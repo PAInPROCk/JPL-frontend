@@ -3,6 +3,15 @@
   color: white; /* optional to make text visible */
 }
 
+.btn-color{
+  background-color: #EE8C2A;
+
+}
+
+.text-color{
+  color: black;
+}
+
 .login-bg{
     background-image: url('/public/assets/images/stadium bg 4096x2867.jpg');
     background-size: cover;

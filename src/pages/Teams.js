@@ -5,23 +5,61 @@ import Navbar from "../components/Navbar";
 import './AllTeams.css';
 
 const Teams = () =>{
-    return(
-    <>
-    <Navbar/>
-    <div className="allteams-bg">
-        <div className="card" style={{width: '18rem'}}>
-        <img src="/assets/images/PLAyer.png" className="card-img-top" alt="..." />
-        <div className="card-body">
-          <h5 className="card-title"></h5>
-          <p className="card-text">
-            
-          </p>
-          <button className="btn btn-primary">Auction</button>
-          
+    return (
+      <>
+        <Navbar />
+        <div className="allteams-bg">
+          <div className="card" style={{ width: "18rem" }}>
+            <img
+              src="/assets/images/football-team_16848377.png"
+              className="card-img-top"
+              alt="..."
+            />
+            <div className="card-body">
+              
+              <p className="card-text"></p>
+              <button className="btn btn-primary">View Info</button>
+            </div>
+          </div>
+          <div className="card" style={{ width: "18rem" }}>
+            <img
+              src="/assets/images/football-team_16848377.png"
+              className="card-img-top"
+              alt="..."
+            />
+            <div className="card-body">
+              
+              <p className="card-text"></p>
+              <button className="btn btn-primary">View Info</button>
+            </div>
+          </div>
+          <div className="card" style={{ width: "18rem" }}>
+            <img
+              src="/assets/images/football-team_16848377.png"
+              className="card-img-top"
+              alt="..."
+            />
+            <div className="card-body">
+              
+              <p className="card-text"></p>
+              <button className="btn btn-primary">View Info</button>
+            </div>
+          </div>
+          <div className="card" style={{ width: "18rem" }}>
+            <img
+              src="/assets/images/football-team_16848377.png"
+              className="card-img-top"
+              alt="..."
+            />
+            <div className="card-body">
+              
+              <p className="card-text"></p>
+              <button className="btn btn-primary">View Info</button>
+            </div>
+          </div>
         </div>
-      </div>
-      </div>
-    </>
+        
+      </>
     );
 }
 console.log("Teams");

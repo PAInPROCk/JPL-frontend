@@ -16,13 +16,13 @@ const Login =()=>{
 
     return (
         <div className="container d-flex justify-content-center align-itmes-center vh-100 login-bg">
-            <form onSubmit={handleLogin} className="border p-4 rounded shadow login-form">
+            <form onSubmit={handleLogin} className="border border-black p-4 rounded shadow login-form text-color">
                 <h2 className="text-center mb-4">Login to JPL</h2>
                 <div className="mb-3">
                     <label>Email</label>
                     <input 
                         type="email"
-                        className="form-control"
+                        className="form-control border-black"
                         onChange={(e) => setEmail(e.target.value)}
                         required
                     />
@@ -31,12 +31,12 @@ const Login =()=>{
                     <label>Password</label>
                     <input 
                         type="password"
-                        className="form-control"
+                        className="form-control border-black"
                         onChange={(e) => setPassword(e.target.value)}
                         required
                     />
                 </div>
-                <button type="submit" className="btn btn-primary w-100">Login</button>
+                <button type="submit" className="btn btn-color border border-1 border-black w-100">Login</button>
             </form>
         </div>
     );
