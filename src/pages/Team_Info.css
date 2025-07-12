@@ -1,0 +1,55 @@
+.team-info-card {
+  background-size: cover;
+  background-position: center;
+  border-radius: 20px;
+  height: 100vh;
+  width: 100wh;
+}
+
+.team-info-wrapper {
+  background-color: rgba(255, 255, 255, 0.95);
+  border-radius: 15px;
+  width: 100%;
+  max-width: 900px;
+}
+
+.team-logo {
+  width: 300px;
+  height: 300px;
+  object-fit: contain;
+  border-radius: 50%;
+  border: 2px solid #163FA7;
+  background-color: white;
+  padding: 5px;
+}
+
+.info-label {
+  background-color: #F97316; /* Orange */
+  color: white;
+  padding: 10px 20px;
+  border-radius: 15px;
+  font-weight: bold;
+  min-width: 150px;
+  text-align: center;
+  margin-right: 10px;
+}
+
+.info-value {
+  background-color: white;
+  padding: 10px 20px;
+  border-radius: 15px;
+  font-weight: 600;
+  min-width: 150px;
+  text-align: center;
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.row{
+    background-color: rgba(83,98,157, 0.4);
+}
+
+@media (max-width: 768px) {
+  .team-info-card {
+    padding: 1rem;
+  }
+}

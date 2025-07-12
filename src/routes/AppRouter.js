@@ -7,6 +7,7 @@ import Auction from '../pages/Auction';
 import Players from '../pages/Players';
 import Teams from '../pages/Teams';
 import Register from '../pages/Register';
+import Team_Info from '../pages/Team_Info';
 
 const AppRouter = () =>{
     return(
@@ -17,7 +18,8 @@ const AppRouter = () =>{
                 <Route path="/admin" element={<Admin/>}/>
                 <Route path="/auction" element={<Auction/>}/>
                 <Route path="/teams" element={<Teams/>}/>
-                <Route path="/players" element={<Players/>}/>    
+                <Route path="/players" element={<Players/>}/> 
+                <Route path="/team_info" element={<Team_Info/>}/>
             </Routes>
     )
 }
