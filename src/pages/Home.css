@@ -4,9 +4,23 @@
   background-position: center;
   background-repeat: no-repeat;
   height: 100vh;                        /* Full height */
-  width: 100vw;                         /* Full width */
+  width: 100%;                         /* Full width */
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 20px;  
+  padding: 0px;  
+  /* Remove all overflow from body */
+  overflow-x: hidden;
+}
+
+.card-bg{
+     background-color: rgba(83,98,157, 0.3);
+     opacity: 100%;
+     border-radius: 12%;
+     width:fit-content;
+     margin-inline-end: auto;
+}
+
+.card-f{
+  margin-left: 5%;
 }

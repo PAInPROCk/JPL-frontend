@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import {BrowserRouter as Router, Routes, Route} from 'react-router-dom';
-import Navbar from "../components/Navbar";
+import Navbar from "../../components/Navbar";
 import './AllTeams.css';
 import { useNavigate } from 'react-router-dom';
 import './Teams.css';

@@ -21,9 +21,10 @@ const Home = () => {
   return (
     <>
     <Navbar/>
-    <div className="container d-flex p-2 mt-0 home-bg">
+    <div className='home-bg'>
+    <div className="container d-flex p-2 mt-0 ">
       
-      <div className="card" style={{width: '18rem'}}>
+      <div className="card card-bg card-f" style={{width: '18rem'}}>
         <img src="/assets/images/football-team_16848377.png" className="card-img-top" alt="..." />
         <div className="card-body">
           <p className="card-text">
@@ -33,7 +34,7 @@ const Home = () => {
           
         </div>
       </div>
-      <div className="card" style={{width: '18rem'}}>
+      <div className="card card-bg" style={{width: '18rem'}}>
         <img src="/assets/images/auction_563673.png" className="card-img-top" alt="..." />
         <div className="card-body">
           
@@ -44,16 +45,15 @@ const Home = () => {
           
         </div>
       </div>
-      <div className="card" style={{width: '18rem'}}>
+      <div className="card card-bg" style={{width: '18rem'}}>
         <img src="/assets/images/PLAyer.png" className="card-img-top" alt="..." />
         <div className="card-body">
           <p className="card-text">
-            
           </p>
-          <button onClick={playersClick} className="btn btn-primary">Auction</button>
-          
+          <button onClick={playersClick} className="btn btn-primary">Players</button>
         </div>
       </div>
+    </div>
     </div>
     </>
   );

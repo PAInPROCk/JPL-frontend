@@ -4,10 +4,10 @@ import Login from '../components/Login';
 import Navbar from '../components/Navbar';
 import Admin from '../pages/Admin';
 import Auction from '../pages/Auction';
-import Players from '../pages/Players';
-import Teams from '../pages/Teams';
+import Players from '../pages/Players/Players';
+import Teams from '../pages/Teams/Teams';
 import Register from '../pages/Register';
-import Team_Info from '../pages/Team_Info';
+import Team_Info from '../pages/Teams/Team_Info';
 
 const AppRouter = () =>{
     return(

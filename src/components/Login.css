@@ -1,6 +1,10 @@
 .login-form {
   background-color: #53629D;
   color: white; /* optional to make text visible */
+  padding: 20;
+  background-repeat: no-repeat;
+  height: 55%;
+  margin-top: 10%;
 }
 
 .btn-color{
@@ -18,11 +22,11 @@
   background-position: center;
   background-repeat: no-repeat;
   height: 100vh;                        /* Full height */
-  width: 100vw;                         /* Full width */
+  width: 100%;                         /* Full width */
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 20px;  
+  padding: 0px;  
 }
 
 .form{

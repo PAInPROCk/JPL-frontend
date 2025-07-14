@@ -1,7 +1,6 @@
-import React from "react";
-import bgImage from '../assets/images/vecteezy_cricket-stadium_427062.jpg'; 
+import bgImage from '../../assets/images/vecteezy_cricket-stadium_427062.jpg'; // ✅ Correct path
 import "./Team_Info.css";
-import Navbar from "../components/Navbar";
+import Navbar from '../../components/Navbar';
 
 const Team_Info = () => {
   return (

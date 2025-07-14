@@ -15,7 +15,8 @@ const Login =()=>{
     };
 
     return (
-        <div className="container d-flex justify-content-center align-itmes-center vh-100 login-bg">
+        <div className="login-bg">
+        <div className="container d-flex justify-content-center align-itmes-center vh-100 ">
             <form onSubmit={handleLogin} className="border border-black p-4 rounded shadow login-form text-color">
                 <h2 className="text-center mb-4">Login to JPL</h2>
                 <div className="mb-3">
@@ -38,6 +39,7 @@ const Login =()=>{
                 </div>
                 <button type="submit" className="btn btn-color border border-1 border-black w-100">Login</button>
             </form>
+        </div>
         </div>
     );
 };
