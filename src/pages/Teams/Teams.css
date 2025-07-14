@@ -2,7 +2,20 @@
      background-color: rgba(83,98,157, 0.3);
      opacity: 100%;
      border-radius: 12%;
-     width:fit-content;
+     height: auto;
+}
+
+.teams-bg{
+    background-image: url('/public/assets/images/stadium bg 4096x2867.jpg');
+    background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  height: 95vh;                        /* Full height */
+  width: 100%;                         /* Full width */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;  
 }
 
 .img{

@@ -1,0 +1,11 @@
+.players-bg {
+  background-image: url("../../assets/images/vecteezy_cricket-stadium_427062.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+

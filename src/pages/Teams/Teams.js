@@ -1,8 +1,4 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import {BrowserRouter as Router, Routes, Route} from 'react-router-dom';
 import Navbar from "../../components/Navbar";
-import './AllTeams.css';
 import { useNavigate } from 'react-router-dom';
 import './Teams.css';
 
@@ -14,7 +10,7 @@ const Teams = () =>{
     return (
       <>
         <Navbar />
-        <div className="allteams-bg">
+        <div className="teams-bg">
         <div className=" d-flex flex-row">
           <div className="card card-bg me-5" style={{ width: "18rem" }}>
             <img
