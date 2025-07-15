@@ -1,4 +1,4 @@
-.players-bg {
+.players-bg{
   background-image: url("../../assets/images/vecteezy_cricket-stadium_427062.jpg");
   background-size: cover;
   background-position: center;
@@ -11,28 +11,28 @@
   overflow: hidden;
 }
 
-.row{
-  background-color: transparent ;
-  border-radius: 20px;
+.players-card img{
+  background-color: white;
+  padding: 5px;
+  border-radius: 50%;
 }
 
-.col{
-  border-radius: 20px;
-  margin-inline-end: 10px;
-}
 
-.players-card{
-  background-color: rgba(53, 128, 38, 0.35);
-  border: 5px;
-  border-color: black;
+.player-card{
+  background-color: rgba(83, 98, 157, 0.35);      /* Solid card color */
+  border: 1px solid black;        /* Visible border */
   border-radius: 15px;
-  box-shadow: 0 4px 12px rgba(0,0, 0, 0.15);
-  height: 200px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  height: 275px;
+  width: 100%;
+  color: white;
+  padding: 10px;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   transition: transform 0.2s ease-in-out;
+  margin-bottom: 5px;
 }
 
 .players-page {
