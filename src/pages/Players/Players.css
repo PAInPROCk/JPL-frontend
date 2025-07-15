@@ -5,7 +5,56 @@
   background-repeat: no-repeat;
   height: 100vh;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
+  overflow: hidden;
 }
 
+.row{
+  background-color: transparent ;
+  border-radius: 20px;
+}
+
+.col{
+  border-radius: 20px;
+  margin-inline-end: 10px;
+}
+
+.players-card{
+  background-color: rgba(53, 128, 38, 0.35);
+  border: 5px;
+  border-color: black;
+  border-radius: 15px;
+  box-shadow: 0 4px 12px rgba(0,0, 0, 0.15);
+  height: 200px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  transition: transform 0.2s ease-in-out;
+}
+
+.players-page {
+  flex: 1;
+  overflow-y: auto;   /* ✅ Scroll only this */
+  padding: 60px 20px; 
+  padding-top: 0px;
+  margin-top: 70px;
+}
+
+
+.players-card:hover{
+  transform: translateY(-5px);
+}
+
+.players-page::-webkit-scrollbar {
+  width: 8px;
+}
+.players-page::-webkit-scrollbar-thumb {
+  background-color: #aaa;
+  border-radius: 10px;
+}
+.players-page::-webkit-scrollbar-track {
+  background: transparent;
+}

@@ -10,7 +10,7 @@
     background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  height: 95vh;                        /* Full height */
+  height: 100vh;                        /* Full height */
   width: 100%;                         /* Full width */
   display: flex;
   justify-content: center;
