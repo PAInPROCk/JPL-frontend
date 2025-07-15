@@ -1,5 +1,5 @@
 import Navbar from "../../components/Navbar";
-import { useNavigate } from "react-router-dom";
+
 import "./Players.css";
 
 import PlayerCard from "../../components/PlayerCard";
@@ -11,7 +11,7 @@ const Players = () => {
     { name: "Player 3", jersey: 7, image: "/assets/images/player3.png" },
     { name: "Player 4", jersey: 5, image: "/assets/images/player4.png" },
     { name: "Player 5", jersey: 19, image: "/assets/images/player5.png" },
-     { name: "Player 1", jersey: 10, image: "/assets/images/player1.png" },
+    { name: "Player 1", jersey: 10, image: "/assets/images/player1.png" },
     { name: "Player 2", jersey: 12, image: "/assets/images/player2.png" },
     { name: "Player 3", jersey: 7, image: "/assets/images/player3.png" },
     { name: "Player 4", jersey: 5, image: "/assets/images/player4.png" },
