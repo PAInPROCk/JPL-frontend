@@ -11,8 +11,8 @@ const Navbar = () => {
           <img
             src="/assets/images/cricket.png"
             alt="Player"
-            width="35"
-            height="35"
+            width="37"
+            height="37"
             className="me-1 -100"
           />
         </Link>
@@ -42,7 +42,7 @@ const Navbar = () => {
               </Link>
             </li>
             <li className="nav-item">
-              <Link className="nav-link" to="/auction">
+              <Link className="nav-link" to="/Auction_rule">
                 Auction
               </Link>
             </li>
@@ -62,5 +62,5 @@ const Navbar = () => {
     </header>
   );
 };
-console.log("Navbar");
+
 export default Navbar;

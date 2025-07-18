@@ -1,6 +1,4 @@
-import React from 'react';
 import Navbar from '../components/Navbar';
-import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import './Home.css';
 
@@ -12,7 +10,7 @@ const Home = () => {
   navigate('/teams');
   };
   const auctionClick = () => {
-  navigate('/auction');
+  navigate('/Auction_rule');
   };
   const playersClick = () => {
   navigate('/players');

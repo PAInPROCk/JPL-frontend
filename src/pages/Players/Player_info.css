@@ -10,7 +10,7 @@
 }
 
 .player-info-container {
-  background-color: rgba(83, 98, 157, 0.35);
+  background-color: rgba(72, 89, 158, 0.45);
   border-radius: 20px;
 }
 
@@ -66,7 +66,7 @@
   margin-top: 5px;
 }
 
-.team-logo {
+.team-logo1 {
   width: 50px;
   height: 50px;
   object-fit: contain;

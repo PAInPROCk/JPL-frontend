@@ -59,10 +59,10 @@ const Player_info = () => {
                 <div className="col-12 team-box">
                   <div className="label bg-primary text-white p-2 rounded">Played for Teams</div>
                   <div className="d-flex gap-3 mt-2 flex-wrap">
-                    <img src={teamIcon} className="team-logo" alt="Team" />
-                    <img src={teamIcon} className="team-logo" alt="Team" />
-                    <img src={teamIcon} className="team-logo" alt="Team" />
-                    <img src={teamIcon} className="team-logo" alt="Team" />
+                    <img src={teamIcon} className="team-logo1" alt="Team" />
+                    <img src={teamIcon} className="team-logo1" alt="Team" />
+                    <img src={teamIcon} className="team-logo1" alt="Team" />
+                    <img src={teamIcon} className="team-logo1" alt="Team" />
                   </div>
                 </div>
               </div>
