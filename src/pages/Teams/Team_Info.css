@@ -62,3 +62,78 @@
     padding: 1rem;
   }
 }
+
+
+
+.team-info-bg {
+  background-image: url('../../assets/images/vecteezy_cricket-stadium_427062.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  min-height: 100vh;
+  padding-top: 100px;
+}
+
+.team-info-container {
+  background-color: rgba(72, 89, 158, 0.45);
+  border-radius: 20px;
+}
+
+.team-image {
+  height: 100%;
+  width: 100%;
+  max-width: 270px;
+  border-radius: 50%;
+  border: 0px solid #163FA7;
+  background-color: rgba(39, 216, 78, 0.35);
+  padding: 1px;
+}
+
+.row{
+    background-color: transparent;
+}
+
+.info-box, .stat-box {
+  background-color: white;
+  border-radius: 15px;
+  padding: 0px;
+  text-align: center;
+  font-weight: 500;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  margin-inline-end: 10px;
+}
+
+.green .label {
+  background-color: #22c55e; /* Tailwind green-500 */
+  color: white;
+  padding: 4px;
+  border-radius: 10px;
+  font-weight: bold;
+}
+
+.red .label {
+  background-color: #ef4444; /* Tailwind red-500 */
+  color: white;
+  padding: 4px;
+  border-radius: 10px;
+  font-weight: bold;
+}
+
+.orange .label {
+  background-color: #f97316; /* Tailwind orange-500 */
+  color: white;
+  padding: 4px;
+  border-radius: 10px;
+  font-weight: bold;
+}
+
+.value {
+  font-size: 1rem;
+  margin-top: 5px;
+}
+
+.team-logo1 {
+  width: 50px;
+  height: 50px;
+  object-fit: contain;
+}
