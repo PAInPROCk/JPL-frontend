@@ -1,47 +1,85 @@
-import React, {useState} from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import './Login.css';
+import "./Login.css";
 
-const Login =()=>{
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const navigate = useNavigate();
+const Login = () => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState("false");
 
-    const handleLogin = (e) =>{
-        e.preventDefault();
-         if (email === "admin@example.com" && password === "1234") {
-        navigate('/home');
-         }
-    };
+  const navigate = useNavigate();
 
-    return (
-        <div className="login-bg">
-        <div className="container d-flex justify-content-center align-itmes-center vh-100 ">
-            <form onSubmit={handleLogin} className="border border-black p-4 rounded shadow login-form text-color">
-                <h2 className="text-center mb-4">Login to JPL</h2>
-                <div className="mb-3">
-                    <label>Email</label>
-                    <input 
-                        type="email"
-                        className="form-control border-black"
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                    />
-                </div>
-                <div className="mb-3">
-                    <label>Password</label>
-                    <input 
-                        type="password"
-                        className="form-control border-black"
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                    />
-                </div>
-                <button type="submit" className="btn btn-color border border-1 border-black w-100">Login</button>
-            </form>
-        </div>
-        </div>
-    );
+  const handleLogin = (e) => {
+    e.preventDefault();
+    setError("");
+    if (!email || !password) {
+      setError("Please fill all fields");
+      return;
+    }
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailPattern.test(email)) {
+      setError("Invalid email format");
+      return;
+    }
+
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+
+      if (email === "admin@example.com" && password === "1234") {
+        navigate("/home");
+      } else {
+        setError("Incorrect email or password");
+      }
+    }, 1500);
+  };
+
+  return (
+    <div className="login-bg">
+        
+      <div className="container d-flex justify-content-center align-itmes-center vh-100 ">
+        <form
+          onSubmit={handleLogin}
+          className="border border-black p-4 rounded shadow login-form text-color"
+        >
+            {error && (
+            <div className="alert alert-danger mt-0" role="alert">
+              {error}
+            </div>
+          )}
+          <h2 className="text-center mb-4">Login to JPL</h2>
+          <div className="mb-3">
+            <label>Email</label>
+            <input
+              type="email"
+              className="form-control border-black"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+          <div className="mb-3">
+            <label>Password</label>
+            <input
+              type="password"
+              className="form-control border-black"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+          
+          <button
+            type="submit"
+            className="btn btn-color border border-1 border-black w-100"
+          >
+            {loading ? "Login" : "Loging in..."}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
 };
 
 export default Login;

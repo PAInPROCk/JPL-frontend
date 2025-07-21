@@ -1,8 +1,12 @@
 import Navbar from "../../components/Navbar";
 import './Auction.css';
-
+import { useNavigate } from "react-router-dom";
 
 const Auction = () => {
+  const navigate = useNavigate();
+  const handleClick = () => {
+    navigate('/Sold');
+  };
   return (
     <>
       <Navbar />
@@ -58,6 +62,7 @@ const Auction = () => {
                 <button className="btn btn-success">▶</button>
               </div>
             </div>
+            <button onClick={handleClick}>Sold</button>
           </div>
 
           {/* Notifications */}

@@ -9,6 +9,7 @@ import Register from '../pages/Register';
 import Team_Info from '../pages/Teams/Team_Info';
 import Player_info from '../pages/Players/Player_info';
 import Auction_rule from '../pages/Auction/Auction_rule';
+import Sold from '../components/Sold';
 
 const AppRouter = () =>{
     return(
@@ -23,6 +24,7 @@ const AppRouter = () =>{
                 <Route path='/Player_info' element={<Player_info/>}/>
                 <Route path="/team_info" element={<Team_Info/>}/>
                 <Route path='/Auction_rule' element={<Auction_rule/>}/>
+                <Route path="/Sold" element={<Sold/>}/>
             </Routes>
     )
 }
