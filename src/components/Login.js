@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Login.css";
 
@@ -7,6 +7,7 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState("false");
+  const [showPassword, setShowPassword] = useState(false);
 
   const navigate = useNavigate();
 
@@ -34,6 +35,15 @@ const Login = () => {
       }
     }, 1500);
   };
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => {
+        setError("");
+      }, 2000);
+      return () => clearTimeout(timer);
+      loading="Login";
+    }
+  }, [error]);
 
   return (
     <div className="login-bg">
@@ -62,17 +72,26 @@ const Login = () => {
           <div className="mb-3">
             <label>Password</label>
             <input
-              type="password"
+              type={showPassword ? "text" : "password"}
               className="form-control border-black"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
             />
+            <button
+              type="button"
+              className="btn btn-outline-secondary"
+              onClick={() => setShowPassword(!showPassword)}
+            >
+              {showPassword ? "Hide" : "Show"}
+            </button>
+            
           </div>
           
           <button
             type="submit"
             className="btn btn-color border border-1 border-black w-100"
+            onClick={() => setShowPassword(!showPassword)}
           >
             {loading ? "Login" : "Loging in..."}
           </button>
