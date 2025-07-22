@@ -1,0 +1,75 @@
+.admin-panel{
+    max-width: 600px;
+    margin: 0 auto;
+    background-color: rgba(255,255,255,0.9);
+    border-radius: 15px;
+    padding: 20px;
+}
+
+.admin-panel, .form-check-label{
+    font-weight: 500;
+}
+
+.admin-panel, .form-check-label{
+    margin-left: 10px;
+}
+
+.admin-panel button{
+    width: 100%;
+    font-size: 1.2rem;
+    padding: 10px;
+    border-radius: 10px;
+    transition: background-color 0.3s ease;
+}
+
+.admin-panel button:hover{
+    background-color: #218838;
+}
+
+.text-bg-custom{
+    color: black;
+    font-size: 20px;
+    background-color: #C3FB40;
+}
+
+.admin-bg{
+    background-image: url('/public/assets/images/stadium bg 4096x2867.jpg');
+    background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  height: 100vh;                        /* Full height */
+  width: 100%;                         /* Full width */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0px; 
+  overflow: hidden;
+}
+
+.player-preview-box {
+  max-height: 140px; /* limit height */
+  overflow-y: auto;  /* enable scrolling when too many players */
+  border: 1px solid #ddd; 
+  border-radius: 10px; 
+  background-color: rgba(255, 255, 255, 0.95);
+}
+
+.player-preview-box h5 {
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.player-preview-box ul {
+  padding-left: 0;
+  margin: 0;
+  list-style-type: none;
+}
+
+.player-preview-box li {
+  padding: 8px 12px;
+  border-bottom: 1px solid #eee;
+}
+
+.player-preview-box li:last-child {
+  border-bottom: none;
+}
