@@ -1,23 +1,12 @@
 import Navbar from "../../components/Navbar";
-
+import { useNavigate } from "react-router-dom";
 import "./Players.css";
-
+import players from "./PlayerData";
 import PlayerCard from "../../components/PlayerCard";
 
 const Players = () => {
-  const players = [
-    { name: "Player 1", jersey: 10, image: "/assets/images/player1.png" }, 
-    { name: "Player 2", jersey: 12, image: "/assets/images/player2.png" },
-    { name: "Player 3", jersey: 7, image: "/assets/images/player3.png" },
-    { name: "Player 4", jersey: 5, image: "/assets/images/player4.png" },
-    { name: "Player 5", jersey: 19, image: "/assets/images/player5.png" },
-    { name: "Player 1", jersey: 10, image: "/assets/images/player1.png" },
-    { name: "Player 2", jersey: 12, image: "/assets/images/player2.png" },
-    { name: "Player 3", jersey: 7, image: "/assets/images/player3.png" },
-    { name: "Player 4", jersey: 5, image: "/assets/images/player4.png" },
-    { name: "Player 5", jersey: 19, image: "/assets/images/player5.png" },
-    // ...more players
-  ];
+  const navigate = useNavigate();
+
   return (
     <>
       <Navbar />
@@ -25,8 +14,13 @@ const Players = () => {
         <div className="players-page pt-5">
           <div className="container py-5">
             <div className="row justify-content-center">
-              {players.map((player, index) => (
-                <div className="col-12 col-sm-6 col-md-4 col-lg-3" key={index}>
+              {players.map((player) => (
+                <div
+                  className="col-12 col-sm-6 col-md-4 col-lg-3"
+                  key={player.id}
+                  onClick={() => navigate(`/player_info/${player.id}`)}
+                  style={{ cursor: "pointer" }}
+                >
                   <PlayerCard player={player} />
                 </div>
               ))}

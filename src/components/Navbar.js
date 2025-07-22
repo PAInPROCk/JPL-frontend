@@ -1,18 +1,23 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import "./Navbar.css";
+import { useNavigate } from "react-router-dom";
 
 const NavbarComponent = () => {
   const [expanded, setExpanded] = useState(false);
   const navRef = useRef();
-
+  const navigate = useNavigate();
   const handleToggle = () => setExpanded((prev) => !prev);
   const handleClose = () => setExpanded(false);
 
   // Close menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (expanded && navRef.current && !navRef.current.contains(event.target)) {
+      if (
+        expanded &&
+        navRef.current &&
+        !navRef.current.contains(event.target)
+      ) {
         setExpanded(false);
       }
     };
@@ -45,22 +50,46 @@ const NavbarComponent = () => {
           <span className="navbar-toggler-icon"></span>
         </button>
 
-        <div className={`collapse navbar-collapse ${expanded ? "show" : ""}`} id="navbarContent">
+        <div
+          className={`collapse navbar-collapse ${expanded ? "show" : ""}`}
+          id="navbarContent"
+        >
           <ul className="navbar-nav ms-auto" onClick={handleClose}>
             <li className="nav-item">
-              <Link className="nav-link" to="/teams">Teams</Link>
+              <Link className="nav-link" to="/teams">
+                Teams
+              </Link>
             </li>
             <li className="nav-item">
-              <Link className="nav-link" to="/players">Players</Link>
+              <Link className="nav-link" to="/players">
+                Players
+              </Link>
             </li>
             <li className="nav-item">
-              <Link className="nav-link" to="/Auction_rule">Auction</Link>
+              <Link className="nav-link" to="/Auction_rule">
+                Auction
+              </Link>
             </li>
             <li className="nav-item">
-              <Link className="nav-link" to="/admin">Admin</Link>
+              <Link className="nav-link" to="/admin">
+                Admin
+              </Link>
             </li>
             <li className="nav-item">
-              <Link className="nav-link" to="/register">Registration</Link>
+              <Link className="nav-link" to="/register">
+                Registration
+              </Link>
+            </li>
+            <li className="nav-item">
+              <button
+                className="btn btn-link nav-link"
+                onClick={() => {
+                  localStorage.removeItem("isLoggedIn");
+                  navigate("/");
+                }}
+              >
+                Logout
+              </button>
             </li>
           </ul>
         </div>

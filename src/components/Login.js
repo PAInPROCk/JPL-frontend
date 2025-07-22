@@ -29,11 +29,13 @@ const Login = () => {
       setLoading(false);
 
       if (email === "admin@example.com" && password === "1234") {
+        localStorage.setItem("isLoggedIn","true");
+        setError("");
         navigate("/home");
       } else {
         setError("Incorrect email or password");
       }
-    }, 1500);
+    }, 100);
   };
   useEffect(() => {
     if (error) {
