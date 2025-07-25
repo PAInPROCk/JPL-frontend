@@ -1,0 +1,120 @@
+.auction-bg {
+  background-image: url("../assets/images/vecteezy_cricket-stadium_427062.jpg");
+  background-size: cover;
+  background-position: center;
+  min-height: 100vh;
+  padding-top: 65px;
+}
+
+.auction-container {
+  background-color: rgba(236, 235, 235, 0.9);
+  border-radius: 15px;
+}
+
+.player-img {
+  width: 150px;
+  height: 150px;
+  object-fit: cover;
+  border:0px solid black;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  padding: 5px;
+  background: white;
+}
+
+.info-box.red{
+  width: 250px;
+}
+/* Label styles */
+.info-label {
+  padding: 8px 12px;
+  border-radius: 12px;
+  color: white;
+  font-weight: bold;
+  width: auto;
+}
+.info-label.green { background-color: #16a34a; }
+.info-label.red { background-color: #dc2626; }
+
+/* Auction details */
+.info-box.grey {
+  background: grey;
+  color: white;
+  padding: 5px;
+  border-radius: 12px;
+}
+
+
+.current-price{
+  width: 300px;
+  background: yellow;
+  padding: 15px;
+  border-radius: 20px;
+  display: inline-block;
+  font-weight: bold;
+}
+
+.timer.orange {
+  background: orange;
+  padding: 10px;
+  border-radius: 8px;
+  font-weight: bold;
+}
+
+.base-price{
+  height: 80px;
+  width: 150px;
+  margin-bottom: 0px;
+}
+
+.timer{
+  height: 60px;
+  width: 150px;
+  margin-bottom: 0px;
+  font-weight: 400;
+}
+
+/* Bid buttons */
+.btn-red-custom{
+  background: #ef4444;
+  color: white;
+  border: 5px;
+  border-color: black;
+  width: 90px;
+  height: 70px;
+  border-radius: 35%;
+  font-weight: bold;
+  font-size: 1.1rem;
+  transition: background 0.3s ease;
+}
+
+.btn-yellow-custom{
+  border: 5px;
+  border-color: black;
+  border-radius: 35%;
+  color: white;
+  font-weight: bold;
+  font-size: 1.1rem;
+  height: 70px;
+  width: 90px;
+  transition: background 0.3s ease;
+}
+
+.btn-black-custom{
+  border: 5px;
+  border-color: black;
+  border-radius: 35%;
+  color: white;
+  font-weight: bold;
+  font-size: 1.1rem;
+  height: 70px;
+  width: 90px;
+}
+
+.btn-yellow-custom:hover{background: #ffc109;}
+.bid-btn.red:hover { background: #b91c1c; }
+
+
+.notifications {
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+}

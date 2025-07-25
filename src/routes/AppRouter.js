@@ -11,6 +11,8 @@ import Player_info from '../pages/Players/Player_info';
 import Auction_rule from '../pages/Auction/Auction_rule';
 import Sold from '../components/Sold';
 import ProtectedRoute from './ProtectedRoute';
+import Admin_auction from '../pages/Admin_auction';
+import Waiting from '../pages/Waiting';
 
 const AppRouter = () =>{
     return(
@@ -22,10 +24,12 @@ const AppRouter = () =>{
                 <Route path="/auction" element={<ProtectedRoute><Auction/></ProtectedRoute>}/>
                 <Route path="/teams" element={<ProtectedRoute><Teams/></ProtectedRoute>}/>
                 <Route path="/players" element={<ProtectedRoute><Players/></ProtectedRoute>}/> 
-                <Route path='/Player_info' element={<ProtectedRoute><Player_info/></ProtectedRoute>}/>
+                <Route path='/Player_info/:id' element={<ProtectedRoute><Player_info/></ProtectedRoute>}/>
                 <Route path="/team_info" element={<ProtectedRoute><Team_Info/></ProtectedRoute>}/>
                 <Route path='/Auction_rule' element={<ProtectedRoute><Auction_rule/></ProtectedRoute>}/>
                 <Route path="/Sold" element={<ProtectedRoute><Sold/></ProtectedRoute>}/>
+                <Route path='/Admin_auction' element={<Admin_auction/>}/>
+                <Route path='/Waiting' element={<Waiting/>}/>
             </Routes>
     )
 }

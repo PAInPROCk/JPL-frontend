@@ -18,7 +18,7 @@ const Players = () => {
                 <div
                   className="col-12 col-sm-6 col-md-4 col-lg-3"
                   key={player.id}
-                  onClick={() => navigate(`/player_info/${player.id}`)}
+                  onClick={() => navigate(`/Player_info/${player.id}`)}
                   style={{ cursor: "pointer" }}
                 >
                   <PlayerCard player={player} />

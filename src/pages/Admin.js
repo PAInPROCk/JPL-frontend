@@ -4,9 +4,18 @@ import "./Admin.css";
 import Papa from "papaparse";
 import * as XLSX from "xlsx";
 import NavbarComponent from "../components/Navbar";
-import { Navigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 
 const Admin = () => {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const isAdminLoggedIn = localStorage.getItem("isAdminLoggedIn");
+    if (!isAdminLoggedIn) {
+      navigate("/");
+    }
+  }, [navigate]);
   const [randomMode, setrandomMode] = useState(false);
   const [useCustomList, setuseCustomList] = useState(false);
   const [unsoldPlayers, setunsoldPlayers] = useState(false);
@@ -15,46 +24,46 @@ const Admin = () => {
 
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
-    if(!file) return;
+    if (!file) return;
 
     const fileExtension = file.name.split(".").pop().toLowerCase();
 
-    if(fileExtension === "csv"){
-        Papa.parse(file,{
-            header: true,
-            complete: (results) => {
-                const sorted = results.data.sort((a,b) => 
-                    a.name.localeCompare(b.name)
-                );
-                setPlayerList(sorted);
-            },
-        });
-    }else if(fileExtension === "xlsx" || fileExtension === "xls") {
-        const reader = new FileReader();
-        reader.onload = (e) =>{
-                const data = new Uint8Array(e.target.result);
-                const workbook = XLSX.read(data, {type: "array"});
-                const sheet = workbook.Sheets[workbook.SheetNames[0]];
-                const json = XLSX.utils.sheet_to_json(sheet);
-                const sorted = json.sort((a,b) => a.name.localeCompare(b.name));
-                setPlayerList(sorted);
-        };
-        reader.readAsArrayBuffer(file);
-    }else{
-        alert("Only CSV or Excel fies are allowed");
-    }
-  }
-
-  const startAuction = () =>{
-    Navigate("/auction", {
-        state: {
-            randomMode,
-            useCustomList,
-            unsoldPlayers,
-            playerList,
+    if (fileExtension === "csv") {
+      Papa.parse(file, {
+        header: true,
+        complete: (results) => {
+          const sorted = results.data.sort((a, b) =>
+            a.name.localeCompare(b.name)
+          );
+          setPlayerList(sorted);
         },
-  });
-  };    
+      });
+    } else if (fileExtension === "xlsx" || fileExtension === "xls") {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: "array" });
+        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+        const json = XLSX.utils.sheet_to_json(sheet);
+        const sorted = json.sort((a, b) => a.name.localeCompare(b.name));
+        setPlayerList(sorted);
+      };
+      reader.readAsArrayBuffer(file);
+    } else {
+      alert("Only CSV or Excel fies are allowed");
+    }
+  };
+
+  const startAuction = () => {
+    navigate("/Admin_auction", {
+      state: {
+        randomMode,
+        useCustomList,
+        unsoldPlayers,
+        playerList,
+      },
+    });
+  };
   return (
     <>
       <NavbarComponent />
@@ -90,17 +99,17 @@ const Admin = () => {
                 {customFile && (
                   <p className="text-muted mt-2">Selected: {customFile.name}</p>
                 )}
-                {playerList.length > 0 &&(
-                    <div className="mt-3 player-preview-box p-2 border-rounded">
-                        <h5>Player Preview</h5>
-                        <ul className="list-group">
-                            {playerList.map((player, index) => (
-                                <li key={index} className="list-group-item">
-                                    {player.name}
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
+                {playerList.length > 0 && (
+                  <div className="mt-3 player-preview-box p-2 border-rounded">
+                    <h5>Player Preview</h5>
+                    <ul className="list-group">
+                      {playerList.map((player, index) => (
+                        <li key={index} className="list-group-item">
+                          {player.name}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 )}
               </div>
             )}
@@ -129,12 +138,10 @@ const Admin = () => {
                 </label>
               </span>
             </div>
-            <button
-              className="btn btn-success mt-3"
-              onClick={startAuction}
-            >
+            <button className="btn btn-success mt-3" onClick={startAuction}>
               Start Auction
             </button>
+            
           </div>
         </div>
       </div>

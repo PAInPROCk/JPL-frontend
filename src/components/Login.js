@@ -9,7 +9,7 @@ const Login = () => {
   const [loading, setLoading] = useState("false");
   const [showPassword, setShowPassword] = useState(false);
 
-  const navigate = useNavigate();
+  const navigate = useNavigate(); 
 
   const handleLogin = (e) => {
     e.preventDefault();
@@ -32,7 +32,12 @@ const Login = () => {
         localStorage.setItem("isLoggedIn","true");
         setError("");
         navigate("/home");
-      } else {
+      }else if(email === "admin@example1.com" && password === "1234"){
+        localStorage.setItem("isAdminLoggedIn","true")
+        setError("");
+        navigate("/admin");
+      } 
+      else {
         setError("Incorrect email or password");
       }
     }, 100);
