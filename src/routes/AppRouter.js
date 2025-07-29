@@ -25,7 +25,7 @@ const AppRouter = () =>{
                 <Route path="/teams" element={<ProtectedRoute><Teams/></ProtectedRoute>}/>
                 <Route path="/players" element={<ProtectedRoute><Players/></ProtectedRoute>}/> 
                 <Route path='/Player_info/:id' element={<ProtectedRoute><Player_info/></ProtectedRoute>}/>
-                <Route path="/team_info" element={<ProtectedRoute><Team_Info/></ProtectedRoute>}/>
+                <Route path="/team_info/${team.id}" element={<ProtectedRoute><Team_Info/></ProtectedRoute>}/>
                 <Route path='/Auction_rule' element={<ProtectedRoute><Auction_rule/></ProtectedRoute>}/>
                 <Route path="/Sold" element={<ProtectedRoute><Sold/></ProtectedRoute>}/>
                 <Route path='/Admin_auction' element={<Admin_auction/>}/>

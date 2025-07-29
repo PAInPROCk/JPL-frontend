@@ -1,14 +1,38 @@
 import { useParams } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import "./Player_info.css";
-import players from "./PlayerData";
+import {fetchPlayers} from "./PlayerData";
 import fallbackImg from "../../assets/images/PlAyer.png";
 import teamIcon from "../../assets/images/football-team_16848377.png";
+import { useEffect, useState } from "react";
+import Spinner from "../../components/Spinner";
 
 const Player_info = () => {
   const { id } = useParams();
-  const player = players.find((p) => p.id === parseInt(id));
+  const [player, setPlayer] = useState(null);
+  const [loading, setLoading] = useState(true); 
 
+  useEffect(() => {
+    const loadPlayer = async ()=>{
+      const allPlayers = await fetchPlayers();
+      const foundPlayer = allPlayers.find((p) => p.id === parseInt(id));
+      setPlayer(foundPlayer);
+      setLoading(false);
+    };
+    loadPlayer();
+  }, [id]);
+
+  if(loading){
+    return (
+      <>
+        <Navbar/>
+        <div className="text-center mt-5 text-muted">
+          <h2>Loading Player....</h2>
+          <Spinner/>
+        </div>
+      </>
+    );
+  }
   if (!player) {
     return (
       <>
@@ -29,7 +53,7 @@ const Player_info = () => {
             {/* Player Image */}
             <div className="col-md-3 text-center">
               <img
-                src={player.image || fallbackImg}
+                src={player.image_path || fallbackImg}
                 alt={player.name}
                 className="player-image img-fluid"
                 onError={(e) => (e.target.src = fallbackImg)}
@@ -49,34 +73,34 @@ const Player_info = () => {
                 </div>
                 <div className="col-md-3 info-box green">
                   <div className="label">Nick Name</div>
-                  <div className="value">—</div>
+                  <div className="value">{player.nickname || "--"}</div>
                 </div>
 
                 <div className="col-md-6 info-box red">
                   <div className="label">Player Category</div>
-                  <div className="value">Baller</div>
+                  <div className="value">{player.category}</div>
                 </div>
                 <div className="col-md-6 info-box red">
                   <div className="label">Type</div>
-                  <div className="value">Right Hand Spinner</div>
+                  <div className="value">{player.type}</div>
                 </div>
 
                 {/* Stats */}
                 <div className="col-md-3 stat-box orange">
                   <div className="label">Total Runs</div>
-                  <div className="value">100</div>
+                  <div className="value">{player.total_runs}</div>
                 </div>
                 <div className="col-md-3 stat-box orange">
                   <div className="label">Highest Runs</div>
-                  <div className="value">45</div>
+                  <div className="value">{player.highest_runs}</div>
                 </div>
                 <div className="col-md-3 stat-box orange">
                   <div className="label">Wickets Taken</div>
-                  <div className="value">10</div>
+                  <div className="value">{player.wickets_taken}</div>
                 </div>
                 <div className="col-md-3 stat-box orange">
                   <div className="label">Being Out</div>
-                  <div className="value">5</div>
+                  <div className="value">{player.times_out}</div>
                 </div>
 
                 {/* Teams */}
@@ -85,8 +109,16 @@ const Player_info = () => {
                     Played for Teams
                   </div>
                   <div className="d-flex gap-3 mt-2 flex-wrap">
-                    <img src={teamIcon} className="team-logo1" alt="Team" />
-                    <img src={teamIcon} className="team-logo1" alt="Team" />
+                     {player.teams_played
+                      ? player.teams_played.split(",").map((team, i) => (
+                          <img
+                            key={i}
+                            src={teamIcon}
+                            className="team-logo1"
+                            alt={team}
+                          />
+                        ))
+                      : "No teams recorded"}
                   </div>
                 </div>
               </div>

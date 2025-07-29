@@ -1,21 +1,23 @@
 import Navbar from "../../components/Navbar";
 import './Teams.css';
 import TeamCard from "../../components/TeamCard";
+import { useEffect, useState } from "react";
+import { data, useNavigate } from "react-router-dom";
+import { fetchTeams } from "./TeamData";
 
 const Teams = () =>{
-  const teams = [
-    { name: "Player 1", jersey: 10, image: "/assets/images/player1.png" }, 
-    { name: "Player 2", jersey: 12, image: "/assets/images/player2.png" },
-    { name: "Player 3", jersey: 7, image: "/assets/images/player3.png" },
-    { name: "Player 4", jersey: 5, image: "/assets/images/player4.png" },
-    { name: "Player 5", jersey: 19, image: "/assets/images/player5.png" },
-    { name: "Player 1", jersey: 10, image: "/assets/images/player1.png" },
-    { name: "Player 2", jersey: 12, image: "/assets/images/player2.png" },
-    { name: "Player 3", jersey: 7, image: "/assets/images/player3.png" },
-    { name: "Player 4", jersey: 5, image: "/assets/images/player4.png" },
-    { name: "Player 5", jersey: 19, image: "/assets/images/player5.png" },
-    // ...more players
-  ];
+  const [teams, setTeams] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const navigate = useNavigate();
+    useEffect(() => {
+          const loadTeams = async () =>{
+              const data = await fetchTeams();
+              setTeams(data);
+              setLoading(false);
+          };
+      loadTeams();
+      },[]);
     return (
       <>
         <Navbar />
@@ -23,8 +25,12 @@ const Teams = () =>{
         <div className="players-page pt-5">
           <div className="container py-5">
             <div className="row justify-content-center">
-              {teams.map((team, index) => (
-                <div className="col-12 col-sm-6 col-md-4 col-lg-3" key={index}>
+              {teams.map((team) => (
+                <div className="col-12 col-sm-6 col-md-4 col-lg-3" 
+                key={team.id}
+                onClick={() => navigate(`/team_info/${team.id}`)}
+                style={{cursor: "pointer"}}
+                >
                   <TeamCard team={team} />
                 </div>
               ))}
@@ -35,5 +41,5 @@ const Teams = () =>{
       </>
     );
 }
-console.log("Teams");
+console.log("Teams", data);
 export default Teams;

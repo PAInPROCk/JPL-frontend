@@ -1,15 +1,25 @@
 import NavbarComponent from "../components/Navbar";
 import "./Admin_auction.css";
 import { useNavigate } from "react-router-dom";
-import players from "../pages/Players/PlayerData";
 import fallbackImg from "../assets/images/PlAyer.png";
+import { use, useEffect, useState } from "react";
+import { fetchPlayers } from "./Players/PlayerData";
 
 const Admin_auction = () => {
-  const navigate = useNavigate();
-  const handleClick = () => {
-    navigate("/Sold");
-  };
-  const player = players[0]; // Temporary: first player for testing
+  const [player, setPlayer] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadPlayer = async () =>{
+      const data = await fetchPlayers();
+      setPlayer(data[0]);
+      setLoading(false);
+    };
+    loadPlayer();
+  },[]);
+
+  if(loading) return <p>Loading player...</p>;
+  if(!player) return <p>No Player found</p>;
 
   return (
     <>
@@ -20,7 +30,7 @@ const Admin_auction = () => {
             <div className="row g-4">
               <div className="col-md-3 text-center">
                 <img
-                  src={player.image || fallbackImg}
+                  src={player.image_path || fallbackImg}
                   alt={player.name}
                   className="player-image img-fluid"
                   onError={(e) => (e.target.src = fallbackImg)}
@@ -38,11 +48,11 @@ const Admin_auction = () => {
                   </div>
                   <div className="col-md-6 info-box red">
                     <div className="label">Player Category</div>
-                    <div className="value">Baller</div>
+                    <div className="value">{player.category}</div>
                   </div>
                   <div className="col-md-6 info-box red">
                     <div className="label">Type</div>
-                    <div className="value">Right Hand Spinner</div>
+                    <div className="value">{player.type}</div>
                   </div>
                 </div>
               </div>
@@ -72,7 +82,7 @@ const Admin_auction = () => {
                 <div className="quick-bids mb-3">
                   <button
                     className="btn btn-danger m-2 btn-red-custom"
-                    onClick={handleClick}
+                    onClick=""
                   >
                     Sold
                   </button>

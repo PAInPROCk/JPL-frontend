@@ -1,11 +1,23 @@
 import Navbar from "../../components/Navbar";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { data, useNavigate } from "react-router-dom";
 import "./Players.css";
-import players from "./PlayerData";
 import PlayerCard from "../../components/PlayerCard";
+import { fetchPlayers } from "./PlayerData";
 
 const Players = () => {
+  const [players, setPlayers] = useState([]);
+  const [loading, setLoading] = useState(true);
+
   const navigate = useNavigate();
+  useEffect(() => {
+        const loadPlayers = async () =>{
+            const data = await fetchPlayers();
+            setPlayers(data);
+            setLoading(false);
+        };
+    loadPlayers();
+    },[]);
 
   return (
     <>
@@ -13,6 +25,10 @@ const Players = () => {
       <div className="players-bg">
         <div className="players-page pt-5">
           <div className="container py-5">
+            {loading ? (
+              <p className="text-center">Loading Players</p>
+            ) : (
+            
             <div className="row justify-content-center">
               {players.map((player) => (
                 <div
@@ -23,13 +39,14 @@ const Players = () => {
                 >
                   <PlayerCard player={player} />
                 </div>
-              ))}
+              ))}  
             </div>
+            )}
           </div>
         </div>
       </div>
     </>
   );
 };
-
+console.log("Fetched Players",data);
 export default Players;

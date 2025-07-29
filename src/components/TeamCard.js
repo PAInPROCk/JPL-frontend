@@ -4,7 +4,7 @@ import { useNavigate} from "react-router-dom";
 const TeamCard = ({ team }) => {
   const navigate = useNavigate();
   const handleClick = () => {
-    navigate("/team_info");
+    navigate(`/team_info/${team.id}`);
   };
 
   return (

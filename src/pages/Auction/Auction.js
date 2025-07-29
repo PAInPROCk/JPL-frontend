@@ -1,12 +1,25 @@
 import Navbar from "../../components/Navbar";
 import "./Auction.css";
 import { useNavigate } from "react-router-dom";
-import players from "../Players/PlayerData";
 import fallbackImg from "../../assets/images/PlAyer.png";
+import { fetchPlayers } from "../Players/PlayerData";
+import { useEffect, useState } from "react";
 
 const Auction = () => {
-  const navigate = useNavigate();
-  const player = players[0];
+  const [player, setPlayer] = useState(null);
+    const [loading, setLoading] = useState(true);
+  
+    useEffect(() => {
+      const loadPlayer = async () =>{
+        const data = await fetchPlayers();
+        setPlayer(data[0]);
+        setLoading(false);
+      };
+      loadPlayer();
+    },[]);
+  
+    if(loading) return <p>Loading player...</p>;
+    if(!player) return <p>No Player found</p>;
   return (
     <>
       <Navbar />
@@ -34,11 +47,11 @@ const Auction = () => {
                   </div>
                   <div className="col-md-6 info-box red">
                     <div className="label">Player Category</div>
-                    <div className="value">Baller</div>
+                    <div className="value">{player.category}</div>
                   </div>
                   <div className="col-md-6 info-box red">
                     <div className="label">Type</div>
-                    <div className="value">Right Hand Spinner</div>
+                    <div className="value">{player.type}</div>
                   </div>
                 </div>
               </div>
