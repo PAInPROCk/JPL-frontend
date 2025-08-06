@@ -46,11 +46,11 @@ const Auction = () => {
                     <div className="value">{player.jersey}</div>
                   </div>
                   <div className="col-md-6 info-box red">
-                    <div className="label">Player Category</div>
+                    <div className="label">Role</div>
                     <div className="value">{player.category}</div>
                   </div>
                   <div className="col-md-6 info-box red">
-                    <div className="label">Type</div>
+                    <div className="label">Style</div>
                     <div className="value">{player.type}</div>
                   </div>
                 </div>

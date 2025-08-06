@@ -41,5 +41,5 @@ const Teams = () =>{
       </>
     );
 }
-console.log("Teams", data);
+
 export default Teams;

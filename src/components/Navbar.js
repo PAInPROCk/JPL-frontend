@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import "./Navbar.css";
 import { useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 
 const NavbarComponent = () => {
   const [expanded, setExpanded] = useState(false);
@@ -9,6 +10,8 @@ const NavbarComponent = () => {
   const navigate = useNavigate();
   const handleToggle = () => setExpanded((prev) => !prev);
   const handleClose = () => setExpanded(false);
+  const location = useLocation();
+  const isActive = (path) => location.pathname === path;
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -56,27 +59,27 @@ const NavbarComponent = () => {
         >
           <ul className="navbar-nav ms-auto" onClick={handleClose}>
             <li className="nav-item">
-              <Link className="nav-link" to="/teams">
+              <Link className={`nav-link ${isActive("/teams") ? "active" : ""}`} to="/teams">
                 Teams
               </Link>
             </li>
             <li className="nav-item">
-              <Link className="nav-link" to="/players">
+              <Link className={`nav-link ${isActive("/players") ? "active" : ""}`} to="/players">
                 Players
               </Link>
             </li>
             <li className="nav-item">
-              <Link className="nav-link" to="/Auction_rule">
+              <Link className={`nav-link ${isActive("/Aucion_rule") ? "active" : ""}`} to="/Auction_rule">
                 Auction
               </Link>
             </li>
             <li className="nav-item">
-              <Link className="nav-link" to="/admin">
+              <Link className={`nav-link ${isActive("/admin") ? "active" : ""}`} to="/admin">
                 Admin
               </Link>
             </li>
             <li className="nav-item">
-              <Link className="nav-link" to="/register">
+              <Link className={`nav-link ${isActive("/register") ? "active" : ""}`} to="/register">
                 Registration
               </Link>
             </li>
@@ -85,7 +88,8 @@ const NavbarComponent = () => {
                 className="btn btn-link nav-link"
                 onClick={() => {
                   localStorage.removeItem("isLoggedIn");
-                  navigate("/");
+                  localStorage.removeItem("isAdminLoggedIn")
+                  navigate("/login");
                 }}
               >
                 Logout

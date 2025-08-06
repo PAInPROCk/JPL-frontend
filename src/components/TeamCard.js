@@ -17,7 +17,7 @@ const TeamCard = ({ team }) => {
         style={{width: "150px", height: "150px", objectFit: "cover"}}
       />
       <h5>{team.name}</h5>
-      <p className="text-muted">#{ team.jersey}</p>
+      <p className="text-muted">{ team.rank}</p>
       <button onClick={handleClick} className="btn btn-primary btn-sm">Info</button>
     </div>
   );

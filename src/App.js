@@ -1,8 +1,8 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
-import Navbar from './components/Navbar';
-import Login from './components/Login';
 import AppRouter from './routes/AppRouter';
+import { Navigate } from "react-router-dom";
+import ProtectedRoute from './routes/ProtectedRoute';
 
 
 function App() {

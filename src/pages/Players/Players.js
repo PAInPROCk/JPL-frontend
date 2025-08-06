@@ -48,5 +48,4 @@ const Players = () => {
     </>
   );
 };
-console.log("Fetched Players",data);
 export default Players;

@@ -9,17 +9,38 @@ import fallbackImg from "../../assets/images/football-team_16848377.png";
 const Team_info = () => {
   const {id} = useParams();
   const [team, setTeam] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() =>{
     const loadTeam = async () =>{
       const teams = await fetchTeams();
-      const found = teams.find((t) => t.id.toString() === id);
-      setTeam(found);
+      const foundTeam = teams.find((t) => t.id.toString() === id);
+      setTeam(foundTeam || null);
+      setLoading(false);
     };
     loadTeam();
   }, [id]);
 
-  if(!team) return <p className="text-center mt-5">Loading team....</p>;
+  if(loading){
+    return(
+      <>
+      <Navbar/>
+      <div className="text-center mt-5">
+        <h2>Loading team...</h2>
+      </div>
+      </>
+    )
+  }
+  if(!team){
+    return(
+      <>
+        <Navbar/>
+        <div className="text-center mt-5 text-danger">
+          <h2>Team Not Found</h2>
+        </div>
+      </>
+    )
+  }
 
   return (
     <>
@@ -32,6 +53,7 @@ const Team_info = () => {
                 src={team.logo_path || fallbackImg}
                 alt={team.name}
                 className="team-image img-fluid"
+                onError={(e) => (e.target.src = fallbackImg)}
               />
             </div>
 
@@ -47,7 +69,7 @@ const Team_info = () => {
                 </div>
                 <div className="col-md-3 info-box green">
                   <div className="label">Total Budget</div>
-                  <div className="value">{team.budget || "--"}</div>
+                  <div className="value">{team.total_budget || "--"}</div>
                 </div>
                 <div className="col-md-3 stat-box orange">
                   <div className="label">Current Season Budget</div>
