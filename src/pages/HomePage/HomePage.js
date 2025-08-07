@@ -12,7 +12,7 @@ const HomePage = () => {
       <div className="home-bg">
         <div className="alert alert-success fixed-top" role="alert">
           Registration for JPL Season 6 have started click on{" "}
-          <a href="#" className="alert-link">
+          <a href="/register" className="alert-link">
             Registration
           </a>
           . Give it a click if you like.
