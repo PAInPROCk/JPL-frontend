@@ -4,19 +4,42 @@ import { useNavigate } from "react-router-dom";
 import fallbackImg from "../../assets/images/PlAyer.png";
 import { fetchPlayers } from "../Players/PlayerData";
 import { useEffect, useState } from "react";
+import axios from "axios";
 
 const Auction = () => {
   const [player, setPlayer] = useState(null);
     const [loading, setLoading] = useState(true);
+    const navigate = useNavigate();
   
     useEffect(() => {
-      const loadPlayer = async () =>{
-        const data = await fetchPlayers();
-        setPlayer(data[0]);
-        setLoading(false);
+      const checkAuthandLoad = async () =>{
+        try{
+          const authRes = await axios.get("http://localhost:5000/check-auth",{
+            withCredentials: true,
+          });
+
+          if(!authRes.data.authenticated){
+            navigate("/");
+            return;
+          }
+
+          if(!["user","admin"].includes(authRes.data.role)){
+            navigate("/"); 
+            return;
+          }
+
+          const res = await axios.get("http://localhost:5000/current-auction",{
+            withCredentials: true,
+          });
+          setPlayer(res.data);
+        } catch (err){
+          navigate("/")
+        } finally{
+          setLoading(false);
+        }
       };
-      loadPlayer();
-    },[]);
+      checkAuthandLoad();
+    }, [navigate]);
   
     if(loading) return <p>Loading player...</p>;
     if(!player) return <p>No Player found</p>;

@@ -1,17 +1,18 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Login.css";
+import axios from "axios";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState("false");
+  const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
   const navigate = useNavigate(); 
 
-  const handleLogin = (e) => {
+  const handleLogin = async(e) => {
     e.preventDefault();
     setError("");
     if (!email || !password) {
@@ -25,22 +26,28 @@ const Login = () => {
     }
 
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-
-      if (email === "admin@example.com" && password === "1234") {
-        localStorage.setItem("isLoggedIn","true");
-        setError("");
-        navigate("/home");
-      }else if(email === "admin@example1.com" && password === "1234"){
-        localStorage.setItem("isAdminLoggedIn","true")
-        setError("");
-        navigate("/admin");
-      } 
-      else {
-        setError("Incorrect email or password");
+    
+    try{
+      const res = await axios.post(
+        "http://localhost:5000/login",
+        {email, password},
+        {withCredentials: true}
+      );
+      console.log(res.data.message);
+      if(res.data.authenticated){
+        if(res.data.role === "admin"){
+            navigate("/admin")
+        } else{
+          navigate("/home")
+        }
+      }else{
+        setError("Authentication Failed");
       }
-    }, 100);
+    }catch(err){
+      setError(err.response?.data?.error || "Login Failed");
+    } finally {
+      setLoading(false);
+    }
   };
   useEffect(() => {
     if (error) {
@@ -48,7 +55,6 @@ const Login = () => {
         setError("");
       }, 2000);
       return () => clearTimeout(timer);
-      loading="Login";
     }
   }, [error]);
 
@@ -98,9 +104,8 @@ const Login = () => {
           <button
             type="submit"
             className="btn btn-color border border-1 border-black w-100"
-            onClick={() => setShowPassword(!showPassword)}
           >
-            {loading ? "Login" : "Loging in..."}
+            {loading ? "Loging in...." : "Login"}
           </button>
         </form>
       </div>

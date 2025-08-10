@@ -14,6 +14,7 @@ import ProtectedRoute from './ProtectedRoute';
 import Admin_auction from '../pages/Admin_auction';
 import Waiting from '../pages/Waiting';
 import HomePage from '../pages/HomePage/HomePage';
+import AdminProtectedRoute from './AdminProtectedRoute';
 
 
 const AppRouter = () =>{
@@ -22,17 +23,21 @@ const AppRouter = () =>{
                 <Route path='/' element={<HomePage/>}/>
                 <Route path="/login" element={<Login/>}/> 
                 <Route path="/register" element={<Register/>}/>
-                <Route path="/home" element={<ProtectedRoute><Home/></ProtectedRoute>}/>
-                <Route path="/admin" element={<ProtectedRoute><Admin/></ProtectedRoute>}/>
-                <Route path="/auction" element={<ProtectedRoute><Auction/></ProtectedRoute>}/>
-                <Route path="/teams" element={<ProtectedRoute><Teams/></ProtectedRoute>}/>
-                <Route path="/players" element={<ProtectedRoute><Players/></ProtectedRoute>}/> 
-                <Route path='/Player_info/:id' element={<ProtectedRoute><Player_info/></ProtectedRoute>}/>
-                <Route path="/team_info/:id" element={<ProtectedRoute><Team_Info/></ProtectedRoute>}/>
-                <Route path='/Auction_rule' element={<ProtectedRoute><Auction_rule/></ProtectedRoute>}/>
-                <Route path="/Sold" element={<ProtectedRoute><Sold/></ProtectedRoute>}/>
-                <Route path='/Admin_auction' element={<ProtectedRoute><Admin_auction/></ProtectedRoute>}/>
-                <Route path='/Waiting' element={<ProtectedRoute><Waiting/></ProtectedRoute>}/>
+
+                {/* User Protected Routes */}
+                <Route path="/home" element={<ProtectedRoute allowedRoles={["user", "admin"]}><Home/></ProtectedRoute>}/>
+                <Route path="/auction" element={<ProtectedRoute allowedRoles={["user", "admin"]}><Auction/></ProtectedRoute>}/>
+                <Route path="/teams" element={<ProtectedRoute allowedRoles={["user", "admin"]}><Teams/></ProtectedRoute>}/>
+                <Route path="/players" element={<ProtectedRoute allowedRoles={["user", "admin"]}><Players/></ProtectedRoute>}/> 
+                <Route path='/Player_info/:id' element={<ProtectedRoute allowedRoles={["user", "admin"]}><Player_info/></ProtectedRoute>}/>
+                <Route path="/team_info/:id" element={<ProtectedRoute allowedRoles={["user", "admin"]}><Team_Info/></ProtectedRoute>}/>
+                <Route path='/Auction_rule' element={<ProtectedRoute allowedRoles={["user", "admin"]}><Auction_rule/></ProtectedRoute>}/>
+                <Route path="/Sold" element={<ProtectedRoute allowedRoles={["user", "admin"]}><Sold/></ProtectedRoute>}/>
+                <Route path='/Waiting' element={<ProtectedRoute allowedRoles={["user", "admin"]}><Waiting/></ProtectedRoute>}/>
+
+                {/* Admin Protected Routes */}
+                <Route path="/admin" element={<AdminProtectedRoute allowedRoles={["admin"]}><Admin/></AdminProtectedRoute>}/>
+                <Route path='/Admin_auction' element={<ProtectedRoute allowedRoles={["admin"]}><Admin_auction/></ProtectedRoute>}/>
             </Routes>
     )
 }

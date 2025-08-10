@@ -110,6 +110,17 @@
   width: 90px;
 }
 
+.btn-blue-custom{
+  border: 5px;
+  border-color: black;
+  border-radius: 35%;
+  color: white;
+  font-weight: bold;
+  font-size: 1.1rem;
+  height: 70px;
+  width: 90px;
+}
+
 .btn-yellow-custom:hover{background: #ffc109;}
 .bid-btn.red:hover { background: #b91c1c; }
 

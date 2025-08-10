@@ -1,6 +1,33 @@
 import "./Sold.css";
+import React, {useEffect} from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import axios from "axios";
 
 const Sold = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const player = location.state?.player;
+
+  useEffect(() =>{
+    const timer = setTimeout(async () =>{
+      if(player.id){
+        try{
+          await  axios.post(
+            "http://localhost:5000/next-auction",
+            {player_id: player.id + 1},
+            {withCredentials: true}
+          );
+        }catch(err){
+          console.error("Error Moving to next player", err);
+        }
+      }
+      navigate("/Admin_auction");
+    }, 10000);
+    return () => clearTimeout(timer);
+  }, [navigate, player]);
+
+  if(!player) return <p>No player data  </p>
+
   return (
     <div className="bg">
     <div className="sold-page container text-white py-4">

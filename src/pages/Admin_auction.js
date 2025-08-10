@@ -1,22 +1,65 @@
 import NavbarComponent from "../components/Navbar";
 import "./Admin_auction.css";
-import { useNavigate } from "react-router-dom";
+import { Await, useNavigate } from "react-router-dom";
 import fallbackImg from "../assets/images/PlAyer.png";
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { fetchPlayers } from "./Players/PlayerData";
+import axios from "axios";
+import Player_info from "./Players/Player_info";
 
 const Admin_auction = () => {
   const [player, setPlayer] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showSold, setShowSold] = useState(false);
+  const navigate = useNavigate();
 
-  useEffect(() => {
+  
     const loadPlayer = async () =>{
-      const data = await fetchPlayers();
-      setPlayer(data[0]);
-      setLoading(false);
+      const res = await axios.get("http://localhost:5000/current-auction",{
+        withCredentials: true,
+      });
+      setPlayer(res.data);
     };
-    loadPlayer();
-  },[]);
+    
+    useEffect(() => {
+      const checkAuthandLoad = async () => {
+        try{
+          const authRes = await axios.get("http://localhost:5000/check-auth",{
+            withCredentials: true,
+          });
+
+          if(!authRes.data.authenticated || authRes.data.role !== "admin"){
+            navigate("/");
+            return;
+          }
+
+          await loadPlayer();
+        } catch (err){
+          navigate("/");
+        }finally{
+          setLoading(false);
+        }
+      };
+      checkAuthandLoad();
+    }, [navigate]);
+
+    const handleSold = () =>{
+      navigate("/sold",{state: {player}})
+    };
+
+    const nextPlayer = async () => {
+      try{
+        await axios.post(
+          "http://localhost:5000/next-auction",
+          {Player_id: player.id + 1},
+          {withCredentials: true}
+        );
+        await loadPlayer();
+      }catch (err){
+        console.error("Error moving to next player", err);
+      }
+    };
+
 
   if(loading) return <p>Loading player...</p>;
   if(!player) return <p>No Player found</p>;
@@ -91,6 +134,9 @@ const Admin_auction = () => {
                   </button>
                   <button className="btn btn-dark m-2 btn-black-custom">
                     Cancel
+                  </button>
+                  <button className="btn btn-primary m-2 btn-blue-customm" onClick={nextPlayer}>
+                    Next Player
                   </button>
                 </div>
               </div>
