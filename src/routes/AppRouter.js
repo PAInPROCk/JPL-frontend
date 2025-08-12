@@ -15,6 +15,7 @@ import Admin_auction from '../pages/Admin_auction';
 import Waiting from '../pages/Waiting';
 import HomePage from '../pages/HomePage/HomePage';
 import AdminProtectedRoute from './AdminProtectedRoute';
+import AdminRegister from '../pages/AdminRegister';
 
 
 const AppRouter = () =>{
@@ -38,6 +39,7 @@ const AppRouter = () =>{
                 {/* Admin Protected Routes */}
                 <Route path="/admin" element={<AdminProtectedRoute allowedRoles={["admin"]}><Admin/></AdminProtectedRoute>}/>
                 <Route path='/Admin_auction' element={<ProtectedRoute allowedRoles={["admin"]}><Admin_auction/></ProtectedRoute>}/>
+                <Route path='/Admin_register' element={<AdminRegister/>}/>
             </Routes>
     )
 }
