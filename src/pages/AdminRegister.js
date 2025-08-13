@@ -1,6 +1,11 @@
 import "./AdminRegister.css";
+import axios from "axios";
+import { useState } from "react";
 
 const AdminRegister = () => {
+    const [formData, setFormData] = useState({
+        playerName: "",
+    })
     return (
         <>
             <div className="register-bg">
@@ -19,42 +24,42 @@ const AdminRegister = () => {
                             <div className="row g-3">
                                 <div className="col-md-6 info-box green">
                                     <div className="label">Player Name</div>
-                                    <div className="value"><input className="border-0" type="text"></input></div>
+                                    <div className="value p-1"><input className="border-1" placeholder="Enter Player Name" type="text" required></input></div>
                                 </div>
                                 <div className="col-md-3 info-box green">
                                     <div className="label">Jersey No</div>
-                                    <div className="value p-1"><input className="border-0" type="text"></input></div>
+                                    <div className="value p-1"><input className="border-1" placeholder="Enter Jersey Number" type="text" required></input></div>
                                 </div>
                                 <div className="col-md-3 info-box green">
                                     <div className="label">Nick Name</div>
-                                    <div className="value p-1"><input className="border-0" type="text"></input></div>
+                                    <div className="value p-1"><input className="border-1" type="text"></input></div>
                                 </div>
 
                                 <div className="col-md-6 info-box red">
                                     <div className="label">Player Category</div>
-                                    <div className="value p-1"><input className="border-0" type="text"></input></div>
+                                    <div className="value p-1"><input className="border-1" type="text" required></input></div>
                                 </div>
                                 <div className="col-md-6 info-box red">
-                                    <div className="label">Type</div>
-                                    <div className="value"><input className="border-0" type="text"></input></div>
+                                    <div className="label">Style</div>
+                                    <div className="value p-1"><input className="border-1" type="text" required></input></div>
                                 </div>
 
                                 {/* Stats */}
                                 <div className="col-md-3 stat-box orange">
                                     <div className="label">Total Runs</div>
-                                    <div className="value"></div>
+                                    <div className="value p-1"><input className="border-1" type="number"></input></div>
                                 </div>
                                 <div className="col-md-3 stat-box orange">
                                     <div className="label">Highest Runs</div>
-                                    <div className="value"></div>
+                                    <div className="value p-1"><input className="border-1" type="number"></input></div>
                                 </div>
                                 <div className="col-md-3 stat-box orange">
                                     <div className="label">Wickets Taken</div>
-                                    <div className="value"></div>
+                                    <div className="value p-1"><input className="border-1" type="number"></input></div>
                                 </div>
                                 <div className="col-md-3 stat-box orange">
                                     <div className="label">Being Out</div>
-                                    <div className="value"></div>
+                                    <div className="value p-1"><input className="border-1" type="number"></input></div>
                                 </div>
 
                                 {/* Teams */}
@@ -66,7 +71,9 @@ const AdminRegister = () => {
                                         
                                     </div>
                                 </div>
+                                
                             </div>
+                            <button className="btn btn-primary" type="submit">Submit form</button>
                         </div>
                     </div>
                 </div>
