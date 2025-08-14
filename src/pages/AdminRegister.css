@@ -14,7 +14,7 @@
   align-items: center;
   padding: 0px;  
   /* Remove all overflow from body */
-  overflow-x: hidden;
+  overflow: hidden;
 }
 
 .info-box, .stat-box {
@@ -69,4 +69,26 @@
 
 .btn-c{
   width: 20%;
+}
+
+.custom-dropdown-menu {
+  max-height: 200px;
+  overflow-y: auto;
+  min-width: 220px;
+}
+
+.register-rg::-webkit-scrollbar {
+  width: 8px;
+}
+.register-rg::-webkit-scrollbar-thumb {
+  background-color: #aaa;
+  border-radius: 10px;
+}
+.register-rg::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.register-rg{
+  flex: 1;
+  overflow-y: auto;
 }
