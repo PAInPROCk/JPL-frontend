@@ -1,6 +1,8 @@
 import "./AdminRegister.css";
 import axios from "axios";
 import { useState } from "react";
+import fallbackImg from "../assets/images/PlAyer.png"
+import NavbarComponent from "../components/Navbar";
 
 const AdminRegister = () => {
 
@@ -31,16 +33,40 @@ const AdminRegister = () => {
     teams: [],
   });
 
+  const [preview, setPreview] = useState(null);
   const [dropdownOpen, setdropDownOpen] = useState(false);
+  const [error, setError] = useState("");
 
   const toggleDropdown = () => setdropDownOpen((open) => !open);
 
   const handleChange = (e) => {
+
+
     const { name, value, files } = e.target;
+
+    if(name === "emailId"){
+        setError("");
+        const emailPattern= /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if(!value){
+          setError("Please Enter Email Address");
+        }else if(!emailPattern.test(value)){
+          setError("Invalid Email Format");
+        }
+    }
+
+    if(name === "image" && files && files[0]){
+      const file = files[0];
+      setFormData({
+        ...formData,
+        image: file,
+      });
+      setPreview(URL.createObjectURL(file));
+    } else{
     setFormData({
       ...formData,
-      [name]: files ? files[0] : value,
+      [name]: value,
     });
+    }
   };
 
   const handleTeamCheckboxChange = (e) => {
@@ -85,12 +111,30 @@ const AdminRegister = () => {
   return (
     <>
       <div className="register-bg">
+        <NavbarComponent/>
         <form onSubmit={handleSubmit}>
-          <div className="container player-info-container shadow p-4 rounded register-rg">
-            <div className="row g-4">
+          {error && (
+            <div className="alert alert-danger mt-0" role="alert">
+              {error}
+            </div>
+          )}
+          <div className="container player-info-container shadow p-3  rounded register-rg">
+            <div className="row g-5">
               {/* Player Image */}
               <div className="col-md-3 text-center">
-                <img />
+                <img 
+                  src={preview || fallbackImg}
+                  alt="Player"
+                  className="img-fluid rounded"
+                  style={{ maxHeight: "200px", objectFit: "cover"}}
+                />
+                <input
+                  type="file"
+                  name="image"
+                  accept="image/*"
+                  onChange={handleChange}
+                  className="form-control mt-2"
+                />
               </div>
 
               {/* Player Details */}
@@ -169,13 +213,27 @@ const AdminRegister = () => {
                     <div className="label">Mobile Number</div>
                     <div className="value p-1">
                       <input
-                        className="border-1"
+                        className="border-1 ph1"
                         type="number"
                         placeholder="Enter Mobile Number without +91"
                         name="mobile"
                         pattern="[0-9]"
                         value={formData.mobile}
                         onChange={handleChange}
+                      ></input>
+                    </div>
+                  </div>
+                  <div className="col-md-3 info-box green">
+                    <div className="label">Email</div>
+                    <div className="value p-1">
+                      <input
+                        className="border-1 ph1"
+                        type="email"
+                        placeholder="Enter Email Address"
+                        name="emailId"
+                        value={formData.emailId}
+                        onChange={handleChange}
+                        required
                       ></input>
                     </div>
                   </div>
@@ -197,11 +255,12 @@ const AdminRegister = () => {
                     <div className="label">Player Category</div>
                     <div className="value p-1">
                       <input
-                        className="border-1"
+                        className="border-1 ph"
                         type="text"
                         name="category"
                         maxLength="1"
                         pattern="[A-Z]"
+                        placeholder="Enter Category (A,B,C,D,...)"
                         value={formData.category}
                         onChange={handleChange}
                         onInput={handleClickUpper}
@@ -213,9 +272,10 @@ const AdminRegister = () => {
                     <div className="label">Style</div>
                     <div className="value p-1">
                       <input
-                        className="border-1"
+                        className="border-1 ph1"
                         type="text"
                         name="style"
+                        placeholder="Enter Playing style (ex: Right Hand Spinner)"
                         value={formData.style}
                         onChange={handleChange}
                         required
@@ -229,9 +289,10 @@ const AdminRegister = () => {
                     <div className="label">Total Runs</div>
                     <div className="value p-1">
                       <input
-                        className="border-1"
+                        className="border-1 ph1"
                         type="number"
                         name="totalRuns"
+                        placeholder="Enter Total Runs made in Career"
                         value={formData.totalRuns}
                         onChange={handleChange}
                       ></input>
@@ -241,9 +302,10 @@ const AdminRegister = () => {
                     <div className="label">Highest Runs</div>
                     <div className="value p-1">
                       <input
-                        className="border-1"
+                        className="border-1 ph1"
                         type="number"
                         name="highestRuns"
+                        placeholder="Enter Highest Runs made in a single match"
                         value={formData.highestRuns}
                         onChange={handleChange}
                       ></input>
@@ -253,10 +315,11 @@ const AdminRegister = () => {
                     <div className="label">Wickets Taken</div>
                     <div className="value p-1">
                       <input
-                        className="border-1"
+                        className="border-1 ph1"
                         type="number"
                         name="wickets"
                         pattern="[0-9]{3}"
+                        placeholder="Enter Wickets Taken by player"
                         value={formData.wickets}
                         onChange={handleChange}
                       ></input>
@@ -266,9 +329,11 @@ const AdminRegister = () => {
                     <div className="label">Being Out</div>
                     <div className="value p-1">
                       <input
-                        className="border-1"
+                        className="border-1 ph1"
                         type="number"
                         name="outs"
+                        width="100%"
+                        placeholder="Enter number of times player has been out"
                         value={formData.outs}
                         onChange={handleChange}
                       ></input>
@@ -276,12 +341,12 @@ const AdminRegister = () => {
                   </div>
 
                   {/* Teams */}
-                  <div className="col-12 team-box">
+                  <div className="col-6 team-box">
                     <div className="label bg-primary text-white p-2 rounded mb-2">
                       Played for Teams
                     </div>
 
-                    <div className="dropdown">
+                    <div className="dropdown dropup">
                       <button
                         className="btn btn-outline-primary dropdown-toggle"
                         type="button"
@@ -297,7 +362,7 @@ const AdminRegister = () => {
                           dropdownOpen ? " show" : ""
                         }`}
                       >
-                        {["JPL Titan", "JPL Warriors", "JPL Kings"].map(
+                        {["JPL Titan", "JPL Warriors", "JPL Kings","JPL Knights"].map(
                           (team) => (
                             <li key={team}>
                               <div className="form-check">

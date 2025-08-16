@@ -30,7 +30,7 @@
 .green .label {
   background-color: #22c55e; /* Tailwind green-500 */
   color: white;
-  padding: 4px;
+  padding: 3px;
   border-radius: 10px;
   font-weight: bold;
 }
@@ -38,7 +38,7 @@
 .red .label {
   background-color: #ef4444; /* Tailwind red-500 */
   color: white;
-  padding: 4px;
+  padding: 3px;
   border-radius: 10px;
   font-weight: bold;
 }
@@ -46,14 +46,14 @@
 .orange .label {
   background-color: #f97316; /* Tailwind orange-500 */
   color: white;
-  padding: 4px;
+  padding: 3px;
   border-radius: 10px;
   font-weight: bold;
 }
 
 .value {
   font-size: 1rem;
-  margin-top: 5px;
+  margin-top: 4px;
 }
 
 .team-logo1 {
@@ -62,10 +62,6 @@
   object-fit: contain;
 }
 
-
-.pn{
-  width: 90%;
-}
 
 .btn-c{
   width: 20%;
@@ -91,4 +87,25 @@
 .register-rg{
   flex: 1;
   overflow-y: auto;
+}
+
+.ph::placeholder{
+  font-size: 80%;
+}
+
+.ph1::placeholder{
+  font-size: 65%;
+  font-weight: bold;
+}
+
+.container{
+  margin-top: 90px;
+  
+}
+
+.custom-dropdown-menu {
+  max-height: 150px;  /* limit height */
+  overflow-y: auto;   /* enable vertical scroll */
+  position: absolute; /* keep inside viewport */
+  z-index: 1050;      /* above other elements */
 }
