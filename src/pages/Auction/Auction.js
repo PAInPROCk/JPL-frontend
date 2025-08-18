@@ -1,23 +1,43 @@
-import Navbar from "../../components/Navbar";
+ import Navbar from "../../components/Navbar";
 import "./Auction.css";
 import { useNavigate } from "react-router-dom";
 import fallbackImg from "../../assets/images/PlAyer.png";
 import { fetchPlayers } from "../Players/PlayerData";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, use } from "react";
 import axios from "axios";
 
 const Auction = () => {
   const [auctionData, setAuctionData] = useState(null);
+  const [timeLeft, setTimeLeft] = useState(0);
+  const [notifications, setNotifications] = useState([]);
+  const [flashIndex, setFlashIndex] = useState(null);
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
+    const audioRef = useRef(new Audio(require("../../assets/Sounds/mixkit-software-interface-start-2574.wav")));
 
     const loadAuction = async () => {
-      setLoading(true);
-      const {data} = await axios.get("http://localhost:5000/api/auction/current",{withCredentials: true});
-      setAuctionData(data);
-      setLoading(false);
-    };
+      try{
+        setLoading(true);
+        const {data} = await axios.get("http://localhost:5000/api/auction/current",{withCredentials: true});
+        setAuctionData(data);
+        setNotifications(data.history || []);
 
+        if(data.auctionEndsAt){
+          const endTime = new Date(data.auctionEndsAt).getTime();
+          setTimeLeft(Math.max(0, endTime - Date.now()));
+        }
+
+        if(data.history?.length > notifications.length){
+          audioRef.current.play();
+          setFlashIndex(data.history.length - 1);
+          setTimeout(()=> setFlashIndex(null),1500);
+        }
+      }catch(err){
+          console.error("Failed to load auction:", err);
+    } finally{
+          setLoading(false);
+    }
+  };
 
   
     useEffect(() => {
@@ -52,9 +72,30 @@ const Auction = () => {
       const interval = setInterval(loadAuction,5000)
       return () => clearInterval(interval);
     }, [navigate]);
+
+    useEffect(() => {
+      if(!auctionData?.auctionEndsAt) return;
+
+      const endTime = new Date(auctionData.auctionEndsAt).getTime();
+      const interval = setInterval(() => {
+        const diff = Math.max(0, endTime - Date.now());
+        setTimeLeft(diff);
+        if(diff <= 0) {
+          clearInterval(interval);
+        }
+      }, 1000);
+
+      return ()=> clearInterval(interval);
+    }, [auctionData]);
+
+    const formatTime = (ms) =>{
+      const totalSeconds = Math.floor(ms/1000);
+      const minutes = String(Math.floor(totalSeconds/60)).padStart(2,"0");
+      const seconds = String(totalSeconds % 60).padStart(2, "0");
+      return `${minutes} : ${seconds}`;
+    }
   
     if(loading) return <p>Loading player...</p>;
-    if(!player) return <p>No Player found</p>;
     if(!auctionData) return <div className="alert alert-warning">No active auction player.</div>;
 
     const {player, basePrice, currentBid, nextSteps = [],teamBalance, canBid} = auctionData;
@@ -65,7 +106,8 @@ const Auction = () => {
         return;
       }
       try{
-        await axios.post("http://localhost:5000/api/auction/bid",{amount: bid},{withCredentials: true})
+        await axios.post("http://localhost:5000/api/auction/bid",{amount: bid},{withCredentials: true});
+        loadAuction();
       }catch(err){
         alert(err.response?.data?.error || "Bid Failed");
       }
@@ -122,7 +164,7 @@ const Auction = () => {
               {/* Timer */}
               <div className="col-md-4 d-flex justify-content-center align-items-center">
                 <div className="timer bg-warning text-dark p-3 rounded">
-                  00 : 00 : 00
+                  {timeLeft > 0 ? formatTime(timeLeft) : "Auction Ended"}
                 </div>
               </div>
 
@@ -133,8 +175,8 @@ const Auction = () => {
                     <button
                       key={i}
                       className="btn btn-danger m-1 bit-btn"
-                      disabled={!canBid || bid > teamBalance}
-                      onClick={() => axios.post("http://localhost:5000/api/auction/bid", {amout: bid}, {withCredentials: true})}
+                      disabled={!canBid || bid > teamBalance || timeLeft <= 0}
+                      onClick={() => handleBid(bid)}
                     >
                       ₹{bid}
                     </button>
@@ -151,8 +193,17 @@ const Auction = () => {
           {/* Notifications */}
           <div className="notifications mt-2 p-3 bg-dark text-white rounded">
             <h5>Notifications</h5>
-            <p>Team A bid ₹1000</p>
-            <p>Team B bid ₹2000</p>
+            {notifications.length === 0 ?(
+              <p>No Bids yet </p>
+            ) : (notifications.map((note, i) => (
+              <p 
+                key={i}
+                className={flashIndex === i ? "flash" : ""}
+              >
+                {note.team} bid ₹{note.amount}
+              </p>
+            ))
+            )}
           </div>
         </div>
       </div>

@@ -83,3 +83,15 @@
   background: rgba(0, 0, 0, 0.8);
   color: white;
 }
+
+.flash {
+  animation: flashAnim 1.5s ease-in-out;
+  color: #ffcc00; /* highlight color */
+  font-weight: bold;
+}
+
+@keyframes flashAnim {
+  0% { background-color: #444; }
+  50% { background-color: #ff5722; }
+  100% { background-color: #444; }
+}
