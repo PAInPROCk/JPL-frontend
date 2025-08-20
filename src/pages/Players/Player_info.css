@@ -1,18 +1,19 @@
 
-
 .player-info-bg {
-  background-image: url('../../assets/images/vecteezy_cricket-stadium_427062.jpg');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  min-height: 100vh;
-  padding-top: 100px;
+  min-height: 100vh;              /* full screen height */
+  display: flex;
+  justify-content: center;        /* center horizontally */
+  align-items: center;            /* center vertically */
+  background: url("/public/assets/images/stadium bg 4096x2867.jpg") no-repeat center center/cover; /* if you have background */
 }
 
 .player-info-container {
   background-color: rgba(72, 89, 158, 0.45);
   border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
 }
+
 
 .player-image {
   width: 100%;
@@ -70,4 +71,15 @@
   width: 50px;
   height: 50px;
   object-fit: contain;
+}
+
+.players-page::-webkit-scrollbar {
+  width: 8px;
+}
+.players-page::-webkit-scrollbar-thumb {
+  background-color: #aaa;
+  border-radius: 10px;
+}
+.players-page::-webkit-scrollbar-track {
+  background: transparent;
 }
