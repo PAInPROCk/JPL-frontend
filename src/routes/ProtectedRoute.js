@@ -1,42 +1,52 @@
+import React, { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
-import React,{useEffect, useState} from "react";
+import Spinner from "../components/Spinner";
 import axios from "axios";
-import Spinner from "../components/Spinner.js";
+
+// Always send cookies for requests
+axios.defaults.withCredentials = true;
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
   const [isAuth, setIsAuth] = useState(null);
   const [userRole, setUserRole] = useState(null);
-
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const checkAuth = async () => {
-      try{
-        const res = await axios.get("http://localhost:5000/check-auth",{
+      try {
+        const res = await axios.get("http://localhost:5000/check-auth", {
           withCredentials: true,
         });
-        if(res.data.authenticated){
-          setIsAuth(true);
-          setUserRole(res.data.role);
-        } else{
-          setIsAuth(false);
-        }
-      }catch(err){
+        console.log("ProtectedRoute: check-auth result", res.data);
+        setIsAuth(res.data.authenticated);
+        setUserRole(res.data.role);
+      } catch (err) {
+        console.error("ProtectedRoute: error", err?.response?.data || err);
         setIsAuth(false);
-      } finally{
+        setUserRole(null);
+      } finally {
         setLoading(false);
       }
     };
+
     checkAuth();
   }, []);
 
-  if(isAuth === null) return <><Spinner/> <p>Loading...</p></>;
-
-  if(!isAuth) return <Navigate to="/"/>;
-
-  if(allowedRoles && !allowedRoles.includes(userRole)){
-    return <Navigate to="/"/>
+  if (loading || isAuth === null) {
+    return <Spinner />;
   }
+
+  if (!isAuth) {
+    // Not logged in at all
+    return <Navigate to="/login" replace />;
+  }
+
+  if (allowedRoles && !allowedRoles.includes(userRole)) {
+    // Logged in, but not the right role
+    return <Navigate to="/" replace />;
+  }
+
+  // All checks passed
   return children;
 };
 

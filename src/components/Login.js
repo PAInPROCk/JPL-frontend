@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Login.css";
 import axios from "axios";
+axios.defaults.withCredentials = true;
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -32,18 +33,21 @@ const Login = () => {
         "http://localhost:5000/login",
         {email, password},
         {withCredentials: true}
-      );
-      console.log(res.data.message);
-      if(res.data.authenticated){
+      )
+      console.log("Login response:",res?.data);
+      if(res?.data?.authenticated){
         if(res.data.role === "admin"){
-            navigate("/admin")
+            navigate("/admin");
+        } else if(res.data.role === "team"){
+          navigate("/home");
         } else{
-          navigate("/home")
+          navigate("/");
         }
       }else{
         setError("Authentication Failed");
       }
     }catch(err){
+      console.error("Login Error: ",err.response?.data || err);
       setError(err.response?.data?.error || "Login Failed");
     } finally {
       setLoading(false);

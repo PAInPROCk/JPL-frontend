@@ -97,7 +97,7 @@ const AdminRegister = () => {
 
     try {
       const res = await axios.post(
-        "http://localhost:5000/api/admin/addPlayer",
+        "http://localhost:5000/add-Player",
         data,
         {
           headers: { "Content-Type": "multipart/form-data" },

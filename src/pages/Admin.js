@@ -1,21 +1,13 @@
-import React, { use } from "react";
-import { useState } from "react";
+import React, { useState } from "react";
 import "./Admin.css";
 import Papa from "papaparse";
 import * as XLSX from "xlsx";
 import NavbarComponent from "../components/Navbar";
-import { Navigate, useNavigate } from "react-router-dom";
-import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Admin = () => {
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const isAdminLoggedIn = localStorage.getItem("isAdminLoggedIn");
-    if (!isAdminLoggedIn) {
-      navigate("/");
-    }
-  }, [navigate]);
   const [randomMode, setrandomMode] = useState(false);
   const [useCustomList, setuseCustomList] = useState(false);
   const [unsoldPlayers, setunsoldPlayers] = useState(false);
@@ -50,7 +42,7 @@ const Admin = () => {
       };
       reader.readAsArrayBuffer(file);
     } else {
-      alert("Only CSV or Excel fies are allowed");
+      alert("Only CSV or Excel files are allowed");
     }
   };
 
@@ -64,6 +56,7 @@ const Admin = () => {
       },
     });
   };
+
   return (
     <>
       <NavbarComponent />
@@ -93,7 +86,7 @@ const Admin = () => {
                   type="file"
                   className="form-control"
                   id="customFile"
-                  accept=".csv,.json, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+                  accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
                   onChange={handleFileUpload}
                 />
                 {customFile && (
@@ -141,7 +134,6 @@ const Admin = () => {
             <button className="btn btn-success mt-3" onClick={startAuction}>
               Start Auction
             </button>
-            
           </div>
         </div>
       </div>

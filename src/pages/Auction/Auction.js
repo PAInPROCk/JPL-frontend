@@ -18,7 +18,7 @@ const Auction = () => {
     const loadAuction = async () => {
       try{
         setLoading(true);
-        const {data} = await axios.get("http://localhost:5000/api/auction/current",{withCredentials: true});
+        const {data} = await axios.get("http://localhost:5000/current-auction",{withCredentials: true});
         setAuctionData(data);
         setNotifications(data.history || []);
 
@@ -106,7 +106,7 @@ const Auction = () => {
         return;
       }
       try{
-        await axios.post("http://localhost:5000/api/auction/bid",{amount: bid},{withCredentials: true});
+        await axios.post("http://localhost:5000/bid",{amount: bid},{withCredentials: true});
         loadAuction();
       }catch(err){
         alert(err.response?.data?.error || "Bid Failed");

@@ -53,7 +53,8 @@ const Admin_auction = () => {
           "http://localhost:5000/next-auction",
           {Player_id: player.id + 1},
           {withCredentials: true}
-        );
+        ).then(res => console.log(res.data))
+         .then(err => console.log(err));
         await loadPlayer();
       }catch (err){
         console.error("Error moving to next player", err);
