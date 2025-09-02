@@ -36,6 +36,7 @@ const AdminRegister = () => {
   const [preview, setPreview] = useState(null);
   const [dropdownOpen, setdropDownOpen] = useState(false);
   const [error, setError] = useState("");
+  const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
   const toggleDropdown = () => setdropDownOpen((open) => !open);
 
@@ -97,13 +98,14 @@ const AdminRegister = () => {
 
     try {
       const res = await axios.post(
-        "http://localhost:5000/add-Player",
+        `${API_BASE_URL}/add-Player`,
         data,
         {
           headers: { "Content-Type": "multipart/form-data" },
         }
       );
       alert(res.data.message || "Player Added Successfully");
+      console.log("Upload Image:", res.data.image);
     } catch (err) {
       alert(err.response?.data?.error || "Something Went wrong");
     }

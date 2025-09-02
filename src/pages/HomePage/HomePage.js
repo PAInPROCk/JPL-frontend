@@ -1,13 +1,13 @@
-import HomeNav from "./HomeNav";
 import "./HomePage.css";
 import jpl1 from "../../assets/images/jpl12.png";
 import jpl2 from "../../assets/images/jpl22.png";
 import jpl3 from "../../assets/images/jpl3.png";
+import Navbar from "../../components/Navbar";
 
 const HomePage = () => {
   return (
     <>
-      <HomeNav />
+      <Navbar/>
 
       <div className="home-bg">
         <div className="alert alert-success fixed-top" role="alert">
