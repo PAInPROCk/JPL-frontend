@@ -1,4 +1,3 @@
-import React from "react";
 import Navbar from "../../components/Navbar";
 import "./Auction_rule.css";
 import { useNavigate } from "react-router-dom";
@@ -6,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 const Auction_rule = () => {
     const navigate = useNavigate();
     const handleClick = () =>{
-        navigate('/Auction');
+        navigate('/Waiting');
     };
   return (
     <>
