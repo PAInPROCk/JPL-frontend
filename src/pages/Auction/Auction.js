@@ -102,7 +102,7 @@ const Auction = () => {
 
     const handleBid = async (bid) => {
       if(bid > teamBalance){
-        alert("You don't have enough purce!");
+        alert("You don't have enough purse!");
         return;
       }
       try{

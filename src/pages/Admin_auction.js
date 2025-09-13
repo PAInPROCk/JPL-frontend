@@ -13,57 +13,66 @@ const Admin_auction = () => {
   const [showSold, setShowSold] = useState(false);
   const navigate = useNavigate();
 
-  
-    const loadPlayer = async () =>{
-      const res = await axios.get("http://localhost:5000/current-auction",{
-        withCredentials: true,
-      });
-      setPlayer(res.data);
-    };
-    
-    useEffect(() => {
-      const checkAuthandLoad = async () => {
-        try{
-          const authRes = await axios.get("http://localhost:5000/check-auth",{
-            withCredentials: true,
-          });
+  const loadPlayer = async () => {
+    const res = await axios.get("http://localhost:5000/current-auction", {
+      withCredentials: true,
+    });
+    setPlayer(res.data);
+  };
 
-          if(!authRes.data.authenticated || authRes.data.role !== "admin"){
-            navigate("/");
-            return;
-          }
+  useEffect(() => {
+    const checkAuthandLoad = async () => {
+      try {
+        const authRes = await axios.get("http://localhost:5000/check-auth", {
+          withCredentials: true,
+        });
 
-          await loadPlayer();
-        } catch (err){
+        if (!authRes.data.authenticated || authRes.data.role !== "admin") {
           navigate("/");
-        }finally{
-          setLoading(false);
+          return;
         }
-      };
-      checkAuthandLoad();
-    }, [navigate]);
 
-    const handleSold = () =>{
-      navigate("/sold",{state: {player}})
-    };
-
-    const nextPlayer = async () => {
-      try{
-        await axios.post(
-          "http://localhost:5000/next-auction",
-          {Player_id: player.id + 1},
-          {withCredentials: true}
-        ).then(res => console.log(res.data))
-         .then(err => console.log(err));
         await loadPlayer();
-      }catch (err){
-        console.error("Error moving to next player", err);
+      } catch (err) {
+        navigate("/");
+      } finally {
+        setLoading(false);
       }
     };
+    checkAuthandLoad();
+  }, [navigate]);
 
+  const handleSold = async () => {
+    try {
+      await axios.post(
+        "http://localhost:5000/end-auction",
+        { player_id: player.id },
+        { withCredentials: true }
+      );
+      navigate("/sold", { state: { player } });
+    } catch (err) {
+      alert("Error marking player as sold");
+    }
+  };
 
-  if(loading) return <p>Loading player...</p>;
-  if(!player) return <p>No Player found</p>;
+  const nextPlayer = async () => {
+    try {
+      await axios
+        .post(
+          "http://localhost:5000/next-auction",
+          { Player_id: player.id + 1 },
+          { withCredentials: true }
+        )
+        .then((res) => console.log(res.data))
+        .then((err) => console.log(err));
+      await loadPlayer();
+    } catch (err) {
+      console.error("Error moving to next player", err);
+    }
+  };
+
+  if (loading) return <p>Loading player...</p>;
+  if (!player) return <p>No Player found</p>;
 
   return (
     <>
@@ -126,7 +135,7 @@ const Admin_auction = () => {
                 <div className="quick-bids mb-3">
                   <button
                     className="btn btn-danger m-2 btn-red-custom"
-                    onClick=""
+                    onClick={handleSold}
                   >
                     Sold
                   </button>
@@ -136,7 +145,10 @@ const Admin_auction = () => {
                   <button className="btn btn-dark m-2 btn-black-custom">
                     Cancel
                   </button>
-                  <button className="btn btn-primary m-2 btn-blue-customm" onClick={nextPlayer}>
+                  <button
+                    className="btn btn-primary m-2 btn-blue-customm"
+                    onClick={nextPlayer}
+                  >
                     Next Player
                   </button>
                 </div>
