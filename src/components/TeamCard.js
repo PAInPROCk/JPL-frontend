@@ -10,7 +10,7 @@ const TeamCard = ({ team }) => {
   return (
     <div className="player-card text-center p-3" >
       <img
-        src={team.img  || fallbackImg} 
+        src={team.image_path  || fallbackImg} 
         onError={(e) => (e.target.src = fallbackImg)}
         alt={team.img}
         className="img-fluid rounded-circle mb-2"

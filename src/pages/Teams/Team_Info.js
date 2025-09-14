@@ -50,7 +50,7 @@ const Team_info = () => {
           <div className="row g-4">
             <div className="col-md-3 text-center">
               <img
-                src={team.logo_path || fallbackImg}
+                src={team.image_path || fallbackImg}
                 alt={team.name}
                 className="team-image img-fluid"
                 onError={(e) => (e.target.src = fallbackImg)}

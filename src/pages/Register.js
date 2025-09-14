@@ -1,10 +1,10 @@
-import HomeNav from "./HomePage/HomeNav";
 import "./Register.css";
+import Navbar from "../components/Navbar";
 
 const Register = () => {
   return (
     <>
-      <HomeNav />
+      <Navbar/>
       <div className="register-bg">
         <h3 className="text-center fixed-top jr">JPL Season 6 Registration</h3>
         <div className="button-group">
