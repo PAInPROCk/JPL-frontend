@@ -4,20 +4,35 @@ import Papa from "papaparse";
 import * as XLSX from "xlsx";
 import NavbarComponent from "../components/Navbar";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const Admin = () => {
   const navigate = useNavigate();
 
-  const [randomMode, setrandomMode] = useState(false);
-  const [useCustomList, setuseCustomList] = useState(false);
-  const [unsoldPlayers, setunsoldPlayers] = useState(false);
   const [customFile, setCustomFile] = useState(null);
+  const [auctionMode, setAuctionMode] = useState(null);
   const [playerList, setPlayerList] = useState([]);
+
+  const requireAdmin = async (nextPath, extraState = {}) => {
+    try {
+      const res = await axios.get("http://localhost:5000/check-auth", {
+        withCredentials: true,
+      });
+      if (res.data.authenticated && res.data.role === "admin") {
+        navigate(nextPath, { state: extraState });
+      } else {
+        alert("Access denied: admin login required");
+        navigate("/"); // Or show an error modal
+      }
+    } catch {
+      alert("Access denied: Please login as admin");
+      navigate("/");
+    }
+  };
 
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-
     const fileExtension = file.name.split(".").pop().toLowerCase();
 
     if (fileExtension === "csv") {
@@ -47,39 +62,47 @@ const Admin = () => {
   };
 
   const startAuction = () => {
-    navigate("/Admin_auction", {
+    requireAdmin("/Admin_auction", {
       state: {
-        randomMode,
-        useCustomList,
-        unsoldPlayers,
-        playerList,
+        auctionMode,
+        playerList: auctionMode === "custom" ? playerList : [],
       },
     });
   };
 
+  const handleTeamRegistration = () => requireAdmin("/registerTeam");
+  const handlePlayerRegistration = () => requireAdmin("/Admin_register");
+
   return (
     <>
       <NavbarComponent />
-      <div className="admin-bg">
-        <div className="container py-5">
-          <h2 className="text-center mb-4 mt-3">Admin Panel</h2>
-          <div className="admin-panel p-4 rounded shadow">
-            <div className="mb-3">
-              <span className="badge text-bg-custom">
-                <input
-                  type="checkbox"
-                  className="form-check-input"
-                  checked={useCustomList}
-                  onChange={() => setuseCustomList(!useCustomList)}
-                />
-                <label className="form-check-label me-2">
-                  Use Custom Player List
-                </label>
-              </span>
+      <div className="admin-bg" style={{ minHeight: "100vh", paddingTop: 0 }}>
+        <div className="container py-4">
+          <h2 className="text-center mb-3 mt-1">Admin Panel</h2>
+          <div className="admin-action-card">
+            <div
+              className="mb-3"
+              style={{ fontWeight: 600, fontSize: 22, textAlign: "center" }}
+            >
+              Auction Setup & Registration
             </div>
-            {useCustomList && (
-              <div className="mb-3">
-                <label htmlFor="customFile" className="form-label">
+
+            <div className="admin-option">
+              <input
+                type="checkbox"
+                checked={auctionMode === "custom"}
+                onChange={() => setAuctionMode("custom")}
+                id="useCustomList"
+              />
+              <label htmlFor="useCustomList">Use Custom Player List</label>
+            </div>
+            {auctionMode === "custom" && (
+              <div className="mb-2 ms-3">
+                <label
+                  htmlFor="customFile"
+                  className="form-label"
+                  style={{ fontSize: 16 }}
+                >
                   Upload Custom Player List
                 </label>
                 <input
@@ -90,11 +113,11 @@ const Admin = () => {
                   onChange={handleFileUpload}
                 />
                 {customFile && (
-                  <p className="text-muted mt-2">Selected: {customFile.name}</p>
+                  <p className="text-muted mt-1">Selected: {customFile.name}</p>
                 )}
                 {playerList.length > 0 && (
-                  <div className="mt-3 player-preview-box p-2 border-rounded">
-                    <h5>Player Preview</h5>
+                  <div className="mt-2 player-preview-box p-2 border-rounded">
+                    <h6 style={{ fontWeight: 600 }}>Player Preview</h6>
                     <ul className="list-group">
                       {playerList.map((player, index) => (
                         <li key={index} className="list-group-item">
@@ -107,32 +130,44 @@ const Admin = () => {
               </div>
             )}
 
-            <div className="mb-3">
-              <span className="badge text-bg-custom">
-                <input
-                  type="checkbox"
-                  className="form-check-input"
-                  checked={randomMode}
-                  onChange={() => setrandomMode(!randomMode)}
-                />
-                <label className="form-check-label me-2">Random Mode</label>
-              </span>
+            <div className="admin-option">
+              <input
+                type="checkbox"
+                checked={auctionMode === "random"}
+                onChange={() => setAuctionMode("random")}
+                id="randomMode"
+              />
+              <label htmlFor="randomMode">Random Mode</label>
             </div>
-            <div className="mb-3">
-              <span className="badge text-bg-custom">
-                <input
-                  type="checkbox"
-                  className="form-check-input"
-                  checked={unsoldPlayers}
-                  onChange={() => setunsoldPlayers(!unsoldPlayers)}
-                />
-                <label className="form-check-label me-2">
-                  Use Unsold Players Only
-                </label>
-              </span>
+            <div className="admin-option">
+              <input
+                type="checkbox"
+                checked={auctionMode === "unsold"}
+                onChange={() => setAuctionMode("unsold")}
+                id="unsoldPlayers"
+              />
+              <label htmlFor="unsoldPlayers">Use Unsold Players Only</label>
             </div>
-            <button className="btn btn-success mt-3" onClick={startAuction}>
+
+            <button
+              className="btn btn-success w-100"
+              onClick={startAuction}
+              disabled={!auctionMode}
+            >
               Start Auction
+            </button>
+
+            <button
+              className="btn btn-info w-100 mt-3"
+              onClick={handleTeamRegistration}
+            >
+              New Team Registration
+            </button>
+            <button
+              className="btn btn-info w-100 mt-2"
+              onClick={handlePlayerRegistration}
+            >
+              New Player Registration
             </button>
           </div>
         </div>

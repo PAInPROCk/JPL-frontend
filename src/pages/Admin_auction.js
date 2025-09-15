@@ -1,16 +1,14 @@
 import NavbarComponent from "../components/Navbar";
 import "./Admin_auction.css";
-import { Await, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import fallbackImg from "../assets/images/PlAyer.png";
 import { useEffect, useState } from "react";
-import { fetchPlayers } from "./Players/PlayerData";
 import axios from "axios";
-import Player_info from "./Players/Player_info";
+
 
 const Admin_auction = () => {
   const [player, setPlayer] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [showSold, setShowSold] = useState(false);
   const navigate = useNavigate();
 
   const loadPlayer = async () => {
