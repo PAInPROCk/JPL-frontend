@@ -139,7 +139,7 @@ const AdminRegister = () => {
                 />
               </div>
 
-              {/* Player Details */}
+              {/* Team Details */}
               <div className="col-md-9 ">
                 <div className="row g-3">
                   <div className="col-md-3 info-box green">

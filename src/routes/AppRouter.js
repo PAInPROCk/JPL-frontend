@@ -16,6 +16,7 @@ import Waiting from '../pages/Waiting';
 import HomePage from '../pages/HomePage/HomePage';
 import AdminProtectedRoute from './AdminProtectedRoute';
 import AdminRegister from '../pages/AdminRegister';
+import TeamRegister from '../pages/TeamRegister';
 
 
 const AppRouter = () =>{
@@ -39,7 +40,8 @@ const AppRouter = () =>{
                 {/* Admin Protected Routes */}
                 <Route path="/admin" element={<AdminProtectedRoute allowedRoles={["admin"]}><Admin/></AdminProtectedRoute>}/>
                 <Route path='/Admin_auction' element={<ProtectedRoute allowedRoles={["admin"]}><Admin_auction/></ProtectedRoute>}/>
-                <Route path='/Admin_register' element={<AdminRegister/>}/>
+                <Route path='/Admin_register' element={<ProtectedRoute allowedRoles={["admin"]}><AdminRegister/></ProtectedRoute>}/>
+                <Route path="/Team_register" element={<ProtectedRoute allowedRoles={["admin"]}><TeamRegister/></ProtectedRoute>}/>
             </Routes>
     )
 }

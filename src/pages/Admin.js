@@ -70,7 +70,7 @@ const Admin = () => {
     });
   };
 
-  const handleTeamRegistration = () => requireAdmin("/registerTeam");
+  const handleTeamRegistration = () => requireAdmin("/Team_register");
   const handlePlayerRegistration = () => requireAdmin("/Admin_register");
 
   return (
