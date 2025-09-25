@@ -1,0 +1,6 @@
+name,base_price,age,category,type,jersey,mobile_no,email_id,nickname,total_runs,highest_runs,wickets_taken,times_out,teams_played,image_path
+Rahul Dravid,25000,44,Batsman,Right Hand Batsman,17,9876543210,rahul@gmail.com,RD,1000,255,0,25,JPL Titans,
+MS Dhoni,30000,42,Wicket Keeper,Right Hand Batsman,7,9876543211,dhoni@gmail.com,Mahi,1500,183,0,30,JPL Warriors,
+Virat Kohli,35000,35,Batsman,Right Hand Batsman,18,9876543212,virat@gmail.com,VK,2000,254,0,40,JPL Kings,
+Jasprit Bumrah,28000,30,Bowler,Right Arm Fast,93,9876543213,bumrah@gmail.com,JB,50,25,150,5,JPL Knights,
+Hardik Pandya,32000,30,All-rounder,Right Hand Batsman,33,9876543214,hardik@gmail.com,HP,800,92,75,15,JPL Titans,

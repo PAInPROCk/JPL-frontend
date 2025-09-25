@@ -3,6 +3,7 @@ import { useNavigate} from "react-router-dom";
 
 const TeamCard = ({ team }) => {
   const navigate = useNavigate();
+  const API_BASE_URL = process.env.APP_BASE_URL || "http://localhost:5000";
   const handleClick = () => {
     navigate(`/team_info/${team.id}`);
   };
@@ -10,7 +11,7 @@ const TeamCard = ({ team }) => {
   return (
     <div className="player-card text-center p-3" >
       <img
-        src={team.image_path  || fallbackImg} 
+        src={team.image_path ? `${API_BASE_URL}/${team.image_path}` : fallbackImg} 
         onError={(e) => (e.target.src = fallbackImg)}
         alt={team.img}
         className="img-fluid rounded-circle mb-2"

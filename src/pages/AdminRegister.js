@@ -36,7 +36,7 @@ const AdminRegister = () => {
   const [preview, setPreview] = useState(null);
   const [dropdownOpen, setdropDownOpen] = useState(false);
   const [error, setError] = useState("");
-  const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
+  const API_BASE_URL = process.env.APP_BASE_URL || "http://localhost:5000";
 
   const toggleDropdown = () => setdropDownOpen((open) => !open);
 
@@ -57,6 +57,14 @@ const AdminRegister = () => {
 
     if(name === "image" && files && files[0]){
       const file = files[0];
+      if(file.size > 1 * 1024 * 1024){
+        alert("Image size should be less than 1MB");
+        return;
+      }
+      if(!file.type.startsWith("image/")){
+        alert("Please upload a valid image file");
+        return;
+      }
       setFormData({
         ...formData,
         image: file,
@@ -98,7 +106,7 @@ const AdminRegister = () => {
 
     try {
       const res = await axios.post(
-        `${API_BASE_URL}/add-Player`,
+        `${API_BASE_URL}/add-player`,
         data,
         {
           headers: { "Content-Type": "multipart/form-data" },

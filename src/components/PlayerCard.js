@@ -1,10 +1,12 @@
 import fallbackImg from "../assets/images/PlAyer.png";
 
 const PlayerCard = ({ player }) => {
+  const API_BASE_URL = process.env.APP_BASE_URL || "http://localhost:5000";
+
   return (
     <div className="player-card text-center p-3">
       <img
-        src={player.image_path || fallbackImg}
+        src={player.image_path ? `${API_BASE_URL}/${player.image_path}`: fallbackImg}
         onError={(e) => (e.target.src = fallbackImg)}
         alt={player.name}
         className="img-fluid rounded-circle mb-2"

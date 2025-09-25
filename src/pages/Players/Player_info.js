@@ -11,6 +11,7 @@ const Player_info = () => {
   const { id } = useParams();
   const [player, setPlayer] = useState(null);
   const [loading, setLoading] = useState(true); 
+  const API_BASE_URL = process.env.APP_BASE_URL || "http://localhost:5000";
 
   useEffect(() => {
     const loadPlayer = async ()=>{
@@ -53,7 +54,7 @@ const Player_info = () => {
             {/* Player Image */}
             <div className="col-md-3 text-center">
               <img
-                src={player.image_path || fallbackImg}
+                src={player.image_path ? `${API_BASE_URL}/${player.image_path}` : fallbackImg}
                 alt={player.name}
                 className="player-image img-fluid"
                 onError={(e) => (e.target.src = fallbackImg)}

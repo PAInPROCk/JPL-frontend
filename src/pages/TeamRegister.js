@@ -6,11 +6,6 @@ import NavbarComponent from "../components/Navbar";
 
 const TeamRegister = () => {
 
-  const [text, setText] = useState('');
-  const handleClickUpper = () => {
-    let newText = text.toUpperCase();
-    setText(newText);
-  };
 
   const [formData, setFormData] = useState({
     teamName: "",
@@ -19,14 +14,14 @@ const TeamRegister = () => {
     seasonBudget: "",
     playersBought: "",
     imagePath: "",
+    captain: "",
+    mobile: "",
+    emailId: ""
   });
 
   const [preview, setPreview] = useState(null);
-  const [dropdownOpen, setdropDownOpen] = useState(false);
   const [error, setError] = useState("");
-  const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
-
-  const toggleDropdown = () => setdropDownOpen((open) => !open);
+  const API_BASE_URL = process.env.APP_BASE_URL || "http://localhost:5000";
 
   const handleChange = (e) => {
 
@@ -45,6 +40,14 @@ const TeamRegister = () => {
 
     if(name === "image" && files && files[0]){
       const file = files[0];
+      if(file.size > 1 * 1024 * 1024){
+        alert("Image size should be less than 1MB");
+        return;
+      }
+      if(!file.type.startsWith("image/")){
+        alert("Please Upload a valid image file");
+        return; 
+      }
       setFormData({
         ...formData,
         image: file,
@@ -56,20 +59,6 @@ const TeamRegister = () => {
       [name]: value,
     });
     }
-  };
-
-  const handleTeamCheckboxChange = (e) => {
-    const { value, checked } = e.target;
-
-    setFormData((prev) => {
-      if (checked) {
-        // add to array
-        return { ...prev, teams: [...prev.teams, value] };
-      } else {
-        // remove from array
-        return { ...prev, teams: prev.teams.filter((team) => team !== value) };
-      }
-    });
   };
 
   const handleSubmit = async (e) => {
@@ -86,13 +75,13 @@ const TeamRegister = () => {
 
     try {
       const res = await axios.post(
-        `${API_BASE_URL}/add-Player`,
+        `${API_BASE_URL}/add-team`,
         data,
         {
           headers: { "Content-Type": "multipart/form-data" },
         }
       );
-      alert(res.data.message || "Player Added Successfully");
+      alert(res.data.message || "Team Added Successfully");
       console.log("Upload Image:", res.data.image);
     } catch (err) {
       alert(err.response?.data?.error || "Something Went wrong");
@@ -139,6 +128,49 @@ const TeamRegister = () => {
                         type="text"
                         name="teamName"
                         value={formData.teamName}
+                        onChange={handleChange}
+                        required
+                      ></input>
+                    </div>
+                  </div>
+
+                  <div className="col-md-3 info-box green">
+                    <div className="label">Captain Name</div>
+                    <div className="value p-1">
+                      <input
+                        className="border-1"
+                        placeholder="Enter Captain Name"
+                        type="text"
+                        name="captain"
+                        value={formData.captain}
+                        onChange={handleChange}
+                        required
+                      ></input>
+                    </div>
+                  </div>
+                  <div className="col-md-3 info-box green">
+                    <div className="label">Mobile Number</div>
+                    <div className="value p-1">
+                      <input
+                        className="border-1"
+                        placeholder="Enter Team Mobile Number"
+                        type="text"
+                        name="mobile"
+                        value={formData.mobile}
+                        onChange={handleChange}
+                        required
+                      ></input>
+                    </div>
+                  </div>
+                  <div className="col-md-3 info-box green">
+                    <div className="label">Email Id</div>
+                    <div className="value p-1">
+                      <input
+                        className="border-1"
+                        placeholder="Enter Teams Email Id"
+                        type="text"
+                        name="emailId"
+                        value={formData.emailId}
                         onChange={handleChange}
                         required
                       ></input>
