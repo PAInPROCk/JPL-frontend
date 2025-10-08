@@ -1,0 +1,63 @@
+.unsold-page {
+  background: radial-gradient(circle, #0f1f47, #070f25);
+  border-radius: 20px;
+  box-shadow: 0 0 20px #000;
+}
+
+.border-4{
+  background-image: linear-gradient(rgb(38 253 138));
+}
+
+.unsold-img-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.unsold-img-wrapper .unsold-stamp {
+  position: absolute;
+  top: 10px;
+  left: -10px;
+  background-color: #fff;
+  color: #e60000;
+  font-weight: 900;
+  padding: 5px 15px;
+  border-radius: 50px;
+  transform: rotate(-20deg);
+  font-size: 1.2rem;
+  border: 2px dashed #e60000;
+}
+
+.player-name {
+  font-size: 2.5rem;
+  font-weight: bold;
+}
+
+.team-logo {
+  width: 100px;
+  height: 100px;
+}
+
+.team-name{
+  font-size:1cm;
+  font-weight: 600;
+}
+
+.price-box {
+  min-width: 180px;
+  text-align: center;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.bg{
+    background-image: url('/public/assets/images/stadium bg 4096x2867.jpg');
+     background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  height: 100vh;                        /* Full height */
+  width: 100%;                         /* Full width */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0px;  
+}

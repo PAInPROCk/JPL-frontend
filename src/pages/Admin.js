@@ -18,7 +18,7 @@ const Admin = () => {
 
   const requireAdmin = async (nextPath, extraState = {}) => {
     try {
-      const res = await axios.get("http://localhost:5000/check-auth", {
+      const res = await axios.get(`${API_BASE_URL}/check-auth`, {
         withCredentials: true,
       });
       if (res.data.authenticated && res.data.role === "admin") {
