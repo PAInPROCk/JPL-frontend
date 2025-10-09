@@ -9,6 +9,7 @@
 .auction-container {
   background-color: rgba(236, 235, 235, 0.9);
   border-radius: 15px;
+  margin-top: 0px;
 }
 
 .player-img {
