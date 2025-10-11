@@ -82,7 +82,7 @@ const Player_info = () => {
                   <div className="value">{player.category}</div>
                 </div>
                 <div className="col-md-6 info-box red">
-                  <div className="label">Type</div>
+                  <div className="label">Style</div>
                   <div className="value">{player.type}</div>
                 </div>
 

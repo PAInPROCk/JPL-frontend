@@ -7,7 +7,8 @@ import axios from "axios";
 import io from "socket.io-client";
 
 // ✅ Use correct env variable and stable socket connection
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "http://localhost:5000";
+const API_BASE_URL =
+  process.env.REACT_APP_API_BASE_URL || "http://localhost:5000";
 const socket = io(API_BASE_URL, { withCredentials: true });
 
 const Admin_auction = () => {
@@ -56,7 +57,8 @@ const Admin_auction = () => {
 
         socket.on("timer_update", (data) => {
           // data can be number or object
-          const remaining = typeof data === "number" ? data : data.remaining_seconds;
+          const remaining =
+            typeof data === "number" ? data : data.remaining_seconds;
           setTimeLeft(remaining);
         });
 
@@ -152,16 +154,28 @@ const Admin_auction = () => {
   };
 
   const handlePause = async () => {
-    await axios.post(`${API_BASE_URL}/pause-auction`, {}, { withCredentials: true });
+    await axios.post(
+      `${API_BASE_URL}/pause-auction`,
+      {},
+      { withCredentials: true }
+    );
   };
 
   const handleResume = async () => {
-    await axios.post(`${API_BASE_URL}/resume-auction`, {}, { withCredentials: true });
+    await axios.post(
+      `${API_BASE_URL}/resume-auction`,
+      {},
+      { withCredentials: true }
+    );
   };
 
   const handleCancel = async () => {
     try {
-      await axios.post(`${API_BASE_URL}/cancel-auction`, {}, { withCredentials: true });
+      await axios.post(
+        `${API_BASE_URL}/cancel-auction`,
+        {},
+        { withCredentials: true }
+      );
       setPlayer(null);
       setTimeLeft(0);
     } catch {
@@ -181,10 +195,10 @@ const Admin_auction = () => {
     <>
       <NavbarComponent />
       <div className="auction-bg d-flex flex-column align-items-center">
-        <div className="container auction-container mt-2 p-3 rounded shadow-lg">
+        <div className="container auction-container mt-1 p-3 rounded shadow-lg">
           {player ? (
             <>
-              <div className="container player-info-container shadow p-4 rounded">
+              <div className="container player-info-container shadow p-3 rounded">
                 <div className="row g-4">
                   <div className="col-md-3 text-center">
                     <img
@@ -213,8 +227,12 @@ const Admin_auction = () => {
                         <div className="value">{player.category}</div>
                       </div>
                       <div className="col-md-6 info-box red">
-                        <div className="label">Type</div>
+                        <div className="label">Style</div>
                         <div className="value">{player.type}</div>
+                      </div>
+                      <div className="col-md-3 stat-box orange">
+                        <div className="label">Highest Runs</div>
+                        <div className="value">{player.highest_runs}</div>
                       </div>
                     </div>
                   </div>
@@ -240,19 +258,34 @@ const Admin_auction = () => {
 
                   <div className="col-md-4 d-flex flex-column align-items-center">
                     <div className="quick-bids mb-3">
-                      <button className="btn btn-danger m-2" onClick={handleSold}>
+                      <button
+                        className="btn btn-danger btn-red-custom m-2"
+                        onClick={handleSold}
+                      >
                         Sold
                       </button>
-                      <button className="btn btn-warning m-2" onClick={handlePause}>
+                      <button
+                        className="btn btn-warning btn-yellow-custom m-2"
+                        onClick={handlePause}
+                      >
                         Pause
                       </button>
-                      <button className="btn btn-success m-2" onClick={handleResume}>
+                      <button
+                        className="btn btn-success btn-green-custom m-2"
+                        onClick={handleResume}
+                      >
                         Resume
                       </button>
-                      <button className="btn btn-dark m-2" onClick={handleCancel}>
+                      <button
+                        className="btn btn-dark m-2"
+                        onClick={handleCancel}
+                      >
                         Cancel
                       </button>
-                      <button className="btn btn-primary m-2" onClick={nextPlayer}>
+                      <button
+                        className="btn btn-primary m-2"
+                        onClick={nextPlayer}
+                      >
                         Next Player
                       </button>
                     </div>

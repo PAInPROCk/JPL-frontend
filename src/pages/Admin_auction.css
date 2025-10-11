@@ -9,7 +9,11 @@
 .auction-container {
   background-color: rgba(236, 235, 235, 0.9);
   border-radius: 15px;
-  margin-top: 0px;
+  margin-top: 10px;
+}
+
+.player-info-container{
+  margin-top: 10px;
 }
 
 .player-img {
@@ -78,25 +82,40 @@
 .btn-red-custom{
   background: #ef4444;
   color: white;
-  border: 5px;
+  border: 2px;
+  border-style: groove;
   border-color: black;
-  width: 90px;
-  height: 70px;
-  border-radius: 35%;
+  width: 100px;
+  height: 90px;
+  border-radius: 45%;
   font-weight: bold;
   font-size: 1.1rem;
   transition: background 0.3s ease;
 }
 
 .btn-yellow-custom{
-  border: 5px;
+  border: 2px;
   border-color: black;
-  border-radius: 35%;
+  border-style: groove;
+  border-radius: 45%;
   color: white;
   font-weight: bold;
   font-size: 1.1rem;
-  height: 70px;
-  width: 90px;
+  height: 90px;
+  width: 100px;
+  transition: background 0.3s ease;
+}
+
+.btn-green-custom{
+  border: 2px;
+  border-color: black;
+  border-style: groove;
+  border-radius: 45%;
+  color: white;
+  font-weight: bold;
+  font-size: 1.1rem;
+  height: 90px;
+  width: 100px;
   transition: background 0.3s ease;
 }
 

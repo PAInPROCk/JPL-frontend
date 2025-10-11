@@ -128,7 +128,7 @@ const AdminRegister = () => {
               {error}
             </div>
           )}
-          <div className="container player-info-container shadow p-3  rounded register-rg">
+          <div className="container player-info-container1 shadow p-3  rounded register-rg">
             <div className="row g-5">
               {/* Player Image */}
               <div className="col-md-3 text-center">

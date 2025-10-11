@@ -98,9 +98,9 @@
   font-weight: bold;
 }
 
-.container{
+.player-info-container1{
   margin-top: 90px;
-  
+  background-color: rgba(72, 89, 158, 0.45);
 }
 
 .custom-dropdown-menu {
