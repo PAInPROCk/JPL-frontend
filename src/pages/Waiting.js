@@ -1,27 +1,57 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import './Waiting.css';
+import "./Waiting.css";
 import Spinner from "../components/Spinner";
+import socket from "../socket";
+import axios from "axios";
 
 const Waiting = () => {
   const navigate = useNavigate();
+  const API_BASE_URL = process.env.REACT_API_BASE_URL || "http://localhost:5000";
+  const [checking, setChecking] = useState(true);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      // Simulate API call to check auction status
-      fetch("http://localhost:5000/auction-status") // replace with your backend URL
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.status === "started") {
-            clearInterval(interval);
-            navigate("/live-auction");
-          }
-        })
-        .catch((err) => console.error(err));
-    }, 2000); // check every 2 seconds
+    // 1️⃣ Check if auction is already active on page load
+    const checkAuction = async () => {
+      try {
+        const res = await axios.get(`${API_BASE_URL}/auction-status`, {
+          withCredentials: true,
+        });
 
-    return () => clearInterval(interval); // cleanup on unmount
+        if (res.data.active) {
+          navigate("/auction");
+        }
+      } catch (err) {
+        console.error("Error checking auction:", err);
+      } finally {
+        setChecking(false);
+      }
+    };
+
+    checkAuction();
+
+    // 2️⃣ Listen for socket event when admin starts auction
+    socket.on("auction_started", () => {
+      navigate("/auction");
+    });
+
+    // 3️⃣ Optional: Poll every 10 seconds in case the socket missed the event
+    const interval = setInterval(checkAuction, 10000);
+
+    // Cleanup
+    return () => {
+      socket.off("auction_started");
+      clearInterval(interval);
+    };
   }, [navigate]);
+
+  if (checking)
+    return (
+      <div className="waiting-bg d-flex flex-column justify-content-center align-items-center text-center vh-100 text-white">
+        <p className="fs-5 mb-3">Checking auction status...</p>
+        <Spinner />
+      </div>
+    );
 
   return (
     <div className="waiting-bg d-flex flex-column justify-content-center align-items-center text-center vh-100">

@@ -67,11 +67,19 @@
   margin-top: 5px;
 }
 
+
 .team-logo1 {
-  width: 50px;
-  height: 50px;
+  width: 70px;
+  height: 70px;
   object-fit: contain;
+  border-radius: 10px;
+  transition: transform 0.3s ease;
 }
+
+.team-logo1:hover {
+  transform: scale(1.15);
+}
+
 
 .players-page::-webkit-scrollbar {
   width: 8px;

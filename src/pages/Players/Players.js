@@ -1,6 +1,6 @@
 import Navbar from "../../components/Navbar";
 import { useEffect, useState } from "react";
-import { data, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import "./Players.css";
 import PlayerCard from "../../components/PlayerCard";
 import { fetchPlayers } from "./PlayerData";
@@ -33,8 +33,9 @@ const Players = () => {
               {players.map((player) => (
                 <div
                   className="col-12 col-sm-6 col-md-4 col-lg-3"
-                  key={player.id}
-                  onClick={() => navigate(`/Player_info/${player.id}`)}
+                  key={player.player_id}
+                  onClick={() => navigate(`/Player_info/${player.player_id}`)}
+                  
                   style={{ cursor: "pointer" }}
                 >
                   <PlayerCard player={player} />

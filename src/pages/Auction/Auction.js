@@ -16,7 +16,11 @@ const Auction = () => {
   const [canBid, setCanBid] = useState(false);
   const [teamBalance, setTeamBalance] = useState(0);
   const [nextSteps, setNextSteps] = useState([]);
-  const audioRef = useRef(new Audio(require("../../assets/Sounds/mixkit-software-interface-start-2574.wav")));
+  const audioRef = useRef(
+    new Audio(
+      require("../../assets/Sounds/mixkit-software-interface-start-2574.wav")
+    )
+  );
 
   const navigate = useNavigate();
   const API_BASE_URL = process.env.APP_BASE_URL || "http://localhost:5000";
@@ -31,7 +35,9 @@ const Auction = () => {
     try {
       setLoading(true);
       // 1) get session info
-      const authRes = await axios.get(`${API_BASE_URL}/check-auth`, { withCredentials: true });
+      const authRes = await axios.get(`${API_BASE_URL}/check-auth`, {
+        withCredentials: true,
+      });
       if (!authRes.data.authenticated) {
         navigate("/");
         return false;
@@ -39,10 +45,13 @@ const Auction = () => {
       // try to extract team id from session user object (best-effort)
       // common places: user.team_id, user.teamId, user.id (if team accounts use user.id)
       const userObj = authRes.data.user || {};
-      teamIdRef.current = userObj.team_id || userObj.teamId || userObj.team || userObj.id || null;
+      teamIdRef.current =
+        userObj.team_id || userObj.teamId || userObj.team || userObj.id || null;
 
       // 2) load current auction once via REST to seed UI quickly (socket will update afterwards)
-      const res = await axios.get(`${API_BASE_URL}/current-auction`, { withCredentials: true });
+      const res = await axios.get(`${API_BASE_URL}/current-auction`, {
+        withCredentials: true,
+      });
       if (res.data && res.data.status === "auction_active") {
         setAuctionData(res.data);
         setNotifications(res.data.history || []);
@@ -50,7 +59,11 @@ const Auction = () => {
         setTeamBalance(res.data.teamBalance || 0);
         setCanBid(Boolean(res.data.canBid));
         // server may return remaining_seconds or time_left
-        const seed = (res.data.remaining_seconds ?? res.data.time_left ?? res.data.timeLeft ?? 0);
+        const seed =
+          res.data.remaining_seconds ??
+          res.data.time_left ??
+          res.data.timeLeft ??
+          0;
         setTimeLeft(Number(seed));
       } else {
         setAuctionData(null);
@@ -82,7 +95,11 @@ const Auction = () => {
         console.warn("Socket connect failed:", e);
       }
 
-      socket.emit("join_auction");
+      socket.emit("join_auction", {
+        team_id: teamIdRef.current,
+        team_name: auctionData?.team_name || "Unknown Team",
+        purse: teamBalance,
+      });
 
       // auction update: main payload from server (player, highest_bid, expires_at, time_left, history, etc.)
       socket.on("auction_update", (data) => {
@@ -94,7 +111,13 @@ const Auction = () => {
         });
 
         // use server-provided time_left or remaining_seconds or timeLeft
-        const serverTime = Number(data.time_left ?? data.remaining_seconds ?? data.timeLeft ?? data.remaining_seconds ?? 0);
+        const serverTime = Number(
+          data.time_left ??
+            data.remaining_seconds ??
+            data.timeLeft ??
+            data.remaining_seconds ??
+            0
+        );
         if (!Number.isNaN(serverTime) && serverTime >= 0) {
           setTimeLeft(serverTime);
         }
@@ -102,7 +125,8 @@ const Auction = () => {
         // update UI bits
         if (data.history) setNotifications(data.history);
         if (data.nextSteps) setNextSteps(data.nextSteps);
-        if (typeof data.teamBalance !== "undefined") setTeamBalance(data.teamBalance);
+        if (typeof data.teamBalance !== "undefined")
+          setTeamBalance(data.teamBalance);
         if (typeof data.canBid !== "undefined") setCanBid(data.canBid);
 
         // play sound if a new bid came (best-effort: compare top bid)
@@ -114,7 +138,9 @@ const Auction = () => {
             // flash the latest
             setFlashIndex(next.length - 1);
             setTimeout(() => setFlashIndex(null), 1500);
-            try { audioRef.current.play(); } catch (e) {}
+            try {
+              audioRef.current.play();
+            } catch (e) {}
             return next;
           });
         }
@@ -134,9 +160,11 @@ const Auction = () => {
         setTimeLeft(0);
         // Optionally set auctionData to reflect sold status or request a fresh REST load
         // We'll request current-auction again to get final state
-        axios.get(`${API_BASE_URL}/current-auction`, { withCredentials: true })
+        axios
+          .get(`${API_BASE_URL}/current-auction`, { withCredentials: true })
           .then((r) => {
-            if (r.data && r.data.status === "auction_active") setAuctionData(r.data);
+            if (r.data && r.data.status === "auction_active")
+              setAuctionData(r.data);
             else setAuctionData(null);
           })
           .catch(() => {});
@@ -171,7 +199,9 @@ const Auction = () => {
       socket.off("auction_cleared");
       socket.off("bid_placed");
       socket.off("error");
-      try { socket.disconnect(); } catch (e) {}
+      try {
+        socket.disconnect();
+      } catch (e) {}
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // run once
@@ -179,7 +209,10 @@ const Auction = () => {
   // local decrementing countdown synced from server timeLeft
   useEffect(() => {
     if (!timeLeft || timeLeft <= 0) return;
-    const t = setInterval(() => setTimeLeft((prev) => (prev > 0 ? prev - 1 : 0)), 1000);
+    const t = setInterval(
+      () => setTimeLeft((prev) => (prev > 0 ? prev - 1 : 0)),
+      1000
+    );
     return () => clearInterval(t);
   }, [timeLeft]);
 
@@ -196,7 +229,9 @@ const Auction = () => {
     const teamId = teamIdRef.current;
     if (!teamId) {
       alert("Team ID not found in session. Can't place bid.");
-      console.warn("Missing team id in session: check /check-auth response structure.");
+      console.warn(
+        "Missing team id in session: check /check-auth response structure."
+      );
       return;
     }
     if (bidAmount > teamBalance) {
@@ -210,12 +245,15 @@ const Auction = () => {
   };
 
   if (loading) return <p>Loading player...</p>;
-  if (!auctionData || !auctionData.player) return <div className="alert alert-warning">No active auction player.</div>;
+  if (!auctionData || !auctionData.player)
+    return <div className="alert alert-warning">No active auction player.</div>;
 
   // destructure from server payload (supports multiple key names)
   const player = auctionData.player || {};
-  const basePrice = auctionData.basePrice ?? auctionData.base_price ?? player.base_price ?? 0;
-  const currentBid = auctionData.currentBid ?? auctionData.highest_bid?.bid_amount ?? 0;
+  const basePrice =
+    auctionData.basePrice ?? auctionData.base_price ?? player.base_price ?? 0;
+  const currentBid =
+    auctionData.currentBid ?? auctionData.highest_bid?.bid_amount ?? 0;
   const displayNextSteps = auctionData.nextSteps ?? nextSteps ?? [];
   const displayTeamBalance = auctionData.teamBalance ?? teamBalance ?? 0;
   const displayCanBid = auctionData.canBid ?? canBid ?? false;
@@ -243,7 +281,9 @@ const Auction = () => {
                   </div>
                   <div className="col-md-3 info-box green">
                     <div className="label">Jersey No</div>
-                    <div className="value">{player?.jersey ?? player?.jersey_number}</div>
+                    <div className="value">
+                      {player?.jersey ?? player?.jersey_number}
+                    </div>
                   </div>
                   <div className="col-md-6 info-box red">
                     <div className="label">Role</div>
@@ -284,7 +324,11 @@ const Auction = () => {
                     <button
                       key={i}
                       className="btn btn-danger m-1 bit-btn"
-                      disabled={!displayCanBid || b > displayTeamBalance || timeLeft <= 0}
+                      disabled={
+                        !displayCanBid ||
+                        b > displayTeamBalance ||
+                        timeLeft <= 0
+                      }
                       onClick={() => placeBidSocket(b)}
                     >
                       ₹{b}
@@ -309,7 +353,11 @@ const Auction = () => {
               notifications.map((note, i) => (
                 <p key={i} className={flashIndex === i ? "flash" : ""}>
                   {/* note may be object with team_name + bid_amount or custom shape */}
-                  {note.team_name ? `${note.team_name} bid ₹${note.bid_amount}` : (note.team ? `${note.team} bid ₹${note.amount}` : JSON.stringify(note))}
+                  {note.team_name
+                    ? `${note.team_name} bid ₹${note.bid_amount}`
+                    : note.team
+                    ? `${note.team} bid ₹${note.amount}`
+                    : JSON.stringify(note)}
                 </p>
               ))
             )}

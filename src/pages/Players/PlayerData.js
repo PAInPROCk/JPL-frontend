@@ -1,11 +1,15 @@
 import axios from "axios";
 
 export const fetchPlayers = async () => {
-    try{
-        const response = await axios.get("http://127.0.0.1:5000/players");
-        return response.data;
-    }catch(error){
-        console.error("Error Fetching players", error);
-        return[];
-    }
+  // ✅ Fix typo & use proper fallback URL
+  const API_BASE_URL = process.env.API_BASE_URL || "http://localhost:5000";
+
+  try {
+    // ✅ Call the updated backend route
+    const response = await axios.get(`${API_BASE_URL}/players-with-teams`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching players:", error);
+    return [];
+  }
 };

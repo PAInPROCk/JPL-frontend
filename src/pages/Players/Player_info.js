@@ -6,17 +6,28 @@ import fallbackImg from "../../assets/images/PlAyer.png";
 import teamIcon from "../../assets/images/football-team_16848377.png";
 import { useEffect, useState } from "react";
 import Spinner from "../../components/Spinner";
+import titansLogo from "../../assets/teams/Team2.png";
+import warriorsLogo from "../../assets/teams/Team1.png";
+import kingsLogo from "../../assets/teams/Team3.png";
+import knightsLogo from "../../assets/teams/Team4.png";
+
+const teamLogos = {
+  "JPL Titan": titansLogo,
+  "JPL Warriors": warriorsLogo,
+  "JPL Kings": kingsLogo,
+  "JPL Knights": knightsLogo,
+};
 
 const Player_info = () => {
   const { id } = useParams();
   const [player, setPlayer] = useState(null);
   const [loading, setLoading] = useState(true); 
-  const API_BASE_URL = process.env.APP_BASE_URL || "http://localhost:5000";
+  const API_BASE_URL = process.env.API_BASE_URL || "http://localhost:5000";
 
   useEffect(() => {
     const loadPlayer = async ()=>{
       const allPlayers = await fetchPlayers();
-      const foundPlayer = allPlayers.find((p) => p.id === parseInt(id));
+      const foundPlayer = allPlayers.find((p) => p.player_id === parseInt(id));
       setPlayer(foundPlayer);
       setLoading(false);
     };
@@ -110,14 +121,18 @@ const Player_info = () => {
                     Played for Teams
                   </div>
                   <div className="d-flex gap-3 mt-2 flex-wrap">
+                    
                      {player.teams_played
                       ? player.teams_played.split(",").map((team, i) => (
+                          <div key={i} className="text-center">
                           <img
                             key={i}
-                            src={teamIcon}
+                            src={teamLogos[team.trim()] || teamIcon}
                             className="team-logo1"
                             alt={team}
                           />
+                          <div className="text-white small fw-bold">{team.trim()}</div>
+                          </div>
                         ))
                       : "No teams recorded"}
                   </div>

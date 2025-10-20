@@ -1,12 +1,11 @@
 import "./AdminRegister.css";
 import axios from "axios";
-import { useState } from "react";
-import fallbackImg from "../assets/images/PlAyer.png"
+import { useState, useEffect } from "react";
+import fallbackImg from "../assets/images/PlAyer.png";
 import NavbarComponent from "../components/Navbar";
 
 const AdminRegister = () => {
-
-  const [text, setText] = useState('');
+  const [text, setText] = useState("");
   const handleClickUpper = () => {
     let newText = text.toUpperCase();
     setText(newText);
@@ -33,6 +32,8 @@ const AdminRegister = () => {
     teams: [],
   });
 
+  const [loading, setLoading] = useState(true);
+  const [teams, setTeams] = useState([]);
   const [preview, setPreview] = useState(null);
   const [dropdownOpen, setdropDownOpen] = useState(false);
   const [error, setError] = useState("");
@@ -40,28 +41,40 @@ const AdminRegister = () => {
 
   const toggleDropdown = () => setdropDownOpen((open) => !open);
 
+  useEffect(() => {
+    const fetchTeams = async () => {
+      try {
+        const res = await axios.get(`${API_BASE_URL}/teams`);
+        setTeams(res.data);
+      } catch (err) {
+        console.error("Error fetching teams:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchTeams();
+  }, [API_BASE_URL]);
+
   const handleChange = (e) => {
-
-
     const { name, value, files } = e.target;
 
-    if(name === "emailId"){
-        setError("");
-        const emailPattern= /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if(!value){
-          setError("Please Enter Email Address");
-        }else if(!emailPattern.test(value)){
-          setError("Invalid Email Format");
-        }
+    if (name === "emailId") {
+      setError("");
+      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!value) {
+        setError("Please Enter Email Address");
+      } else if (!emailPattern.test(value)) {
+        setError("Invalid Email Format");
+      }
     }
 
-    if(name === "image" && files && files[0]){
+    if (name === "image" && files && files[0]) {
       const file = files[0];
-      if(file.size > 1 * 1024 * 1024){
+      if (file.size > 1 * 1024 * 1024) {
         alert("Image size should be less than 1MB");
         return;
       }
-      if(!file.type.startsWith("image/")){
+      if (!file.type.startsWith("image/")) {
         alert("Please upload a valid image file");
         return;
       }
@@ -70,25 +83,21 @@ const AdminRegister = () => {
         image: file,
       });
       setPreview(URL.createObjectURL(file));
-    } else{
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
+    } else {
+      setFormData({
+        ...formData,
+        [name]: value,
+      });
     }
   };
 
   const handleTeamCheckboxChange = (e) => {
     const { value, checked } = e.target;
-
     setFormData((prev) => {
-      if (checked) {
-        // add to array
-        return { ...prev, teams: [...prev.teams, value] };
-      } else {
-        // remove from array
-        return { ...prev, teams: prev.teams.filter((team) => team !== value) };
-      }
+      const newTeams = checked
+        ? [...prev.teams, value]
+        : prev.teams.filter((teamId) => teamId !== value);
+      return { ...prev, teams: newTeams };
     });
   };
 
@@ -98,30 +107,26 @@ const AdminRegister = () => {
     const data = new FormData();
     Object.keys(formData).forEach((key) => {
       if (key === "teams") {
-        formData.teams.forEach((team) => data.append("teams[]", team));
+        formData.teams.forEach((teamId) => data.append("teams[]", teamId)); // ✅ team IDs
       } else {
         data.append(key, formData[key]);
       }
     });
 
     try {
-      const res = await axios.post(
-        `${API_BASE_URL}/add-player`,
-        data,
-        {
-          headers: { "Content-Type": "multipart/form-data" },
-        }
-      );
+      const res = await axios.post(`${API_BASE_URL}/add-player`, data, {
+        headers: { "Content-Type": "multipart/form-data" },
+        withCredentials: true,
+      });
       alert(res.data.message || "Player Added Successfully");
-      console.log("Upload Image:", res.data.image);
     } catch (err) {
-      alert(err.response?.data?.error || "Something Went wrong");
+      alert(err.response?.data?.error || "Something Went Wrong");
     }
   };
   return (
     <>
       <div className="register-bg">
-        <NavbarComponent/>
+        <NavbarComponent />
         <form onSubmit={handleSubmit}>
           {error && (
             <div className="alert alert-danger mt-0" role="alert">
@@ -132,11 +137,11 @@ const AdminRegister = () => {
             <div className="row g-5">
               {/* Player Image */}
               <div className="col-md-3 text-center">
-                <img 
+                <img
                   src={preview || fallbackImg}
                   alt="Player"
                   className="img-fluid rounded"
-                  style={{ maxHeight: "200px", objectFit: "cover"}}
+                  style={{ maxHeight: "200px", objectFit: "cover" }}
                 />
                 <input
                   type="file"
@@ -191,6 +196,24 @@ const AdminRegister = () => {
                       ></input>
                     </div>
                   </div>
+                  <div className="col-md-3 info-box green">
+                    <div className="label">Gender</div>
+                    <div className="value p-1">
+                      <select
+                        className="form-select border-1 border-black"
+                        name="gender"
+                        value={formData.gender}
+                        onChange={handleChange}
+                        required
+                      >
+                        <option value="">Select Gender</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                      </select>
+                    </div>
+                  </div>
+
                   <div className="col-md-3 info-box green">
                     <div className="label">Jersey No</div>
                     <div className="value p-1">
@@ -293,7 +316,6 @@ const AdminRegister = () => {
                     </div>
                   </div>
 
-
                   {/* Stats */}
                   <div className="col-md-3 stat-box orange">
                     <div className="label">Total Runs</div>
@@ -365,35 +387,38 @@ const AdminRegister = () => {
                       >
                         {formData.teams.length === 0
                           ? "Select Teams"
-                          : formData.teams.join(", ")}
+                          : formData.teams
+                            .map(
+                              (teamId) => 
+                                teams.find((t) => t.id === parseInt(teamId))?.name
+                            )
+                            .join(", ")}
                       </button>
                       <ul
                         className={`dropdown-menu p-2 custom-dropdown-menu${
                           dropdownOpen ? " show" : ""
                         }`}
                       >
-                        {["JPL Titan", "JPL Warriors", "JPL Kings","JPL Knights"].map(
-                          (team) => (
-                            <li key={team}>
-                              <div className="form-check">
-                                <input
-                                  className="form-check-input"
-                                  type="checkbox"
-                                  id={`team-${team}`}
-                                  value={team}
-                                  checked={formData.teams.includes(team)}
-                                  onChange={handleTeamCheckboxChange}
-                                />
-                                <label
-                                  className="form-check-label"
-                                  htmlFor={`team-${team}`}
-                                >
-                                  {team}
-                                </label>
-                              </div>
-                            </li>
-                          )
-                        )}
+                        {teams.map((team) => (
+                          <li key={team.id}>
+                            <div className="form-check">
+                              <input
+                                className="form-check-input"
+                                type="checkbox"
+                                id={`team-${team.id}`}
+                                value={team.id}
+                                checked={formData.teams.includes(String(team.id))}
+                                onChange={handleTeamCheckboxChange}
+                              />
+                              <label
+                                className="form-check-label"
+                                htmlFor={`team-${team.id}`}
+                              >
+                                {team.name}
+                              </label>
+                            </div>
+                          </li>
+                        ))}
                       </ul>
                     </div>
                   </div>

@@ -1,76 +1,90 @@
 import NavbarComponent from "../components/Navbar";
 import "./Admin_auction.css";
-import { useNavigate } from "react-router-dom";
 import fallbackImg from "../assets/images/PlAyer.png";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import io from "socket.io-client";
 
-// ✅ Use correct env variable and stable socket connection
-const API_BASE_URL =
-  process.env.REACT_APP_API_BASE_URL || "http://localhost:5000";
-const socket = io(API_BASE_URL, { withCredentials: true });
+// Environment variable fallback
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "http://localhost:5000";
+
+// Use ref to ensure only one socket instance is created
+const useSocket = () => {
+  const socketRef = useRef();
+  if (!socketRef.current) {
+    socketRef.current = io(API_BASE_URL, { withCredentials: true });
+  }
+  return socketRef.current;
+};
 
 const Admin_auction = () => {
   const [player, setPlayer] = useState(null);
   const [notifications, setNotifications] = useState([]);
   const [timeLeft, setTimeLeft] = useState(0);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
+  const [auctionActive, setAuctionActive] = useState(false);
 
-  // ✅ Load current auction
+  const navigate = useNavigate();
+  const socket = useSocket();
+
+  // Load auction data
   const loadPlayer = async () => {
     try {
       const res = await axios.get(`${API_BASE_URL}/current-auction`, {
         withCredentials: true,
       });
-
       if (res.data.status === "auction_active") {
         setPlayer(res.data.player);
         setTimeLeft(res.data.remaining_seconds || 0);
         setNotifications(res.data.history || []);
+        setAuctionActive(true);
       } else {
         setPlayer(null);
         setTimeLeft(0);
+        setAuctionActive(false);
       }
     } catch (err) {
+      setPlayer(null);
+      setTimeLeft(0);
+      setAuctionActive(false);
       console.error("Error loading player:", err);
     }
   };
 
+  // Authentication and socket setup
   useEffect(() => {
-    const checkAuthandLoad = async () => {
+    let ignore = false; // For handling race conditions with async
+
+    const checkAuthAndLoad = async () => {
       try {
         const authRes = await axios.get(`${API_BASE_URL}/check-auth`, {
           withCredentials: true,
         });
-
         if (!authRes.data.authenticated || authRes.data.role !== "admin") {
           navigate("/");
           return;
         }
+        if (!ignore) await loadPlayer();
 
-        await loadPlayer();
-
-        // 🧠 Socket events
+        // Socket events registration
         socket.emit("join_auction");
 
         socket.on("timer_update", (data) => {
-          // data can be number or object
           const remaining =
             typeof data === "number" ? data : data.remaining_seconds;
           setTimeLeft(remaining);
         });
 
-        socket.on("auction_started", (data) => {
-          console.log("🏁 Auction started:", data);
+        socket.on("auction_started", () => {
+          setAuctionActive(true);
           loadPlayer();
         });
 
         socket.on("auction_ended", (data) => {
-          console.log("🏁 Auction ended:", data);
           setTimeLeft(0);
           setPlayer(null);
+          setAuctionActive(false);
           if (data.status === "sold") navigate("/sold", { state: data });
           else navigate("/unsold", { state: data });
         });
@@ -92,6 +106,7 @@ const Admin_auction = () => {
           setPlayer(null);
           setNotifications([]);
           setTimeLeft(0);
+          setAuctionActive(false);
         });
       } catch (err) {
         console.error("Auth check failed:", err);
@@ -101,18 +116,20 @@ const Admin_auction = () => {
       }
     };
 
-    checkAuthandLoad();
+    checkAuthAndLoad();
 
     return () => {
+      ignore = true;
       socket.off("auction_update");
       socket.off("auction_started");
       socket.off("auction_ended");
       socket.off("auction_cleared");
       socket.off("timer_update");
     };
+    // eslint-disable-next-line
   }, [navigate]);
 
-  // ✅ Admin control actions
+  // Admin control actions
   const startAuction = async () => {
     try {
       const res = await axios.post(
@@ -120,8 +137,12 @@ const Admin_auction = () => {
         { mode: "random" },
         { withCredentials: true }
       );
-      alert(res.data.message);
-      loadPlayer();
+      if (res.data.status === "auction_started") {
+        setAuctionActive(true);
+        await loadPlayer();
+      } else {
+        alert(res.data.message || "Failed to start auction");
+      }
     } catch (err) {
       alert(err.response?.data?.error || "Failed to start auction");
     }
@@ -178,6 +199,7 @@ const Admin_auction = () => {
       );
       setPlayer(null);
       setTimeLeft(0);
+      setAuctionActive(false);
     } catch {
       alert("Error cancelling auction");
     }
@@ -311,9 +333,12 @@ const Admin_auction = () => {
           ) : (
             <div className="text-center">
               <p>No Player Found or Auction Not Started</p>
-              <button className="btn btn-success mt-3" onClick={startAuction}>
-                Start Auction
-              </button>
+              {/* Only show Start if auction not active */}
+              {!auctionActive && (
+                <button className="btn btn-success mt-3" onClick={startAuction}>
+                  Start Auction
+                </button>
+              )}
             </div>
           )}
         </div>
