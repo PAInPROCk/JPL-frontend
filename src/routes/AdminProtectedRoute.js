@@ -6,6 +6,7 @@ import axios from "axios";
 axios.defaults.withCredentials = true;
 
 const AdminProtectedRoute = ({ children, allowedRoles = ["admin"] }) => {
+  const API_BASE_URL = process.env.REACT_API_BASE_URL || "http://localhost:5000";
   const [isAuthenticated, setIsAuthenticated] = useState(null);
   const [userRole, setUserRole] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -13,7 +14,7 @@ const AdminProtectedRoute = ({ children, allowedRoles = ["admin"] }) => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/check-auth", { withCredentials: true });
+        const res = await axios.get(`${API_BASE_URL}/check-auth`, { withCredentials: true });
         console.log("AdminProtectedRoute check-auth response:", res.data);
         setIsAuthenticated(res.data.authenticated);
         setUserRole(res.data.role ? String(res.data.role).toLowerCase(): null);

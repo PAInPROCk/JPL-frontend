@@ -7,6 +7,7 @@ import axios from "axios";
 axios.defaults.withCredentials = true;
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
+  const API_BASE_URL = process.env.REACT_API_BASE_URL || "http://localhost:5000";
   const [isAuth, setIsAuth] = useState(null);
   const [userRole, setUserRole] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -14,7 +15,7 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/check-auth", {
+        const res = await axios.get(`${API_BASE_URL}/check-auth`, {
           withCredentials: true,
         });
         console.log("ProtectedRoute: check-auth result", res.data);

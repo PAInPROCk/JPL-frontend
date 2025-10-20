@@ -28,7 +28,7 @@ const Teams = () =>{
               {teams.map((team) => (
                 <div className="col-12 col-sm-6 col-md-4 col-lg-3" 
                 key={team.id}
-                onClick={() => navigate(`/team_info/${team.id}`)}
+                onClick={() => navigate(`/team_info/${team.team_id}`)}
                 style={{cursor: "pointer"}}
                 >
                   <TeamCard team={team} />

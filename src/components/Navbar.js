@@ -6,6 +6,7 @@ import "./Navbar.css";
 axios.defaults.withCredentials = true;
 
 const Navbar = () => {
+  const API_BASE_URL = process.env.REACT_API_BASE_URL || "http://localhost:5000";
   const [auth, setAuth] = useState({ authenticated: false, user: null, role: null });
   const [expanded, setExpanded] = useState(false);
   const navRef = useRef();
@@ -16,7 +17,7 @@ const Navbar = () => {
 
   useEffect(() => {
     axios
-      .get("http://localhost:5000/check-auth")
+      .get(`${API_BASE_URL}/check-auth`)
       .then((res) => {
         setAuth({
           authenticated: res.data.authenticated,
@@ -39,7 +40,7 @@ const Navbar = () => {
   const handleClose = () => setExpanded(false);
 
   const handleLogout = () => {
-    axios.post("http://localhost:5000/logout")
+    axios.post(`${API_BASE_URL}/logout`)
       .then(() => {
         setAuth({ authenticated: false, user: null, role: null });
         navigate("/login");

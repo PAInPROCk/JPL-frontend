@@ -5,6 +5,7 @@ import axios from "axios";
 axios.defaults.withCredentials = true;
 
 const Login = () => {
+  const API_BASE_URL = process.env.REACT_API_BASE_URL || "http://localhost:5000";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -30,7 +31,7 @@ const Login = () => {
     
     try{
       const res = await axios.post(
-        "http://localhost:5000/login",
+        `${API_BASE_URL}/login`,
         {email, password},
         {withCredentials: true}
       )
