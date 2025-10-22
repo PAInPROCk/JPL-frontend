@@ -9,7 +9,16 @@
 
 .btn-color{
   background-color: #EE8C2A;
+}
 
+.btn-color:hover{
+  background-color: #df8327;
+}
+
+.btn-bg{
+  margin-top: 5px;
+  background-color: azure;
+  color: black;
 }
 
 .text-color{

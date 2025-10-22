@@ -68,7 +68,7 @@ const Admin_auction = () => {
         if (!ignore) await loadPlayer();
 
         // Socket events registration
-        socket.emit("join_auction");
+        socket.emit("join_auction",{});
 
         socket.on("timer_update", (data) => {
           const remaining =
