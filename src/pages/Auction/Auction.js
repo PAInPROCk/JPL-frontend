@@ -158,16 +158,28 @@ const Auction = () => {
       socket.on("auction_ended", (data) => {
         if (!mounted) return;
         setTimeLeft(0);
-        // Optionally set auctionData to reflect sold status or request a fresh REST load
-        // We'll request current-auction again to get final state
-        axios
-          .get(`${API_BASE_URL}/current-auction`, { withCredentials: true })
-          .then((r) => {
-            if (r.data && r.data.status === "auction_active")
-              setAuctionData(r.data);
-            else setAuctionData(null);
-          })
-          .catch(() => {});
+
+        if (data.status === "sold") {
+          navigate("/sold", { state: data });
+        } else if (data.status === "unsold") {
+          navigate("/unsold", {
+            state: {
+              player: data.player,
+              base_price: data.player?.base_price,
+              message: data.message,
+            },
+          });
+        } else {
+          // fallback: refresh current auction if status unknown
+          axios
+            .get(`${API_BASE_URL}/current-auction`, { withCredentials: true })
+            .then((r) => {
+              if (r.data && r.data.status === "auction_active")
+                setAuctionData(r.data);
+              else setAuctionData(null);
+            })
+            .catch(() => console.error("Auction fetch failed"));
+        }
       });
 
       socket.on("auction_cleared", () => {

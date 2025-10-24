@@ -7,7 +7,8 @@ import axios from "axios";
 import io from "socket.io-client";
 
 // Environment variable fallback
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "http://localhost:5000";
+const API_BASE_URL =
+  process.env.REACT_APP_API_BASE_URL || "http://localhost:5000";
 
 // Use ref to ensure only one socket instance is created
 const useSocket = () => {
@@ -68,7 +69,7 @@ const Admin_auction = () => {
         if (!ignore) await loadPlayer();
 
         // Socket events registration
-        socket.emit("join_auction",{});
+        socket.emit("join_auction", {});
 
         socket.on("timer_update", (data) => {
           const remaining =
@@ -83,10 +84,23 @@ const Admin_auction = () => {
 
         socket.on("auction_ended", (data) => {
           setTimeLeft(0);
-          setPlayer(null);
-          setAuctionActive(false);
-          if (data.status === "sold") navigate("/sold", { state: data });
-          else navigate("/unsold", { state: data });
+          setAuctionActive(null);
+
+          if (data.status === "sold") {
+            navigate("/sold", { state: data });
+          } else if (data.status === "unsold") {
+            navigate("/unsold", {
+              state: {
+                player: data.player,
+                base_price: data.player?.base_price,
+                message: data.message,
+              },
+            });
+          }
+        });
+
+        socket.on("load_next_player", (data) => {
+          nextPlayer(data.player_id);
         });
 
         socket.on("auction_update", (data) => {

@@ -15,7 +15,20 @@ const Unsold = () => {
     return () => clearTimeout(timer);
   }, [navigate]);
 
-  if (!player) return <p>No player data</p>;
+  if (!player) {
+  return (
+    <div className="bg text-white text-center py-5">
+      <h2>No player data available</h2>
+      <button
+        className="btn btn-light mt-3"
+        onClick={() => navigate("/Admin_auction")}
+      >
+        Back
+      </button>
+    </div>
+  );
+}
+
 
   return (
     <div className="bg">

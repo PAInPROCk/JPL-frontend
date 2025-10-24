@@ -17,6 +17,7 @@ import HomePage from '../pages/HomePage/HomePage';
 import AdminProtectedRoute from './AdminProtectedRoute';
 import AdminRegister from '../pages/AdminRegister';
 import TeamRegister from '../pages/TeamRegister';
+import Unsold from '../components/Unsold';
 
 
 const AppRouter = () =>{
@@ -35,7 +36,9 @@ const AppRouter = () =>{
                 <Route path="/team_info/:id" element={<Team_Info/>}/>
                 <Route path='/Auction_rule' element={<Auction_rule/>}/>
                 <Route path="/Sold" element={<ProtectedRoute allowedRoles={["team", "admin"]}><Sold/></ProtectedRoute>}/>
+                <Route path="/unsold" element={<ProtectedRoute allowedRoles={["team", "admin"]}><Unsold/></ProtectedRoute>}/>
                 <Route path='/Waiting' element={<ProtectedRoute allowedRoles={["team", "admin"]}><Waiting/></ProtectedRoute>}/>
+
 
                 {/* Admin Protected Routes */}
                 <Route path="/admin" element={<AdminProtectedRoute allowedRoles={["admin"]}><Admin/></AdminProtectedRoute>}/>
