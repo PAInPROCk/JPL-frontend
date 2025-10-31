@@ -5,6 +5,7 @@ import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import io from "socket.io-client";
+import useSyncedTimer from "../hooks/useSyncedTimer";
 
 // Environment variable fallback
 const API_BASE_URL =
@@ -29,6 +30,7 @@ const Admin_auction = () => {
   const navigate = useNavigate();
   const socket = useSocket();
 
+  useSyncedTimer(socket, setTimeLeft);
   // Load auction data
   const loadPlayer = async () => {
     try {
@@ -55,7 +57,13 @@ const Admin_auction = () => {
 
   // Authentication and socket setup
   useEffect(() => {
-    let ignore = false; // For handling race conditions with async
+    let mounted = true;
+
+    try {
+      socket.connect();
+    } catch (e) {
+      console.warn("Socket connection failed:", e);
+    }
 
     const checkAuthAndLoad = async () => {
       try {
@@ -65,24 +73,21 @@ const Admin_auction = () => {
         if (!authRes.data.authenticated || authRes.data.role !== "admin") {
           navigate("/");
           return;
-        }
-        if (!ignore) await loadPlayer();
+        } 
+        await loadPlayer();
+      
 
         // Socket events registration
         socket.emit("join_auction", {});
 
-        socket.on("timer_update", (data) => {
-          const remaining =
-            typeof data === "number" ? data : data.remaining_seconds;
-          setTimeLeft(remaining);
-        });
-
-        socket.on("auction_started", () => {
+        socket.on("auction_started", (data) => {
           setAuctionActive(true);
+          setTimeLeft(data.duration || 0);
           loadPlayer();
         });
 
         socket.on("auction_ended", (data) => {
+          if(!data) return;
           setTimeLeft(0);
           setAuctionActive(null);
 
@@ -133,13 +138,12 @@ const Admin_auction = () => {
     checkAuthAndLoad();
 
     return () => {
-      ignore = true;
-      socket.off("auction_update");
-      socket.off("auction_started");
-      socket.off("auction_ended");
-      socket.off("auction_cleared");
-      socket.off("timer_update");
-    };
+  mounted = false;
+  socket.removeAllListeners();
+  try {
+    socket.disconnect();
+  } catch {}
+};
     // eslint-disable-next-line
   }, [navigate]);
 
@@ -219,11 +223,12 @@ const Admin_auction = () => {
     }
   };
 
-  const formatTime = (seconds) => {
-    const minutes = String(Math.floor(seconds / 60)).padStart(2, "0");
-    const secs = String(seconds % 60).padStart(2, "0");
-    return `${minutes}:${secs}`;
-  };
+const formatTime = (seconds) => {
+  const s = Math.max(0, Math.floor(Number(seconds) || 0));
+  const minutes = String(Math.floor(s / 60)).padStart(2, "0");
+  const secs = String(s % 60).padStart(2, "0");
+  return `${minutes}:${secs}`;
+};
 
   if (loading) return <p>Loading player...</p>;
 
