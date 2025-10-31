@@ -43,19 +43,15 @@ const Auction = () => {
       const authRes = await axios.get(`${API_BASE_URL}/check-auth`, {
         withCredentials: true,
       });
+      const auctionRes = await axios.get(`${API_BASE_URL}/current-auction`, {
+        withCredentials: true,
+      });
 
       if (!authRes.data.authenticated) {
         navigate("/");
         return false;
       }
 
-      const userObj = authRes.data.user || {};
-      teamIdRef.current =
-        userObj.team_id || userObj.teamId || userObj.team || userObj.id || null;
-
-      const res = await axios.get(`${API_BASE_URL}/current-auction`, {
-        withCredentials: true,
-      });
 
       if (res.data && res.data.status === "auction_active") {
         setAuctionData(res.data);
@@ -100,8 +96,8 @@ const Auction = () => {
 
       socket.emit("join_auction", {
         team_id: teamIdRef.current,
-        team_name: auctionData?.team_name || "Unknown Team",
-        purse: teamBalance,
+        team_name: auctionData?.data?.user?.team_name || "Unknown Team",
+        purse: res?.data?.teamBalance || 0,
       });
 
       socket.on("auction_update", (data) => {
