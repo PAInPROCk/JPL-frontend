@@ -25,6 +25,7 @@ const Admin_auction = () => {
   const [timeLeft, setTimeLeft] = useState(0);
   const [loading, setLoading] = useState(true);
   const [auctionActive, setAuctionActive] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
 
   const navigate = useNavigate();
   const socket = useSocket();
@@ -82,6 +83,16 @@ const Admin_auction = () => {
           loadPlayer();
         });
 
+        socket.on("auction_paused", (data) => {
+          setIsPaused(true);
+          setTimeLeft(data.remaining);
+        });
+
+        socket.on("auction_resumed", (data) => {
+          setIsPaused(false);
+          setTimeLeft(data.remaining);
+        });
+
         socket.on("auction_ended", (data) => {
           setTimeLeft(0);
           setAuctionActive(null);
@@ -104,6 +115,8 @@ const Admin_auction = () => {
         });
 
         socket.on("auction_update", (data) => {
+          setTimeLeft(data.time_left);
+          setIsPaused(data.paused);
           if (data.player) setPlayer(data.player);
           if (data.highest_bid) {
             setNotifications((prev) => [
@@ -138,10 +151,12 @@ const Admin_auction = () => {
       socket.off("auction_started");
       socket.off("auction_ended");
       socket.off("auction_cleared");
+      socket.off("auction_paused");
+      socket.off("auction_resumed");
       socket.off("timer_update");
     };
     // eslint-disable-next-line
-  }, [navigate]);
+  }, [isPaused, navigate]);
 
   // Admin control actions
   const startAuction = async () => {

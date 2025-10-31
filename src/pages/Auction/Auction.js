@@ -16,6 +16,7 @@ const Auction = () => {
   const [canBid, setCanBid] = useState(false);
   const [teamBalance, setTeamBalance] = useState(0);
   const [nextSteps, setNextSteps] = useState([]);
+  const [isPaused, setIsPaused] = useState(false);
   const audioRef = useRef(
     new Audio(
       require("../../assets/Sounds/mixkit-software-interface-start-2574.wav")
@@ -104,6 +105,8 @@ const Auction = () => {
       // auction update: main payload from server (player, highest_bid, expires_at, time_left, history, etc.)
       socket.on("auction_update", (data) => {
         if (!mounted) return;
+        setTimeLeft(data.time_left);
+        setIsPaused(data.paused);
         // server may send different keys; handle both historical and current-style payloads
         setAuctionData((prev) => {
           // prefer richer server payload
@@ -153,6 +156,20 @@ const Auction = () => {
         const t = Number(data.time_left ?? data.remaining_seconds ?? 0);
         if (!Number.isNaN(t)) setTimeLeft(t);
         setNotifications([]);
+      });
+
+      socket.on("auction_paused", (data) => {
+        setIsPaused(true);
+        setTimeLeft(data.remaining);
+      });
+
+      socket.on("auction_resumed", (data) => {
+        setIsPaused(false);
+        setTimeLeft(data.remaining);
+      });
+
+      socket.on("timer_update", (seconds) => {
+        if (!isPaused) setTimeLeft(seconds);
       });
 
       socket.on("auction_ended", (data) => {
@@ -207,6 +224,9 @@ const Auction = () => {
       // remove handlers and disconnect
       socket.off("auction_update");
       socket.off("auction_started");
+      socket.off("auction_paused");
+      socket.off("auction_resumed");
+      socket.off("timer_update");
       socket.off("auction_ended");
       socket.off("auction_cleared");
       socket.off("bid_placed");
@@ -216,19 +236,22 @@ const Auction = () => {
       } catch (e) {}
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // run once
+  }, [isPaused]); // run once
 
   // local decrementing countdown synced from server timeLeft
-  useEffect(() => {
-    if (!timeLeft || timeLeft <= 0) return;
-    const t = setInterval(
-      () => setTimeLeft((prev) => (prev > 0 ? prev - 1 : 0)),
-      1000
-    );
-    return () => clearInterval(t);
-  }, [timeLeft]);
+useEffect(() => {
+  if (isPaused) return; // ⛔ Stop decrementing when paused
+  if (!timeLeft || timeLeft <= 0) return;
+  
+  const timer = setInterval(() => {
+    setTimeLeft(prev => (prev > 0 ? prev - 1 : 0));
+  }, 1000);
+  
+  return () => clearInterval(timer);
+}, [isPaused, timeLeft]);
 
-  // helper format mm:ss
+
+  // helper format musem:ss
   const formatTime = (seconds) => {
     const s = Number(seconds) || 0;
     const minutes = String(Math.floor(s / 60)).padStart(2, "0");
