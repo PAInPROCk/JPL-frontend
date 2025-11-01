@@ -9,10 +9,15 @@ import useSyncedTimer from "../../hooks/useSyncedTimer";
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "http://localhost:5000";
 
+// ✅ Keep only this one
 const useSocket = () => {
   const socketRef = useRef();
   if (!socketRef.current) {
-    socketRef.current = io(API_BASE_URL, { withCredentials: true });
+    socketRef.current = io(API_BASE_URL, {
+      withCredentials: true,
+      autoConnect: false,  // prevent reconnect storm
+      transports: ["websocket", "polling"], // stable fallback
+    });
   }
   return socketRef.current;
 };
@@ -26,20 +31,24 @@ const Auction = () => {
   const [canBid, setCanBid] = useState(false);
   const [teamBalance, setTeamBalance] = useState(0);
   const [nextSteps, setNextSteps] = useState([]);
+
+  const navigate = useNavigate();
+  const socket = useSocket(); // ✅ only one instance
   const audioRef = useRef(
     new Audio(require("../../assets/Sounds/mixkit-software-interface-start-2574.wav"))
   );
 
-  const navigate = useNavigate();
-  const socket = useSocket();
   useSyncedTimer(socket, setTimeLeft);
 
   const teamIdRef = useRef(null);
+  const teamNameRef = useRef("Unknown Team");
 
-  // Load initial auction data`
+
+  // Load initial auction and authentication data
   const loadInitial = async () => {
     try {
       setLoading(true);
+
       const authRes = await axios.get(`${API_BASE_URL}/check-auth`, {
         withCredentials: true,
       });
@@ -47,23 +56,29 @@ const Auction = () => {
         withCredentials: true,
       });
 
+      // ✅ Auth check
       if (!authRes.data.authenticated) {
+        console.warn("Redirecting: user not authenticated", authRes.data);
         navigate("/");
         return false;
       }
 
+      // ✅ Store team info globally
+      teamIdRef.current = authRes.data.user?.team_id || null;
+      teamNameRef.current = authRes.data.user?.team_name || "Unknown Team";
 
-      if (res.data && res.data.status === "auction_active") {
-        setAuctionData(res.data);
-        setNotifications(res.data.history || []);
-        setNextSteps(res.data.nextSteps || []);
-        setTeamBalance(res.data.teamBalance || 0);
-        setCanBid(Boolean(res.data.canBid));
+      // ✅ Auction data setup
+      if (auctionRes.data && auctionRes.data.status === "auction_active") {
+        setAuctionData(auctionRes.data);
+        setNotifications(auctionRes.data.history || []);
+        setNextSteps(auctionRes.data.nextSteps || []);
+        setTeamBalance(auctionRes.data.teamBalance || 0);
+        setCanBid(Boolean(auctionRes.data.canBid));
 
         const seed =
-          res.data.remaining_seconds ??
-          res.data.time_left ??
-          res.data.timeLeft ??
+          auctionRes.data.remaining_seconds ??
+          auctionRes.data.time_left ??
+          auctionRes.data.timeLeft ??
           0;
         setTimeLeft(Number(seed));
       } else {
@@ -80,35 +95,30 @@ const Auction = () => {
     }
   };
 
-  // Listen to socket events
+  // 🎯 Socket logic
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     let mounted = true;
-
-    try {
-      socket.connect();
-    } catch (e) {
-      console.warn("Socket connect failed:", e);
-    }
+    socket.connect();
 
     const startRealtime = async () => {
       const ok = await loadInitial();
       if (!ok) return;
 
+      // ✅ Join auction only after authentication success
       socket.emit("join_auction", {
         team_id: teamIdRef.current,
-        team_name: auctionData?.data?.user?.team_name || "Unknown Team",
-        purse: res?.data?.teamBalance || 0,
+        team_name: teamNameRef.current,
+        purse: auctionData?.teamBalance || 0,
       });
 
+      // Listen to updates
       socket.on("auction_update", (data) => {
         if (!mounted) return;
         setAuctionData(data);
 
         const serverTime = Number(
-          data.time_left ??
-            data.remaining_seconds ??
-            data.timeLeft ??
-            0
+          data.time_left ?? data.remaining_seconds ?? data.timeLeft ?? 0
         );
         if (!Number.isNaN(serverTime) && serverTime >= 0) {
           setTimeLeft(serverTime);
@@ -194,7 +204,7 @@ const Auction = () => {
     };
   }, []);
 
-  // Format time for display
+  // Format time
   const formatTime = (seconds) => {
     const s = Math.max(0, Math.floor(Number(seconds) || 0));
     const minutes = String(Math.floor(s / 60)).padStart(2, "0");
@@ -202,7 +212,7 @@ const Auction = () => {
     return `${minutes}:${secs}`;
   };
 
-  // Place bid via socket
+  // 🔨 Place bid
   const placeBidSocket = (bidAmount) => {
     const teamId = teamIdRef.current;
     if (!teamId) {
@@ -213,10 +223,10 @@ const Auction = () => {
       alert("You don't have enough purse!");
       return;
     }
-
     socket.emit("place_bid", { team_id: teamId, bid_amount: bidAmount });
   };
 
+  // Loading & empty UI states
   if (loading) return <p>Loading player...</p>;
   if (!auctionData || !auctionData.player)
     return <div className="alert alert-warning">No active auction player.</div>;
