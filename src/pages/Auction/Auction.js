@@ -33,7 +33,7 @@ const Auction = () => {
 
   const navigate = useNavigate();
   const socket = useSocket();
-  useSyncedTimer(socket, setTimeLeft);
+  useSyncedTimer(socket, setTimeLeft, isPaused);
 
   const teamIdRef = useRef(null);
 
@@ -54,17 +54,17 @@ const Auction = () => {
       }
 
 
-      if (res.data && res.data.status === "auction_active") {
-        setAuctionData(res.data);
-        setNotifications(res.data.history || []);
-        setNextSteps(res.data.nextSteps || []);
-        setTeamBalance(res.data.teamBalance || 0);
-        setCanBid(Boolean(res.data.canBid));
+      if (auctionRes.data && auctionRes.data.status === "auction_active") {
+        setAuctionData(auctionRes.data);
+        setNotifications(auctionRes.data.history || []);
+        setNextSteps(auctionRes.data.nextSteps || []);
+        setTeamBalance(auctionRes.data.teamBalance || 0);
+        setCanBid(Boolean(auctionRes.data.canBid));
 
         const seed =
-          res.data.remaining_seconds ??
-          res.data.time_left ??
-          res.data.timeLeft ??
+          auctionRes.data.remaining_seconds ??
+          auctionRes.data.time_left ??
+          auctionRes.data.timeLeft ??
           0;
         setTimeLeft(Number(seed));
       } else {
@@ -98,7 +98,7 @@ const Auction = () => {
       socket.emit("join_auction", {
         team_id: teamIdRef.current,
         team_name: auctionData?.data?.user?.team_name || "Unknown Team",
-        purse: res?.data?.teamBalance || 0,
+        purse: auctionData?.data?.teamBalance || 0,
       });
 
       socket.on("auction_update", (data) => {
@@ -145,7 +145,12 @@ const Auction = () => {
         if (!mounted) return;
         setAuctionData(data);
         const t = Number(data.time_left ?? data.remaining_seconds ?? 0);
-        if (!Number.isNaN(t)) setTimeLeft(t);
+        if (!Number.isNaN(t) && t > 0) {
+          setTimeLeft(t);
+        } else {
+          // fallback: wait for the first timer_update
+          console.warn("⏱️ No initial time from auction_started, waiting for timer_update...");
+        }
         setNotifications([]);
       });
 
@@ -159,9 +164,12 @@ const Auction = () => {
         setTimeLeft(data.remaining);
       });
 
-      socket.on("timer_update", (seconds) => {
-        if (!isPaused) setTimeLeft(seconds);
+      socket.on("timer_update", (data) => {
+        if (!data) return;
+        const remaining = Number(data.remaining_seconds ?? data.time_left ?? data.remaining ?? 0);
+        if (!isPaused) setTimeLeft(remaining);
       });
+
 
       socket.on("auction_ended", (data) => {
         if (!mounted) return;
