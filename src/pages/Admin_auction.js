@@ -26,11 +26,12 @@ const Admin_auction = () => {
   const [timeLeft, setTimeLeft] = useState(0);
   const [loading, setLoading] = useState(true);
   const [auctionActive, setAuctionActive] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
 
   const navigate = useNavigate();
   const socket = useSocket();
 
-  useSyncedTimer(socket, setTimeLeft);
+  useSyncedTimer(socket, setTimeLeft, isPaused);
   // Load auction data
   const loadPlayer = async () => {
     try {
@@ -73,11 +74,11 @@ const Admin_auction = () => {
         if (!authRes.data.authenticated || authRes.data.role !== "admin") {
           navigate("/");
           return;
-        } 
-        await loadPlayer();
-      
+        }
 
-        // Socket events registration
+        await loadPlayer();
+
+        // Register socket events
         socket.emit("join_auction", {});
 
         socket.on("auction_started", (data) => {
@@ -86,10 +87,20 @@ const Admin_auction = () => {
           loadPlayer();
         });
 
+        socket.on("auction_paused", (data) => {
+          setIsPaused(true);
+          setTimeLeft(data.remaining);
+        });
+
+        socket.on("auction_resumed", (data) => {
+          setIsPaused(false);
+          setTimeLeft(data.remaining);
+        });
+
         socket.on("auction_ended", (data) => {
-          if(!data) return;
+          if (!data) return;
           setTimeLeft(0);
-          setAuctionActive(null);
+          setAuctionActive(false);
 
           if (data.status === "sold") {
             navigate("/sold", { state: data });
@@ -109,6 +120,8 @@ const Admin_auction = () => {
         });
 
         socket.on("auction_update", (data) => {
+          setTimeLeft(data.time_left);
+          setIsPaused(data.paused);
           if (data.player) setPlayer(data.player);
           if (data.highest_bid) {
             setNotifications((prev) => [
@@ -137,15 +150,26 @@ const Admin_auction = () => {
 
     checkAuthAndLoad();
 
+    // ✅ Clean up all socket listeners on unmount
     return () => {
-  mounted = false;
-  socket.removeAllListeners();
-  try {
-    socket.disconnect();
-  } catch {}
-};
+      mounted = false;
+      socket.off("auction_update");
+      socket.off("auction_started");
+      socket.off("auction_ended");
+      socket.off("auction_cleared");
+      socket.off("auction_paused");
+      socket.off("auction_resumed");
+      socket.off("timer_update");
+      socket.removeAllListeners();
+
+      try {
+        socket.disconnect();
+      } catch (e) {
+        console.warn("Socket disconnect error:", e);
+      }
+    };
     // eslint-disable-next-line
-  }, [navigate]);
+  }, [isPaused, navigate]);
 
   // Admin control actions
   const startAuction = async () => {
@@ -193,11 +217,17 @@ const Admin_auction = () => {
   };
 
   const handlePause = async () => {
-    await axios.post(
-      `${API_BASE_URL}/pause-auction`,
-      {},
-      { withCredentials: true }
-    );
+    try {
+      setIsPaused(true); // immediately reflect UI state
+      await axios.post(
+        `${API_BASE_URL}/pause-auction`,
+        {},
+        { withCredentials: true }
+      );
+    } catch (err) {
+      setIsPaused(false); // revert if request fails
+      console.error("Pause error:", err);
+    }
   };
 
   const handleResume = async () => {
@@ -223,12 +253,12 @@ const Admin_auction = () => {
     }
   };
 
-const formatTime = (seconds) => {
-  const s = Math.max(0, Math.floor(Number(seconds) || 0));
-  const minutes = String(Math.floor(s / 60)).padStart(2, "0");
-  const secs = String(s % 60).padStart(2, "0");
-  return `${minutes}:${secs}`;
-};
+  const formatTime = (seconds) => {
+    const s = Math.max(0, Math.floor(Number(seconds) || 0));
+    const minutes = String(Math.floor(s / 60)).padStart(2, "0");
+    const secs = String(s % 60).padStart(2, "0");
+    return `${minutes}:${secs}`;
+  };
 
   if (loading) return <p>Loading player...</p>;
 
@@ -308,12 +338,14 @@ const formatTime = (seconds) => {
                       <button
                         className="btn btn-warning btn-yellow-custom m-2"
                         onClick={handlePause}
+                        disabled={isPaused || !auctionActive}
                       >
                         Pause
                       </button>
                       <button
                         className="btn btn-success btn-green-custom m-2"
                         onClick={handleResume}
+                        disabled={!isPaused}
                       >
                         Resume
                       </button>

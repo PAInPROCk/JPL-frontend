@@ -31,6 +31,7 @@ const Auction = () => {
   const [canBid, setCanBid] = useState(false);
   const [teamBalance, setTeamBalance] = useState(0);
   const [nextSteps, setNextSteps] = useState([]);
+  const [isPaused, setIsPaused] = useState(false);
 
   const navigate = useNavigate();
   const socket = useSocket(); // ✅ only one instance
@@ -67,7 +68,6 @@ const Auction = () => {
       teamIdRef.current = authRes.data.user?.team_id || null;
       teamNameRef.current = authRes.data.user?.team_name || "Unknown Team";
 
-      // ✅ Auction data setup
       if (auctionRes.data && auctionRes.data.status === "auction_active") {
         setAuctionData(auctionRes.data);
         setNotifications(auctionRes.data.history || []);
@@ -108,13 +108,20 @@ const Auction = () => {
       // ✅ Join auction only after authentication success
       socket.emit("join_auction", {
         team_id: teamIdRef.current,
-        team_name: teamNameRef.current,
-        purse: auctionData?.teamBalance || 0,
+        team_name: auctionData?.data?.user?.team_name || "Unknown Team",
+        purse: auctionData?.data?.teamBalance || 0,
       });
 
       // Listen to updates
       socket.on("auction_update", (data) => {
         if (!mounted) return;
+        setTimeLeft(data.time_left);
+        setIsPaused(data.paused);
+        // server may send different keys; handle both historical and current-style payloads
+        setAuctionData((prev) => {
+          // prefer richer server payload
+          return data;
+        });
         setAuctionData(data);
 
         const serverTime = Number(
@@ -147,9 +154,31 @@ const Auction = () => {
         if (!mounted) return;
         setAuctionData(data);
         const t = Number(data.time_left ?? data.remaining_seconds ?? 0);
-        if (!Number.isNaN(t)) setTimeLeft(t);
+        if (!Number.isNaN(t) && t > 0) {
+          setTimeLeft(t);
+        } else {
+          // fallback: wait for the first timer_update
+          console.warn("⏱️ No initial time from auction_started, waiting for timer_update...");
+        }
         setNotifications([]);
       });
+
+      socket.on("auction_paused", (data) => {
+        setIsPaused(true);
+        setTimeLeft(data.remaining);
+      });
+
+      socket.on("auction_resumed", (data) => {
+        setIsPaused(false);
+        setTimeLeft(data.remaining);
+      });
+
+      socket.on("timer_update", (data) => {
+        if (!data) return;
+        const remaining = Number(data.remaining_seconds ?? data.time_left ?? data.remaining ?? 0);
+        if (!isPaused) setTimeLeft(remaining);
+      });
+
 
       socket.on("auction_ended", (data) => {
         if (!mounted) return;
