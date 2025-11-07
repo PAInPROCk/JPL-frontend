@@ -21,6 +21,7 @@ const AdminRegister = () => {
     style: "",
     totalRuns: "",
     highestRuns: "",
+    basePrice: "",
     wickets: "",
     outs: "",
     role: "",
@@ -257,6 +258,21 @@ const AdminRegister = () => {
                     </div>
                   </div>
                   <div className="col-md-3 info-box green">
+                    <div className="label">Age</div>
+                    <div className="value p-1">
+                      <input
+                        className="border-1 ph1"
+                        type="number"
+                        placeholder="Enter age of player"
+                        name="age"
+                        pattern="[0-9]"
+                        maxlength="2"
+                        value={formData.age}
+                        onChange={handleChange}
+                      ></input>
+                    </div>
+                  </div>
+                  <div className="col-md-3 info-box green">
                     <div className="label">Email</div>
                     <div className="value p-1">
                       <input
@@ -310,6 +326,20 @@ const AdminRegister = () => {
                         name="style"
                         placeholder="Enter Playing style (ex: Right Hand Spinner)"
                         value={formData.style}
+                        onChange={handleChange}
+                        required
+                      ></input>
+                    </div>
+                  </div>
+                  <div className="col-md-6 info-box red">
+                    <div className="label">Base Price</div>
+                    <div className="value p-1">
+                      <input
+                        className="border-1 ph1"
+                        type="text"
+                        name="basePrice"
+                        placeholder="Enter Base Price (in INR ₹)"
+                        value={formData.basePrice}
                         onChange={handleChange}
                         required
                       ></input>
@@ -390,7 +420,7 @@ const AdminRegister = () => {
                           : formData.teams
                             .map(
                               (teamId) => 
-                                teams.find((t) => t.id === parseInt(teamId))?.name
+                                teams.find((t) => t.team_id === parseInt(teamId))?.name
                             )
                             .join(", ")}
                       </button>
@@ -405,14 +435,14 @@ const AdminRegister = () => {
                               <input
                                 className="form-check-input"
                                 type="checkbox"
-                                id={`team-${team.id}`}
-                                value={team.id}
-                                checked={formData.teams.includes(String(team.id))}
+                                id={`team-${team.team_id}`}
+                                value={team.team_id}
+                                checked={formData.teams.includes(String(team.team_id))}
                                 onChange={handleTeamCheckboxChange}
                               />
                               <label
                                 className="form-check-label"
-                                htmlFor={`team-${team.id}`}
+                                htmlFor={`team-${team.team_id}`}
                               >
                                 {team.name}
                               </label>
