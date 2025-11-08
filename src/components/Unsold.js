@@ -4,13 +4,16 @@ import { useNavigate, useLocation } from "react-router-dom";
 import fallbackImg from "../assets/images/PlAyer.png";
 import axios from "axios";
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "http://localhost:5000";
+const API_BASE_URL =
+  process.env.REACT_APP_API_BASE_URL || "http://localhost:5000";
 
 const Unsold = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [player, setPlayer] = useState(location.state?.player || null);
-  const [basePrice, setBasePrice] = useState(location.state?.base_price || null);
+  const [basePrice, setBasePrice] = useState(
+    location.state?.base_price || null
+  );
 
   // 🧠 If player data missing (e.g. page reloaded), fetch it by ID
   useEffect(() => {
@@ -37,8 +40,22 @@ const Unsold = () => {
   // 🕒 Auto return to auction after 10 seconds
   useEffect(() => {
     const timer = setTimeout(() => {
-      navigate("/Admin_auction");
+      // Ask backend who this user is
+      axios
+        .get(`${API_BASE_URL}/check-auth`, { withCredentials: true })
+        .then((res) => {
+          const role = res.data.user?.role;
+          if (role === "admin") {
+            navigate("/Admin_auction");
+          } else if (role === "team") {
+            navigate("/auction");
+          } else {
+            navigate("/");
+          }
+        })
+        .catch(() => navigate("/"));
     }, 10000);
+
     return () => clearTimeout(timer);
   }, [navigate]);
 
@@ -59,13 +76,21 @@ const Unsold = () => {
 
   return (
     <div className="bg">
+      
       <div className="unsold-page container text-white py-4">
+        <p className="text-muted mt-3 text-custom">
+          Redirecting back to auction page in 10 seconds...
+        </p>
         <div className="row align-items-center">
           {/* Player Image */}
           <div className="col-md-4 text-center">
             <div className="unsold-img-wrapper">
               <img
-                src={player.image_path ? `${API_BASE_URL}/${player.image_path}` : fallbackImg}
+                src={
+                  player.image_path
+                    ? `${API_BASE_URL}/${player.image_path}`
+                    : fallbackImg
+                }
                 alt={player.name}
                 className="img-fluid rounded-circle border border-4"
                 onError={(e) => (e.target.src = fallbackImg)}

@@ -4,6 +4,10 @@
   box-shadow: 0 0 20px #000;
 }
 
+.text-custom {
+  color: #e73b3b;
+}
+
 .border-4{
   background-image: linear-gradient(rgb(38 253 138));
 }
