@@ -7,7 +7,8 @@ import axios from "axios";
 import io from "socket.io-client";
 import useSyncedTimer from "../../hooks/useSyncedTimer";
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "http://localhost:5000";
+const API_BASE_URL =
+  process.env.REACT_APP_API_BASE_URL || "http://localhost:5000";
 
 // ✅ Keep only this one
 const useSocket = () => {
@@ -15,7 +16,7 @@ const useSocket = () => {
   if (!socketRef.current) {
     socketRef.current = io(API_BASE_URL, {
       withCredentials: true,
-      autoConnect: false,  // prevent reconnect storm
+      autoConnect: false, // prevent reconnect storm
       transports: ["websocket", "polling"], // stable fallback
     });
   }
@@ -36,14 +37,15 @@ const Auction = () => {
   const navigate = useNavigate();
   const socket = useSocket(); // ✅ only one instance
   const audioRef = useRef(
-    new Audio(require("../../assets/Sounds/mixkit-software-interface-start-2574.wav"))
+    new Audio(
+      require("../../assets/Sounds/mixkit-software-interface-start-2574.wav")
+    )
   );
 
   useSyncedTimer(socket, setTimeLeft);
 
   const teamIdRef = useRef(null);
   const teamNameRef = useRef("Unknown Team");
-
 
   // Load initial auction and authentication data
   const loadInitial = async () => {
@@ -158,7 +160,9 @@ const Auction = () => {
           setTimeLeft(t);
         } else {
           // fallback: wait for the first timer_update
-          console.warn("⏱️ No initial time from auction_started, waiting for timer_update...");
+          console.warn(
+            "⏱️ No initial time from auction_started, waiting for timer_update..."
+          );
         }
         setNotifications([]);
       });
@@ -175,17 +179,26 @@ const Auction = () => {
 
       socket.on("timer_update", (data) => {
         if (!data) return;
-        const remaining = Number(data.remaining_seconds ?? data.time_left ?? data.remaining ?? 0);
+        const remaining = Number(
+          data.remaining_seconds ?? data.time_left ?? data.remaining ?? 0
+        );
         if (!isPaused) setTimeLeft(remaining);
       });
-
 
       socket.on("auction_ended", (data) => {
         if (!mounted) return;
         setTimeLeft(0);
 
         if (data.status === "sold") {
-          navigate("/sold", { state: data });
+          navigate("/sold", {
+            state: {
+              player: data.player,
+              team: data.team,
+              base_price: data.player?.base_price,
+              finale_bid: data.team?.bid_amount,
+              message: data.message,
+            },
+          });
         } else if (data.status === "unsold") {
           navigate("/unsold", {
             state: {
@@ -278,7 +291,11 @@ const Auction = () => {
             <div className="row g-4">
               <div className="col-md-3 text-center">
                 <img
-                  src={player?.image_path || fallbackImg}
+                  src={
+                    player.image_path
+                      ? `${API_BASE_URL}/${player.image_path}`
+                      : fallbackImg
+                  }
                   alt={player?.name}
                   className="player-image img-fluid"
                   onError={(e) => (e.target.src = fallbackImg)}

@@ -1,63 +1,54 @@
+.bg {
+  background: linear-gradient(135deg, #00264d, #004d99);
+  min-height: 100vh;
+}
+
 .sold-page {
-  background: radial-gradient(circle, #0f1f47, #070f25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.player-card, .team-card {
+  background: rgba(0, 0, 0, 0.6);
   border-radius: 20px;
-  box-shadow: 0 0 20px #000;
+  color: #fff;
+  text-align: center;
+  transition: transform 0.3s ease;
 }
 
-.border-4{
-  background-image: linear-gradient(rgb(38 253 138));
+.player-card:hover, .team-card:hover {
+  transform: scale(1.03);
 }
 
-.sold-img-wrapper {
-  position: relative;
-  display: inline-block;
+.player-img, .team-img {
+  width: 180px;
+  height: 180px;
+  object-fit: cover;
 }
 
-.sold-img-wrapper .sold-stamp {
+.sold-stamp {
   position: absolute;
   top: 10px;
-  left: -10px;
-  background-color: #fff;
-  color: #e60000;
-  font-weight: 900;
-  padding: 5px 15px;
-  border-radius: 50px;
-  transform: rotate(-20deg);
-  font-size: 1.2rem;
-  border: 2px dashed #e60000;
-}
-
-.player-name {
-  font-size: 2.5rem;
+  right: 10px;
+  background: rgba(255, 215, 0, 0.8);
+  color: black;
   font-weight: bold;
-}
-
-.team-logo {
-  width: 100px;
-  height: 100px;
-}
-
-.team-name{
-  font-size:1cm;
-  font-weight: 600;
+  font-size: 1.2rem;
+  padding: 5px 12px;
+  border-radius: 8px;
+  transform: rotate(-10deg);
+  box-shadow: 0 0 10px gold;
 }
 
 .price-box {
-  min-width: 180px;
-  text-align: center;
-  font-size: 1.2rem;
-  font-weight: 600;
+  font-size: 1.1rem;
 }
 
-.bg{
-    background-image: url('/public/assets/images/stadium bg 4096x2867.jpg');
-     background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  height: 100vh;                        /* Full height */
-  width: 100%;                         /* Full width */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 0px;  
+@media (max-width: 768px) {
+  .player-img, .team-img {
+    width: 130px;
+    height: 130px;
+  }
 }
