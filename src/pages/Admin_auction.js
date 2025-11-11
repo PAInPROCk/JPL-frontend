@@ -25,6 +25,7 @@ const Admin_auction = () => {
   const [notifications, setNotifications] = useState([]);
   const [timeLeft, setTimeLeft] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [sessionId, setSessionId] = useState(null);
   const [auctionActive, setAuctionActive] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
 
@@ -59,7 +60,6 @@ const Admin_auction = () => {
   // Authentication and socket setup
   useEffect(() => {
     let mounted = true;
-
     try {
       socket.connect();
     } catch (e) {
@@ -80,7 +80,8 @@ const Admin_auction = () => {
 
         // Register socket events
         socket.emit("join_auction", {});
-
+        
+        socket.on("session_info", (data) => setSessionId(data.session_id));
         socket.on("auction_started", (data) => {
           setAuctionActive(true);
           setTimeLeft(data.duration || 0);
@@ -116,7 +117,7 @@ const Admin_auction = () => {
         });
 
         socket.on("load_next_player", (data) => {
-          nextPlayer(data.player_id);
+          nextPlayer();
         });
 
         socket.on("auction_update", (data) => {
@@ -203,16 +204,16 @@ const Admin_auction = () => {
     }
   };
 
-  const handleSold = async () => {
+  const markPlayerAsSold = async (playerId) => {
     try {
-      await axios.post(
-        `${API_BASE_URL}/end-auction`,
-        { player_id: player.id },
+      const res = await axios.post(
+        `${API_BASE_URL}/mark-sold`,
+        { player_id: playerId },
         { withCredentials: true }
       );
-      navigate("/sold", { state: { player } });
-    } catch {
-      alert("Error marking player as sold");
+      alert(res.data.message);
+    } catch (err) {
+      alert(err.response?.data?.error || "Failed to mark player as SOLD");
     }
   };
 
@@ -331,7 +332,7 @@ const Admin_auction = () => {
                     <div className="quick-bids mb-3">
                       <button
                         className="btn btn-danger btn-red-custom m-2"
-                        onClick={handleSold}
+                        onClick={() => markPlayerAsSold(player.id)}
                       >
                         Sold
                       </button>

@@ -110,8 +110,8 @@ const Auction = () => {
       // ✅ Join auction only after authentication success
       socket.emit("join_auction", {
         team_id: teamIdRef.current,
-        team_name: auctionData?.data?.user?.team_name || "Unknown Team",
-        purse: auctionData?.data?.teamBalance || 0,
+        team_name: teamNameRef.current,
+        purse: teamBalance,
       });
 
       // Listen to updates
@@ -227,11 +227,13 @@ const Auction = () => {
       });
 
       socket.on("bid_placed", (payload) => {
-        console.log("bid_placed ack:", payload);
+        console.log("✅ Bid placed successfully:", payload);
+        alert(`${payload.team_name} placed a bid of ₹${payload.bid_amount}`);
       });
 
       socket.on("error", (err) => {
-        console.warn("socket error:", err);
+        console.error("❌ Socket error from server:", err);
+        alert(err.error || "Something went wrong placing the bid");
       });
     };
 
@@ -257,15 +259,38 @@ const Auction = () => {
   // 🔨 Place bid
   const placeBidSocket = (bidAmount) => {
     const teamId = teamIdRef.current;
+    const playerId = auctionData?.player?.id;
+
     if (!teamId) {
       alert("Team ID not found in session. Can't place bid.");
       return;
     }
+
+    if (!playerId) {
+      alert("No active player found!");
+      return;
+    }
+
     if (bidAmount > teamBalance) {
       alert("You don't have enough purse!");
       return;
     }
-    socket.emit("place_bid", { team_id: teamId, bid_amount: bidAmount });
+
+    console.log("📤 Emitting place_bid →", {
+      team_id: teamId,
+      player_id: playerId,
+      bid_amount: bidAmount,
+    });
+
+    socket.emit(
+      "place_bid",
+      { team_id: teamId, player_id: playerId, bid_amount: bidAmount },
+      (ack) => {
+        console.log("✅ Bid Acknowledged:", ack);
+        if (ack?.error) alert(ack.error);
+        else if (ack?.message) alert(ack.message);
+      }
+    );
   };
 
   // Loading & empty UI states
