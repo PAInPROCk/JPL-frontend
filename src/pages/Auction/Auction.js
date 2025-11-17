@@ -134,7 +134,7 @@ const Auction = () => {
         }
 
         if (data.history) setNotifications(data.history);
-        if (data.nextSteps) setNextSteps(data.nextSteps);
+
         if (typeof data.teamBalance !== "undefined")
           setTeamBalance(data.teamBalance);
         if (typeof data.canBid !== "undefined") setCanBid(data.canBid);
@@ -149,6 +149,23 @@ const Auction = () => {
             } catch {}
             return next;
           });
+        }
+        const MIN_INCREMENT = 500;
+
+        if (data.highest_bid) {
+          const current = Number(data.highest_bid.bid_amount) || 0;
+          setNextSteps([
+            current + MIN_INCREMENT,
+            current + MIN_INCREMENT * 2,
+            current + MIN_INCREMENT * 3,
+          ]);
+        } else if (data.player && data.player.base_price) {
+          const base = Number(data.player.base_price) || 0;
+          setNextSteps([
+            base + MIN_INCREMENT,
+            base + MIN_INCREMENT * 2,
+            base + MIN_INCREMENT * 3,
+          ]);
         }
       });
 
@@ -228,7 +245,7 @@ const Auction = () => {
 
       socket.on("bid_placed", (payload) => {
         console.log("✅ Bid placed successfully:", payload);
-        alert(`${payload.team_name} placed a bid of ₹${payload.bid_amount}`);
+        console.info(`✅ ${payload.team_name} placed ₹${payload.bid_amount}`);
       });
 
       socket.on("error", (err) => {
@@ -247,6 +264,11 @@ const Auction = () => {
       } catch {}
     };
   }, []);
+
+  useEffect(() => {
+    const el = document.querySelector(".notifications");
+    if (el) el.scrollTop = el.scrollHeight;
+  }, [notifications]);
 
   // Format time
   const formatTime = (seconds) => {
@@ -397,21 +419,37 @@ const Auction = () => {
           </div>
 
           {/* Notifications */}
-          <div className="notifications mt-2 p-3 bg-dark text-white rounded">
-            <h5>Notifications</h5>
-            {notifications.length === 0 ? (
-              <p>No Bids yet</p>
-            ) : (
-              notifications.map((note, i) => (
-                <p key={i} className={flashIndex === i ? "flash" : ""}>
-                  {note.team_name
-                    ? `${note.team_name} bid ₹${note.bid_amount}`
-                    : note.team
-                    ? `${note.team} bid ₹${note.amount}`
-                    : JSON.stringify(note)}
-                </p>
-              ))
-            )}
+          <div className="notifications-container">
+            <h5 className="notifications-title">Notifications</h5>
+
+            <div className="notifications-list">
+              {notifications.length ? (
+                notifications.map((note, i) => {
+                  const rankClass =
+                    i === notifications.length - 1
+                      ? "gold"
+                      : i === notifications.length - 2
+                      ? "silver"
+                      : i === notifications.length - 3
+                      ? "bronze"
+                      : "";
+
+                  return (
+                    <p
+                      key={i}
+                      className={`${
+                        flashIndex === i ? "flash" : ""
+                      } ${rankClass}`}
+                    >
+                      🕒 {note.bid_time} — {note.team_name} bid ₹
+                      {note.bid_amount}
+                    </p>
+                  );
+                })
+              ) : (
+                <p>No Bids yet</p>
+              )}
+            </div>
           </div>
         </div>
       </div>

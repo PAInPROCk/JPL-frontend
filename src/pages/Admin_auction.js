@@ -23,12 +23,18 @@ const useSocket = () => {
 const Admin_auction = () => {
   const [player, setPlayer] = useState(null);
   const [notifications, setNotifications] = useState([]);
+  const [auctionData, setAuctionData] = useState(null);
   const [timeLeft, setTimeLeft] = useState(0);
   const [loading, setLoading] = useState(true);
   const [sessionId, setSessionId] = useState(null);
   const [auctionActive, setAuctionActive] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
-
+  const [flashIndex, setFlashIndex] = useState(null);
+  const audioRef = useRef(
+    new Audio(
+      require("../assets/Sounds/mixkit-software-interface-start-2574.wav")
+    )
+  );
   const navigate = useNavigate();
   const socket = useSocket();
 
@@ -40,7 +46,20 @@ const Admin_auction = () => {
         withCredentials: true,
       });
       if (res.data.status === "auction_active") {
-        setPlayer(res.data.player);
+        // ensure player object contains a "current_bid" field used by UI
+        const serverPlayer = res.data.player || {};
+        const seededCurrentBid =
+          res.data.currentBid ??
+          res.data.current_bid ??
+          serverPlayer.current_bid ??
+          serverPlayer.base_price ??
+          0;
+
+        setPlayer({
+          ...serverPlayer,
+          current_bid: seededCurrentBid,
+        });
+
         setTimeLeft(res.data.remaining_seconds || 0);
         setNotifications(res.data.history || []);
         setAuctionActive(true);
@@ -80,7 +99,7 @@ const Admin_auction = () => {
 
         // Register socket events
         socket.emit("join_auction", {});
-        
+
         socket.on("session_info", (data) => setSessionId(data.session_id));
         socket.on("auction_started", (data) => {
           setAuctionActive(true);
@@ -104,16 +123,33 @@ const Admin_auction = () => {
           setAuctionActive(false);
 
           if (data.status === "sold") {
-            navigate("/sold", { state: data });
-          } else if (data.status === "unsold") {
-            navigate("/unsold", {
-              state: {
-                player: data.player,
-                base_price: data.player?.base_price,
-                message: data.message,
-              },
-            });
-          }
+          navigate("/sold", {
+            state: {
+              player: data.player,
+              team: data.team,
+              base_price: data.player?.base_price,
+              finale_bid: data.team?.bid_amount,
+              message: data.message,
+            },
+          });
+        } else if (data.status === "unsold") {
+          navigate("/unsold", {
+            state: {
+              player: data.player,
+              base_price: data.player?.base_price,
+              message: data.message,
+            },
+          });
+        } else {
+          axios
+            .get(`${API_BASE_URL}/current-auction`, { withCredentials: true })
+            .then((r) => {
+              if (r.data && r.data.status === "auction_active")
+                setAuctionData(r.data);
+              else setAuctionData(null);
+            })
+            .catch(() => console.error("Auction fetch failed"));
+        }
         });
 
         socket.on("load_next_player", (data) => {
@@ -121,18 +157,68 @@ const Admin_auction = () => {
         });
 
         socket.on("auction_update", (data) => {
-          setTimeLeft(data.time_left);
-          setIsPaused(data.paused);
-          if (data.player) setPlayer(data.player);
-          if (data.highest_bid) {
-            setNotifications((prev) => [
-              ...prev,
-              {
-                team: data.highest_bid.team_name,
-                amount: data.highest_bid.bid_amount,
-              },
-            ]);
+          // time / pause
+          setTimeLeft(
+            data.time_left ?? data.remaining_seconds ?? data.timeLeft ?? 0
+          );
+          setIsPaused(Boolean(data.paused));
+
+          // If server sent a full player object, use it but preserve/overwrite current_bid
+          if (data.player) {
+            const incomingPlayer = data.player;
+            const incomingCurrent =
+              data.currentBid ??
+              data.current_bid ??
+              data.highest_bid?.bid_amount ??
+              incomingPlayer.current_bid ??
+              incomingPlayer.base_price ??
+              0;
+            setPlayer((prev) => ({
+              ...(incomingPlayer || prev || {}),
+              current_bid: incomingCurrent,
+            }));
           }
+
+          // If server sent only highest_bid (live bid), update player.current_bid and notifications
+          if (data.highest_bid) {
+            const hb = data.highest_bid;
+            // Update player.current_bid safely
+            setPlayer((prev) => {
+              if (!prev) return { current_bid: hb.bid_amount, ...{} };
+              return { ...prev, current_bid: hb.bid_amount };
+            });
+
+            // Cheap dedupe: only add if last notification differs
+            setNotifications((prev) => {
+              const last = prev[prev.length - 1];
+              const isDuplicate =
+                last &&
+                Number(last.bid_amount) === Number(hb.bid_amount) &&
+                String(last.team_id) === String(hb.team_id);
+              if (isDuplicate) return prev;
+
+              const next = [...prev, hb];
+              setFlashIndex(next.length - 1);
+              setTimeout(() => setFlashIndex(null), 1500);
+              try {
+                audioRef.current.play();
+              } catch {}
+              return next;
+            });
+          }
+
+          // If history or nextSteps come in, refresh them
+          if (data.history) setNotifications(data.history);
+          if (data.nextSteps)
+            setPlayer((prev) => ({
+              ...(prev || {}),
+              nextSteps: data.nextSteps,
+            }));
+          if (typeof data.teamBalance !== "undefined")
+            setPlayer((prev) => ({
+              ...(prev || {}),
+              teamBalance: data.teamBalance,
+            }));
         });
 
         socket.on("auction_cleared", () => {
@@ -171,6 +257,11 @@ const Admin_auction = () => {
     };
     // eslint-disable-next-line
   }, [isPaused, navigate]);
+
+  useEffect(() => {
+    const el = document.querySelector(".notifications");
+    if (el) el.scrollTop = el.scrollHeight;
+  }, [notifications]);
 
   // Admin control actions
   const startAuction = async () => {
@@ -367,20 +458,34 @@ const Admin_auction = () => {
                 </div>
               </div>
 
-              <div className="notifications mt-2 p-3 bg-dark text-white rounded">
-                <h5>Notifications</h5>
-                {notifications.length ? (
-                  notifications.map((note, i) => (
-                    <p key={i}>
-                      {note.team
-                        ? `${note.team} bid ₹${note.amount}`
-                        : "System Event"}
-                    </p>
-                  ))
-                ) : (
-                  <p>No Bids yet</p>
-                )}
-              </div>
+              <div className="notifications-container">
+  <h5 className="notifications-title">Notifications</h5>
+
+  <div className="notifications-list">
+    {notifications.length ? (
+      notifications.map((note, i) => {
+        const rankClass =
+          i === notifications.length - 1
+            ? "gold"
+            : i === notifications.length - 2
+            ? "silver"
+            : i === notifications.length - 3
+            ? "bronze"
+            : "";
+
+        return (
+          <p key={i} className={`${flashIndex === i ? "flash" : ""} ${rankClass}`}>
+            🕒 {note.bid_time} — {note.team_name} bid ₹{note.bid_amount}
+          </p>
+        );
+      })
+    ) : (
+      <p>No Bids yet</p>
+    )}
+  </div>
+</div>
+
+
             </>
           ) : (
             <div className="text-center">
