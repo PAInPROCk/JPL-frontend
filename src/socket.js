@@ -1,8 +1,7 @@
 import {io} from "socket.io-client";
+import API_BASE_URL from "./Config";
 
-
-const URL = process.env.APP_BASE_URL || "http://127.0.0.1:5000";
-const socket = io(URL, {
+const socket = io(API_BASE_URL, {
     withCredentials: true,
     autoConnect: false,
 });

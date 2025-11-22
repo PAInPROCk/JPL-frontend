@@ -2,9 +2,7 @@ import "./Sold.css";
 import React, { useEffect } from "react";
 import axios from "axios";
 import { useNavigate, useLocation } from "react-router-dom";
-
-const API_BASE_URL =
-  process.env.REACT_APP_API_BASE_URL || "http://localhost:5000";
+import API_BASE_URL from "../Config";
 
 const Sold = () => {
   const navigate = useNavigate();
