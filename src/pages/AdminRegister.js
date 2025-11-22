@@ -3,6 +3,7 @@ import axios from "axios";
 import { useState, useEffect } from "react";
 import fallbackImg from "../assets/images/PlAyer.png";
 import NavbarComponent from "../components/Navbar";
+import API_BASE_URL from "../Config.js";
 
 const AdminRegister = () => {
   const [text, setText] = useState("");
@@ -38,7 +39,6 @@ const AdminRegister = () => {
   const [preview, setPreview] = useState(null);
   const [dropdownOpen, setdropDownOpen] = useState(false);
   const [error, setError] = useState("");
-  const API_BASE_URL = process.env.APP_BASE_URL || "http://localhost:5000";
 
   const toggleDropdown = () => setdropDownOpen((open) => !open);
 

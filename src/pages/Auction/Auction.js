@@ -6,9 +6,7 @@ import { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import io from "socket.io-client";
 import useSyncedTimer from "../../hooks/useSyncedTimer";
-
-const API_BASE_URL =
-  process.env.REACT_APP_API_BASE_URL || "http://localhost:5000";
+import API_BASE_URL from "../../Config";
 
 // Always use one socket instance
 const useSocket = () => {
@@ -76,10 +74,7 @@ const Auction = () => {
         setCanBid(Boolean(data.canBid));
 
         const seed =
-          data.remaining_seconds ||
-          data.time_left ||
-          data.timeLeft ||
-          0;
+          data.remaining_seconds || data.time_left || data.timeLeft || 0;
         setTimeLeft(Number(seed));
       } else {
         setAuctionData(null);
@@ -127,34 +122,43 @@ const Auction = () => {
 
         setTimeLeft(
           Number(
-            data.time_left ??
-              data.remaining_seconds ??
-              data.remaining ??
-              0
+            data.time_left ?? data.remaining_seconds ?? data.remaining ?? 0
           )
         );
 
         setIsPaused(Boolean(data.paused));
 
-        if (data.history) setNotifications(data.history);
+        // --- notifications & audio (single source of truth) ---
+        if (Array.isArray(data.history)) {
+          const newHistory = data.history;
+
+          setNotifications((prev) => {
+            const prevLast = prev[prev.length - 1];
+            const newLast = newHistory[newHistory.length - 1];
+
+            const isNewBid =
+              newLast &&
+              (!prevLast ||
+                prevLast.bid_amount !== newLast.bid_amount ||
+                prevLast.team_id !== newLast.team_id ||
+                prevLast.bid_time !== newLast.bid_time);
+
+            if (isNewBid) {
+              setFlashIndex(newHistory.length - 1);
+              try {
+                audioRef.current.play();
+              } catch {}
+              setTimeout(() => setFlashIndex(null), 1500);
+            }
+
+            return newHistory; // always trust backend history
+          });
+        }
 
         if (typeof data.teamBalance !== "undefined")
           setTeamBalance(data.teamBalance);
         if (typeof data.canBid !== "undefined") setCanBid(data.canBid);
 
-        if (data.highest_bid) {
-          setNotifications((prev) => {
-            const next = [...prev, data.highest_bid];
-            setFlashIndex(next.length - 1);
-
-            setTimeout(() => setFlashIndex(null), 1500);
-            try {
-              audioRef.current.play();
-            } catch {}
-
-            return next;
-          });
-        }
         const MIN_INCREMENT = 500;
 
         if (data.highest_bid) {
@@ -197,10 +201,7 @@ const Auction = () => {
         if (!data) return;
         if (!isPaused) {
           const r = Number(
-            data.remaining_seconds ??
-              data.time_left ??
-              data.remaining ??
-              0
+            data.remaining_seconds ?? data.time_left ?? data.remaining ?? 0
           );
           setTimeLeft(r);
         }
@@ -253,7 +254,7 @@ const Auction = () => {
       });
 
       socket.on("bid_rejected", (msg) => {
-          alert(msg.error);
+        alert(msg.error);
       });
     };
 
@@ -294,8 +295,7 @@ const Auction = () => {
     }
     if (!teamId) return alert("Team ID missing");
     if (!playerId) return alert("No active player");
-    if (bidAmount > teamBalance)
-      return alert("You don't have enough purse!");
+    if (bidAmount > teamBalance) return alert("You don't have enough purse!");
 
     socket.emit(
       "place_bid",
@@ -318,16 +318,11 @@ const Auction = () => {
 
   const player = auctionData.player;
   const basePrice =
-    auctionData.basePrice ??
-    auctionData.base_price ??
-    player.base_price ??
-    0;
+    auctionData.basePrice ?? auctionData.base_price ?? player.base_price ?? 0;
 
   // ⭐ FINAL & CORRECT CURRENT BID LOGIC
   const currentBid = Number(
-    auctionData?.currentBid ??
-      auctionData?.highest_bid?.bid_amount ??
-      basePrice
+    auctionData?.currentBid ?? auctionData?.highest_bid?.bid_amount ?? basePrice
   );
 
   const displayNextSteps = auctionData.nextSteps ?? nextSteps ?? [];

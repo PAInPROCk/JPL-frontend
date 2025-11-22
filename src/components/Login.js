@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Login.css";
+import API_BASE_URL from "../Config.js";
 import axios from "axios";
 axios.defaults.withCredentials = true;
 
 const Login = () => {
-  const API_BASE_URL = process.env.REACT_API_BASE_URL || "http://localhost:5000";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");

@@ -3,9 +3,8 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import fallbackImg from "../assets/images/PlAyer.png";
 import axios from "axios";
+import API_BASE_URL from "../Config.js";
 
-const API_BASE_URL =
-  process.env.REACT_APP_API_BASE_URL || "http://localhost:5000";
 
 const Unsold = () => {
   const navigate = useNavigate();
@@ -54,10 +53,21 @@ const Unsold = () => {
           }
         })
         .catch(() => navigate("/"));
-    }, 10000);
+    }, 10000)
 
     return () => clearTimeout(timer);
   }, [navigate]);
+
+  useEffect(() => {
+  const audio = new Audio(require("../assets/Sounds/Fail/fail-234710.mp3"));
+
+  const timer = setTimeout(() => {
+    audio.play().catch(() => {});
+  }, 1500);
+
+  return () => clearTimeout(timer);
+}, []);
+
 
   // 🧩 If still no player info
   if (!player) {

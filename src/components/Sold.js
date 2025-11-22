@@ -27,6 +27,17 @@ const Sold = () => {
     return () => clearTimeout(timer);
   }, [navigate]);
 
+  useEffect(() => {
+  const audio = new Audio(require("../assets/Sounds/Success/Sold brass-fanfare-reverberated-146263.mp3"));
+
+  const timer = setTimeout(() => {
+    audio.play().catch(() => {});
+  }, 1500); // 1.5 sec delay
+
+  return () => clearTimeout(timer);
+}, []);
+
+
   if (!player || !team)
     return (
       <p className="text-center text-white mt-5">

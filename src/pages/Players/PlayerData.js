@@ -1,8 +1,8 @@
 import axios from "axios";
+import API_BASE_URL from "../../Config.js";
 
 export const fetchPlayers = async () => {
   // ✅ Fix typo & use proper fallback URL
-  const API_BASE_URL = process.env.API_BASE_URL || "http://localhost:5000";
 
   try {
     // ✅ Call the updated backend route

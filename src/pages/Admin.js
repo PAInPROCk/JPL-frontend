@@ -5,6 +5,7 @@ import * as XLSX from "xlsx";
 import NavbarComponent from "../components/Navbar";
 import { Await, useNavigate } from "react-router-dom";
 import axios from "axios";
+import API_BASE_URL from "../Config.js";
 
 const Admin = () => {
   const navigate = useNavigate();
@@ -14,7 +15,6 @@ const Admin = () => {
   const [playerList, setPlayerList] = useState([]);
   const [batchFile, setBatchFile] = useState(null);
   const [batchPlayerList, setBatchPlayerList] = useState([]);
-  const API_BASE_URL = process.env.APP_BASE_URL || "http://localhost:5000";
 
   const requireAdmin = async (nextPath, extraState = {}) => {
     try {

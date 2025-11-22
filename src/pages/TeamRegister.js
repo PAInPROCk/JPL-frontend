@@ -3,6 +3,7 @@ import axios from "axios";
 import { useState } from "react";
 import fallbackImg from "../assets/images/football-team_16848377.png"
 import NavbarComponent from "../components/Navbar";
+import API_BASE_URL from "../Config.js";
 
 const TeamRegister = () => {
 
@@ -21,7 +22,6 @@ const TeamRegister = () => {
 
   const [preview, setPreview] = useState(null);
   const [error, setError] = useState("");
-  const API_BASE_URL = process.env.APP_BASE_URL || "http://localhost:5000";
 
   const handleChange = (e) => {
 

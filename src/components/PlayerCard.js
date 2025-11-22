@@ -1,7 +1,8 @@
 import fallbackImg from "../assets/images/PlAyer.png";
+import API_BASE_URL from "../Config.js";
 
 const PlayerCard = ({ player }) => {
-  const API_BASE_URL = process.env.APP_BASE_URL || "http://localhost:5000";
+  
 
   return (
     <div className="player-card text-center p-3">

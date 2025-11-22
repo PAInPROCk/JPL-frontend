@@ -10,6 +10,7 @@ import titansLogo from "../../assets/teams/Team2.png";
 import warriorsLogo from "../../assets/teams/Team1.png";
 import kingsLogo from "../../assets/teams/Team3.png";
 import knightsLogo from "../../assets/teams/Team4.png";
+import API_BASE_URL from "../../Config.js";
 
 const teamLogos = {
   "JPL Titan": titansLogo,
@@ -22,7 +23,6 @@ const Player_info = () => {
   const { id } = useParams();
   const [player, setPlayer] = useState(null);
   const [loading, setLoading] = useState(true); 
-  const API_BASE_URL = process.env.API_BASE_URL || "http://localhost:5000";
 
   useEffect(() => {
     const loadPlayer = async ()=>{

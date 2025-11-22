@@ -4,10 +4,10 @@ import "./Waiting.css";
 import Spinner from "../components/Spinner";
 import socket from "../socket";
 import axios from "axios";
+import API_BASE_URL from "../Config.js";
 
 const Waiting = () => {
   const navigate = useNavigate();
-  const API_BASE_URL = process.env.REACT_API_BASE_URL || "http://localhost:5000";
   const [checking, setChecking] = useState(true);
 
   useEffect(() => {

@@ -2,12 +2,12 @@ import React, { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import Spinner from "../components/Spinner";
 import axios from "axios";
+import API_BASE_URL from "../Config.js";
 
 // Always send cookies for requests
 axios.defaults.withCredentials = true;
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
-  const API_BASE_URL = process.env.REACT_API_BASE_URL || "http://localhost:5000";
   const [isAuth, setIsAuth] = useState(null);
   const [userRole, setUserRole] = useState(null);
   const [loading, setLoading] = useState(true);

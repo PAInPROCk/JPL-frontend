@@ -2,11 +2,11 @@ import React, { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import Spinner from "../components/Spinner";
 import axios from "axios";
+import API_BASE_URL from "../Config.js";
 
 axios.defaults.withCredentials = true;
 
 const AdminProtectedRoute = ({ children, allowedRoles = ["admin"] }) => {
-  const API_BASE_URL = process.env.REACT_API_BASE_URL || "http://localhost:5000";
   const [isAuthenticated, setIsAuthenticated] = useState(null);
   const [userRole, setUserRole] = useState(null);
   const [loading, setLoading] = useState(true);

@@ -1,7 +1,7 @@
 import axios from "axios";
+import API_BASE_URL from "../../Config.js";
 
 export const fetchTeams = async () => {
-    const API_BASE_URL = process.env.APP_BASE_URL || "http://localhost:5000";
     try{
         const response = await axios.get(`${API_BASE_URL}/teams`);
         return response.data;

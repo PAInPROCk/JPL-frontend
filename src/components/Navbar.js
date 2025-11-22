@@ -2,11 +2,11 @@ import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import "./Navbar.css";
+import API_BASE_URL from "../Config.js";
 
 axios.defaults.withCredentials = true;
 
 const Navbar = () => {
-  const API_BASE_URL = process.env.REACT_API_BASE_URL || "http://localhost:5000";
   const [auth, setAuth] = useState({ authenticated: false, user: null, role: null });
   const [expanded, setExpanded] = useState(false);
   const navRef = useRef();

@@ -4,10 +4,10 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { fetchTeams } from "./TeamData";
 import fallbackImg from "../../assets/images/football-team_16848377.png";
+import API_BASE_URL from "../../Config.js";
 
 
 const Team_info = () => {
-  const API_BASE_URL = process.env.API_BASE_URL || "http://localhost:5000";
   const {id} = useParams();
   const [team, setTeam] = useState(null);
   const [loading, setLoading] = useState(true);

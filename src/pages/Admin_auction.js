@@ -6,9 +6,8 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import io from "socket.io-client";
 import useSyncedTimer from "../hooks/useSyncedTimer";
+import API_BASE_URL from "../Config.js";
 
-const API_BASE_URL =
-  process.env.REACT_APP_API_BASE_URL || "http://localhost:5000";
 
 // Single socket instance (hook-like)
 const useSocket = () => {
@@ -47,42 +46,37 @@ const Admin_auction = () => {
 
   // Load current auction player from API
   const loadPlayer = async () => {
-  try {
-    const res = await axios.get(`${API_BASE_URL}/current-auction`, {
-      withCredentials: true,
-    });
+    try {
+      const res = await axios.get(`${API_BASE_URL}/current-auction`, {
+        withCredentials: true,
+      });
 
-    if (res.data.status === "auction_active") {
-      const p = res.data.player || {};
+      if (res.data.status === "auction_active") {
+        const p = res.data.player || {};
 
-      // embed correct current bid
-      p.current_bid = Number(
-        p.current_bid ??
-        res.data.currentBid ??
-        p.base_price ??
-        0
-      );
+        // embed correct current bid
+        p.current_bid = Number(
+          p.current_bid ?? res.data.currentBid ?? p.base_price ?? 0
+        );
 
-      console.log("🔍 Loaded player:", p);
+        console.log("🔍 Loaded player:", p);
 
-      setPlayer(p);
-      setTimeLeft(res.data.remaining_seconds || 0);
-      setNotifications(res.data.history || []);
-      setAuctionActive(true);
-    } else {
+        setPlayer(p);
+        setTimeLeft(res.data.remaining_seconds || 0);
+        setNotifications(res.data.history || []);
+        setAuctionActive(true);
+      } else {
+        setPlayer(null);
+        setTimeLeft(0);
+        setAuctionActive(false);
+      }
+    } catch (err) {
+      console.error("Error loading player:", err);
       setPlayer(null);
       setTimeLeft(0);
       setAuctionActive(false);
     }
-
-  } catch (err) {
-    console.error("Error loading player:", err);
-    setPlayer(null);
-    setTimeLeft(0);
-    setAuctionActive(false);
-  }
-};
-
+  };
 
   // Authentication + socket listeners
   useEffect(() => {
@@ -182,27 +176,39 @@ const Admin_auction = () => {
               return { ...prev, current_bid: hb.bid_amount };
             });
 
-            // Cheap dedupe: only add if last notification differs
-            setNotifications((prev) => {
-              const last = prev[prev.length - 1];
-              const isDuplicate =
-                last &&
-                Number(last.bid_amount) === Number(hb.bid_amount) &&
-                String(last.team_id) === String(hb.team_id);
-              if (isDuplicate) return prev;
+            // notifications from backend + audio
+            if (Array.isArray(data.history)) {
+              const newHistory = data.history;
 
-              const next = [...prev, hb];
-              setFlashIndex(next.length - 1);
-              setTimeout(() => setFlashIndex(null), 1500);
-              try {
-                audioRef.current.play();
-              } catch {}
-              return next;
-            });
+              setNotifications((prev) => {
+                const prevLast = prev[prev.length - 1];
+                const newLast = newHistory[newHistory.length - 1];
+
+                const isNewBid =
+                  newLast &&
+                  (!prevLast ||
+                    prevLast.bid_amount !== newLast.bid_amount ||
+                    prevLast.team_id !== newLast.team_id ||
+                    prevLast.bid_time !== newLast.bid_time);
+
+                if (isNewBid) {
+                  setFlashIndex(newHistory.length - 1);
+                  try {
+                    audioRef.current.play();
+                  } catch {}
+                  setTimeout(() => setFlashIndex(null), 1500);
+                }
+
+                return newHistory;
+              });
+            }
           }
 
           // If history or nextSteps come in, refresh them
-          if (data.history) setNotifications(data.history);
+          if (Array.isArray(data.history) && data.history.length > 0) {
+            setNotifications(data.history);
+          }
+
           if (data.nextSteps)
             setPlayer((prev) => ({
               ...(prev || {}),
@@ -315,7 +321,11 @@ const Admin_auction = () => {
   const handlePause = async () => {
     try {
       setIsPaused(true);
-      await axios.post(`${API_BASE_URL}/pause-auction`, {}, { withCredentials: true });
+      await axios.post(
+        `${API_BASE_URL}/pause-auction`,
+        {},
+        { withCredentials: true }
+      );
     } catch (err) {
       console.error("Pause failed:", err);
       setIsPaused(false);
@@ -324,7 +334,11 @@ const Admin_auction = () => {
 
   const handleResume = async () => {
     try {
-      await axios.post(`${API_BASE_URL}/resume-auction`, {}, { withCredentials: true });
+      await axios.post(
+        `${API_BASE_URL}/resume-auction`,
+        {},
+        { withCredentials: true }
+      );
       setIsPaused(false);
     } catch (err) {
       console.error("Resume failed:", err);
@@ -333,7 +347,11 @@ const Admin_auction = () => {
 
   const handleCancel = async () => {
     try {
-      await axios.post(`${API_BASE_URL}/cancel-auction`, {}, { withCredentials: true });
+      await axios.post(
+        `${API_BASE_URL}/cancel-auction`,
+        {},
+        { withCredentials: true }
+      );
 
       setPlayer(null);
       setNotifications([]);
@@ -367,7 +385,11 @@ const Admin_auction = () => {
                   {/* PLAYER IMAGE */}
                   <div className="col-md-3 text-center">
                     <img
-                      src={player.image_path ? `${API_BASE_URL}/${player.image_path}` : fallbackImg}
+                      src={
+                        player.image_path
+                          ? `${API_BASE_URL}/${player.image_path}`
+                          : fallbackImg
+                      }
                       alt={player.name}
                       className="player-image img-fluid"
                       onError={(e) => (e.target.src = fallbackImg)}
@@ -420,24 +442,43 @@ const Admin_auction = () => {
                   </div>
 
                   <div className="col-md-4 d-flex justify-content-center align-items-center">
-                    <div className="timer bg-warning text-dark p-3 rounded">{formatTime(timeLeft)}</div>
+                    <div className="timer bg-warning text-dark p-3 rounded">
+                      {formatTime(timeLeft)}
+                    </div>
                   </div>
 
                   <div className="col-md-4 d-flex flex-column align-items-center">
                     <div className="quick-bids mb-3">
-                      <button className="btn btn-danger m-2" onClick={() => markPlayerAsSold(player.id)}>
+                      <button
+                        className="btn btn-danger m-2"
+                        onClick={() => markPlayerAsSold(player.id)}
+                      >
                         Sold
                       </button>
-                      <button className="btn btn-warning m-2" onClick={handlePause} disabled={isPaused || !auctionActive}>
+                      <button
+                        className="btn btn-warning m-2"
+                        onClick={handlePause}
+                        disabled={isPaused || !auctionActive}
+                      >
                         Pause
                       </button>
-                      <button className="btn btn-success m-2" onClick={handleResume} disabled={!isPaused}>
+                      <button
+                        className="btn btn-success m-2"
+                        onClick={handleResume}
+                        disabled={!isPaused}
+                      >
                         Resume
                       </button>
-                      <button className="btn btn-dark m-2" onClick={handleCancel}>
+                      <button
+                        className="btn btn-dark m-2"
+                        onClick={handleCancel}
+                      >
                         Cancel
                       </button>
-                      <button className="btn btn-primary m-2" onClick={nextPlayer}>
+                      <button
+                        className="btn btn-primary m-2"
+                        onClick={nextPlayer}
+                      >
                         Next Player
                       </button>
                     </div>
@@ -446,33 +487,37 @@ const Admin_auction = () => {
               </div>
 
               <div className="notifications-container">
-  <h5 className="notifications-title">Notifications</h5>
+                <h5 className="notifications-title">Notifications</h5>
 
-  <div className="notifications-list">
-    {notifications.length ? (
-      notifications.map((note, i) => {
-        const rankClass =
-          i === notifications.length - 1
-            ? "gold"
-            : i === notifications.length - 2
-            ? "silver"
-            : i === notifications.length - 3
-            ? "bronze"
-            : "";
+                <div className="notifications-list">
+                  {notifications.length ? (
+                    notifications.map((note, i) => {
+                      const rankClass =
+                        i === notifications.length - 1
+                          ? "gold"
+                          : i === notifications.length - 2
+                          ? "silver"
+                          : i === notifications.length - 3
+                          ? "bronze"
+                          : "";
 
-        return (
-          <p key={i} className={`${flashIndex === i ? "flash" : ""} ${rankClass}`}>
-            🕒 {note.bid_time} — {note.team_name} bid ₹{note.bid_amount}
-          </p>
-        );
-      })
-    ) : (
-      <p>No Bids yet</p>
-    )}
-  </div>
-</div>
-
-
+                      return (
+                        <p
+                          key={i}
+                          className={`${
+                            flashIndex === i ? "flash" : ""
+                          } ${rankClass}`}
+                        >
+                          🕒 {note.bid_time} — {note.team_name} bid ₹
+                          {note.bid_amount}
+                        </p>
+                      );
+                    })
+                  ) : (
+                    <p>No Bids yet</p>
+                  )}
+                </div>
+              </div>
             </>
           ) : (
             <div className="text-center">
