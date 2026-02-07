@@ -2,7 +2,8 @@ import "./Sold.css";
 import React, { useEffect } from "react";
 import axios from "axios";
 import { useNavigate, useLocation } from "react-router-dom";
-import API_BASE_URL from "../Config";
+import { api } from "../Config";
+import { API_BASE_URL } from "../Utils/constants";
 
 const Sold = () => {
   const navigate = useNavigate();
@@ -11,8 +12,8 @@ const Sold = () => {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      axios
-        .get(`${API_BASE_URL}/check-auth`, { withCredentials: true })
+      api
+        .get("/check-auth", { withCredentials: true })
         .then((res) => {
           const role = res.data.user?.role;
           if (role === "admin") navigate("/Admin_auction");

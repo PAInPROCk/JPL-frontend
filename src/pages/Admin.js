@@ -3,9 +3,8 @@ import "./Admin.css";
 import Papa from "papaparse";
 import * as XLSX from "xlsx";
 import NavbarComponent from "../components/Navbar";
-import { Await, useNavigate } from "react-router-dom";
-import axios from "axios";
-import API_BASE_URL from "../Config.js";
+import { useNavigate } from "react-router-dom";
+import { api } from "../Config";
 
 const Admin = () => {
   const navigate = useNavigate();
@@ -18,9 +17,7 @@ const Admin = () => {
 
   const requireAdmin = async (nextPath, extraState = {}) => {
     try {
-      const res = await axios.get(`${API_BASE_URL}/check-auth`, {
-        withCredentials: true,
-      });
+      const res = await api.get("/check-auth");
       if (res.data.authenticated && res.data.role === "admin") {
         navigate(nextPath, { state: extraState });
       } else {
@@ -108,8 +105,8 @@ const Admin = () => {
     formData.append("file", batchFile);
 
     try {
-      const response = await axios.post(
-        `${API_BASE_URL}/upload-players`,
+      const response = await api.post(
+        "/upload-players",
         formData,
         {
           headers: { "Content-Type": "multipart/form-data" },
@@ -136,7 +133,8 @@ const Admin = () => {
 
   return (
     <>
-      <NavbarComponent />
+      <h1>Heaading</h1>
+      <NavbarComponent /> 
       <div className="admin-bg" style={{ minHeight: "100vh", paddingTop: 0 }}>
         <div className="container py-4">
           <div className="row">

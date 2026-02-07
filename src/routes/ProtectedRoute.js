@@ -1,30 +1,22 @@
-import React, { useEffect, useState } from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, Outlet } from "react-router-dom";
+import { useEffect, useState } from "react";
 import Spinner from "../components/Spinner";
-import axios from "axios";
-import API_BASE_URL from "../Config.js";
+import { api } from "../Config";
 
-// Always send cookies for requests
-axios.defaults.withCredentials = true;
-
-const ProtectedRoute = ({ children, allowedRoles }) => {
-  const [isAuth, setIsAuth] = useState(null);
-  const [userRole, setUserRole] = useState(null);
+const ProtectedRoute = ({ allowedRoles }) => {
   const [loading, setLoading] = useState(true);
+  const [authenticated, setAuthenticated] = useState(false);
+  const [role, setRole] = useState(null);
 
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const res = await axios.get(`${API_BASE_URL}/check-auth`, {
-          withCredentials: true,
-        });
-        console.log("ProtectedRoute: check-auth result", res.data);
-        setIsAuth(res.data.authenticated);
-        setUserRole(res.data.role);
-      } catch (err) {
-        console.error("ProtectedRoute: error", err?.response?.data || err);
-        setIsAuth(false);
-        setUserRole(null);
+        const res = await api.get("/check-auth");
+        setAuthenticated(res.data.authenticated);
+        setRole(res.data.role);
+      } catch {
+        setAuthenticated(false);
+        setRole(null);
       } finally {
         setLoading(false);
       }
@@ -33,22 +25,23 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
     checkAuth();
   }, []);
 
-  if (loading || isAuth === null) {
+  if (loading){
+    console.log("🛡 ProtectedRoute: loading");
     return <Spinner />;
-  }
+  } 
 
-  if (!isAuth) {
-    // Not logged in at all
+  if (!authenticated) {
+    console.log("🔒 ProtectedRoute: NOT authenticated → /login");
     return <Navigate to="/login" replace />;
   }
 
-  if (allowedRoles && !allowedRoles.includes(userRole)) {
-    // Logged in, but not the right role
+  if (allowedRoles && !allowedRoles.includes(role)) {
+    console.log("🔒 ProtectedRoute: role mismatch", role);  
     return <Navigate to="/" replace />;
   }
 
-  // All checks passed
-  return children;
+  console.log("🔒 ProtectedRoute: ACCESS GRANTED");
+  return <Outlet />;
 };
 
 export default ProtectedRoute;

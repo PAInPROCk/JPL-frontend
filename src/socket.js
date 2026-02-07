@@ -1,9 +1,8 @@
-import {io} from "socket.io-client";
-import API_BASE_URL from "./Config";
+import { io } from "socket.io-client";
 
-const socket = io(API_BASE_URL, {
-    withCredentials: true,
-    autoConnect: false,
+const SOCKET_URL = process.env.REACT_APP_API_BASE_URL;
+
+export const socket = io(SOCKET_URL, {
+  withCredentials: true,
+  autoConnect: false, // important
 });
-
-export default socket;

@@ -6,7 +6,8 @@ import { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import io from "socket.io-client";
 import useSyncedTimer from "../../hooks/useSyncedTimer";
-import API_BASE_URL from "../../Config";
+import { api } from "../../Config";
+import { API_BASE_URL } from "../../Utils/constants";
 
 // Always use one socket instance
 const useSocket = () => {
@@ -50,7 +51,7 @@ const Auction = () => {
     try {
       setLoading(true);
 
-      const authRes = await axios.get(`${API_BASE_URL}/check-auth`, {
+      const authRes = await api.get("/check-auth", {
         withCredentials: true,
       });
       if (!authRes.data.authenticated) {
@@ -61,7 +62,7 @@ const Auction = () => {
       teamIdRef.current = authRes.data.user?.team_id || null;
       teamNameRef.current = authRes.data.user?.team_name || "Unknown Team";
 
-      const auctionRes = await axios.get(`${API_BASE_URL}/current-auction`, {
+      const auctionRes = await api.get("/current-auction", {
         withCredentials: true,
       });
 
@@ -236,8 +237,8 @@ const Auction = () => {
           });
         } else {
           // reload auction status
-          axios
-            .get(`${API_BASE_URL}/current-auction`, {
+          api
+            .get("/current-auction", {
               withCredentials: true,
             })
             .then((r) =>

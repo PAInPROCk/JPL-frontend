@@ -10,7 +10,7 @@ import titansLogo from "../../assets/teams/Team2.png";
 import warriorsLogo from "../../assets/teams/Team1.png";
 import kingsLogo from "../../assets/teams/Team3.png";
 import knightsLogo from "../../assets/teams/Team4.png";
-import API_BASE_URL from "../../Config.js";
+import { API_BASE_URL } from "../../Utils/constants";
 
 const teamLogos = {
   "JPL Titan": titansLogo,

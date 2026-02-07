@@ -2,9 +2,10 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Waiting.css";
 import Spinner from "../components/Spinner";
-import socket from "../socket";
+import { socket } from "../socket";
 import axios from "axios";
-import API_BASE_URL from "../Config.js";
+import { api } from "../Config";
+
 
 const Waiting = () => {
   const navigate = useNavigate();
@@ -14,7 +15,7 @@ const Waiting = () => {
     // 1️⃣ Check if auction is already active on page load
     const checkAuction = async () => {
       try {
-        const res = await axios.get(`${API_BASE_URL}/auction-status`, {
+        const res = await api.get("/auction-status", {
           withCredentials: true,
         });
 

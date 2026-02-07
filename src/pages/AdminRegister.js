@@ -3,7 +3,8 @@ import axios from "axios";
 import { useState, useEffect } from "react";
 import fallbackImg from "../assets/images/PlAyer.png";
 import NavbarComponent from "../components/Navbar";
-import API_BASE_URL from "../Config.js";
+import { api } from "../Config";
+import { API_BASE_URL } from "../Utils/constants";
 
 const AdminRegister = () => {
   const [text, setText] = useState("");
@@ -45,7 +46,7 @@ const AdminRegister = () => {
   useEffect(() => {
     const fetchTeams = async () => {
       try {
-        const res = await axios.get(`${API_BASE_URL}/teams`);
+        const res = await api.get("/teams");
         setTeams(res.data);
       } catch (err) {
         console.error("Error fetching teams:", err);
@@ -115,7 +116,7 @@ const AdminRegister = () => {
     });
 
     try {
-      const res = await axios.post(`${API_BASE_URL}/add-player`, data, {
+      const res = await api.post("/add-player", data, {
         headers: { "Content-Type": "multipart/form-data" },
         withCredentials: true,
       });

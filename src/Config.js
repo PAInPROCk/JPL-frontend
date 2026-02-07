@@ -1,10 +1,6 @@
-// Config.js
-const api = process.env.REACT_APP_API_BASE_URL;
+import axios from "axios";
 
-const API_BASE_URL = api
-  ? api
-  : window.location.hostname === "localhost"
-  ? "http://localhost:5000"
-  : `http://${window.location.hostname}:5000`;
-
-export default API_BASE_URL;
+export const api = axios.create({
+  baseURL: "http://localhost:5000",
+  withCredentials: true,
+});

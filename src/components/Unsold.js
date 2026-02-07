@@ -3,7 +3,8 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import fallbackImg from "../assets/images/PlAyer.png";
 import axios from "axios";
-import API_BASE_URL from "../Config.js";
+import { api } from "../Config";
+import { API_BASE_URL } from "../Utils/constants";
 
 
 const Unsold = () => {
@@ -22,7 +23,7 @@ const Unsold = () => {
       if (!playerId) return;
 
       try {
-        const res = await axios.get(`${API_BASE_URL}/players/${playerId}`, {
+        const res = await api.get("/players/${playerId}", {
           withCredentials: true,
         });
         if (res.data) {
@@ -40,8 +41,8 @@ const Unsold = () => {
   useEffect(() => {
     const timer = setTimeout(() => {
       // Ask backend who this user is
-      axios
-        .get(`${API_BASE_URL}/check-auth`, { withCredentials: true })
+      api
+        .get("/check-auth", { withCredentials: true })
         .then((res) => {
           const role = res.data.user?.role;
           if (role === "admin") {

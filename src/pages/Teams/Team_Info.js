@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { fetchTeams } from "./TeamData";
 import fallbackImg from "../../assets/images/football-team_16848377.png";
-import API_BASE_URL from "../../Config.js";
+
+import { API_BASE_URL } from "../../Utils/constants";
 
 
 const Team_info = () => {

@@ -6,7 +6,8 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import io from "socket.io-client";
 import useSyncedTimer from "../hooks/useSyncedTimer";
-import API_BASE_URL from "../Config.js";
+import { api } from "../Config";
+import { API_BASE_URL } from "../Utils/constants";
 
 
 // Single socket instance (hook-like)
@@ -47,7 +48,7 @@ const Admin_auction = () => {
   // Load current auction player from API
   const loadPlayer = async () => {
     try {
-      const res = await axios.get(`${API_BASE_URL}/current-auction`, {
+      const res = await api.get("/current-auction", {
         withCredentials: true,
       });
 
@@ -86,7 +87,7 @@ const Admin_auction = () => {
 
     const setup = async () => {
       try {
-        const authRes = await axios.get(`${API_BASE_URL}/check-auth`, {
+        const authRes = await api.get("/check-auth", {
           withCredentials: true,
         });
 
@@ -275,8 +276,8 @@ const Admin_auction = () => {
   // Admin actions
   const startAuction = async () => {
     try {
-      const res = await axios.post(
-        `${API_BASE_URL}/start-auction`,
+      const res = await api.post(
+        "/start-auction",
         { mode: "random" },
         { withCredentials: true }
       );
@@ -294,8 +295,8 @@ const Admin_auction = () => {
 
   const nextPlayer = async () => {
     try {
-      const res = await axios.post(
-        `${API_BASE_URL}/next-auction`,
+      const res = await api.post(
+        "/next-auction",
         {},
         { withCredentials: true }
       );
@@ -307,8 +308,8 @@ const Admin_auction = () => {
 
   const markPlayerAsSold = async (id) => {
     try {
-      const res = await axios.post(
-        `${API_BASE_URL}/mark-sold`,
+      const res = await api.post(
+        "/mark-sold",
         { player_id: id },
         { withCredentials: true }
       );
@@ -321,8 +322,8 @@ const Admin_auction = () => {
   const handlePause = async () => {
     try {
       setIsPaused(true);
-      await axios.post(
-        `${API_BASE_URL}/pause-auction`,
+      await api.post(
+        "/pause-auction",
         {},
         { withCredentials: true }
       );
@@ -334,8 +335,8 @@ const Admin_auction = () => {
 
   const handleResume = async () => {
     try {
-      await axios.post(
-        `${API_BASE_URL}/resume-auction`,
+      await api.post(
+        "/resume-auction",
         {},
         { withCredentials: true }
       );
@@ -347,8 +348,8 @@ const Admin_auction = () => {
 
   const handleCancel = async () => {
     try {
-      await axios.post(
-        `${API_BASE_URL}/cancel-auction`,
+      await api.post(
+        "/cancel-auction",
         {},
         { withCredentials: true }
       );

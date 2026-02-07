@@ -2,9 +2,8 @@ import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import "./Navbar.css";
-import API_BASE_URL from "../Config.js";
+import { api } from "../Config";
 
-axios.defaults.withCredentials = true;
 
 const Navbar = () => {
   const [auth, setAuth] = useState({ authenticated: false, user: null, role: null });
@@ -16,8 +15,8 @@ const Navbar = () => {
   const isActive = (path) => location.pathname === path;
 
   useEffect(() => {
-    axios
-      .get(`${API_BASE_URL}/check-auth`)
+    api
+      .get("/check-auth")
       .then((res) => {
         setAuth({
           authenticated: res.data.authenticated,
@@ -40,7 +39,7 @@ const Navbar = () => {
   const handleClose = () => setExpanded(false);
 
   const handleLogout = () => {
-    axios.post(`${API_BASE_URL}/logout`)
+    api.post("/logout")
       .then(() => {
         setAuth({ authenticated: false, user: null, role: null });
         navigate("/login");

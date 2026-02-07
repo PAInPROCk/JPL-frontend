@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Login.css";
-import API_BASE_URL from "../Config.js";
-import axios from "axios";
-axios.defaults.withCredentials = true;
+import { api } from "../Config";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -12,15 +10,19 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
 
-  const handleLogin = async(e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
+    console.log("🔐 Login button clicked");
+
+
     if (!email || !password) {
       setError("Please fill all fields");
       return;
     }
+
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailPattern.test(email)) {
       setError("Invalid email format");
@@ -28,32 +30,40 @@ const Login = () => {
     }
 
     setLoading(true);
-    
-    try{
-      const res = await axios.post(
-        `${API_BASE_URL}/login`,
-        {email, password},
-        {withCredentials: true}
-      )
-      console.log("Login response:",res?.data);
-      if(res?.data?.authenticated){
+
+    try {
+      const res = await api.post(
+        "/login",
+        { email, password });
+
+      console.log("✅ Login API raw response:", res);
+      console.log("Login response:", res.data);
+      console.log("✅ authenticated:", res.data?.authenticated);
+      console.log("✅ role:", res.data?.role);
+
+      if(res.data?.authenticated){
         if(res.data.role === "admin"){
-            navigate("/admin");
-        } else if(res.data.role === "team"){
-          navigate("/home");
-        } else{
-          navigate("/");
+          console.log("➡️ Navigating to /admin");
+          navigate("/admin",{replace : true});
+        } else if (res.data.role === "team") {
+          console.log("➡️ Navigating to /home");
+          navigate("/home",{replace: true});
+        }else{
+          console.log("⚠️ Role unknown, navigating to /");
+          navigate("/", {replace: true});
         }
-      }else{
+      } else{
+        console.log("❌ Authentication failed according to response");
         setError("Authentication Failed");
       }
-    }catch(err){
-      console.error("Login Error: ",err.response?.data || err);
-      setError(err.response?.data?.error || "Login Failed");
+    } catch (err) {
+      console.error("Login Error:", err.response?.data || err);
+      setError(err.response?.data?.detail || "Login Failed");
     } finally {
       setLoading(false);
     }
   };
+
   useEffect(() => {
     if (error) {
       const timer = setTimeout(() => {
@@ -63,15 +73,35 @@ const Login = () => {
     }
   }, [error]);
 
+  useEffect(() => {
+  const checkAuth = async () => {
+    try {
+      const res = await api.get("/check-auth");
+      if (res.data.authenticated) {
+        if (res.data.role === "admin") {
+          navigate("/admin", { replace: true });
+        } else {
+          navigate("/home", { replace: true });
+        }
+      }
+    } catch {
+      // not logged in → stay on login
+    }
+  };
+
+  checkAuth();
+}, [navigate]);
+
+
   return (
     <div className="login-bg">
-        
-      <div className="container d-flex justify-content-center align-itmes-center vh-100 ">
+
+      <div className="container d-flex justify-content-center align-items-center vh-100 ">
         <form
           onSubmit={handleLogin}
           className="border border-black p-4 rounded shadow login-form text-color"
         >
-            {error && (
+          {error && (
             <div className="alert alert-danger mt-0" role="alert">
               {error}
             </div>
@@ -103,15 +133,17 @@ const Login = () => {
             >
               {showPassword ? "Hide" : "Show"}
             </button>
-            
+
           </div>
-          
+
           <button
             type="submit"
+            disabled={loading}
             className="btn btn-color border border-1 border-black w-100"
           >
-            {loading ? "Loging in...." : "Login"}
+            {loading ? "Logging in..." : "Login"}
           </button>
+
         </form>
       </div>
     </div>

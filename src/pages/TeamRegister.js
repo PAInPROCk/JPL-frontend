@@ -3,7 +3,7 @@ import axios from "axios";
 import { useState } from "react";
 import fallbackImg from "../assets/images/football-team_16848377.png"
 import NavbarComponent from "../components/Navbar";
-import API_BASE_URL from "../Config.js";
+import { api } from "../Config";
 
 const TeamRegister = () => {
 
@@ -74,8 +74,8 @@ const TeamRegister = () => {
     });
 
     try {
-      const res = await axios.post(
-        `${API_BASE_URL}/add-team`,
+      const res = await api.post(
+        "/add-team",
         data,
         {
           headers: { "Content-Type": "multipart/form-data" },

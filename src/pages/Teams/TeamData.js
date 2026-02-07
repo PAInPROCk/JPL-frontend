@@ -1,9 +1,9 @@
 import axios from "axios";
-import API_BASE_URL from "../../Config.js";
+import { api } from "../../Config";
 
 export const fetchTeams = async () => {
     try{
-        const response = await axios.get(`${API_BASE_URL}/teams`);
+        const response = await api.get("/teams");
         return response.data;
     }catch(error){
         console.error("Error Fetching Teams", error);
