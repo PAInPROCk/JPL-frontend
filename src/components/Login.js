@@ -2,21 +2,20 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Login.css";
 import { api } from "../Config";
+import { useAuth } from "../context/AuthContext";
 
 const Login = () => {
+  const { refreshAuth } = useAuth();   // ✅ correct place
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  const navigate = useNavigate();
-
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
-    console.log("🔐 Login button clicked");
-
 
     if (!email || !password) {
       setError("Please fill all fields");
@@ -32,28 +31,19 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const res = await api.post(
-        "/login",
-        { email, password });
+      const res = await api.post("/login", { email, password });
 
-      console.log("✅ Login API raw response:", res);
-      console.log("Login response:", res.data);
-      console.log("✅ authenticated:", res.data?.authenticated);
-      console.log("✅ role:", res.data?.role);
+      // console.log("Login response:", res.data);
 
-      if(res.data?.authenticated){
-        if(res.data.role === "admin"){
-          console.log("➡️ Navigating to /admin");
-          navigate("/admin",{replace : true});
-        } else if (res.data.role === "team") {
-          console.log("➡️ Navigating to /home");
-          navigate("/home",{replace: true});
-        }else{
-          console.log("⚠️ Role unknown, navigating to /");
-          navigate("/", {replace: true});
+      if (res.data.authenticated) {
+        await refreshAuth(); // 🔥 sync global auth state
+
+        if (res.data.role === "admin") {
+          navigate("/admin", { replace: true });
+        } else {
+          navigate("/home", { replace: true });
         }
-      } else{
-        console.log("❌ Authentication failed according to response");
+      } else {
         setError("Authentication Failed");
       }
     } catch (err) {
@@ -66,84 +56,60 @@ const Login = () => {
 
   useEffect(() => {
     if (error) {
-      const timer = setTimeout(() => {
-        setError("");
-      }, 2000);
+      const timer = setTimeout(() => setError(""), 2000);
       return () => clearTimeout(timer);
     }
   }, [error]);
 
-  useEffect(() => {
-  const checkAuth = async () => {
-    try {
-      const res = await api.get("/check-auth");
-      if (res.data.authenticated) {
-        if (res.data.role === "admin") {
-          navigate("/admin", { replace: true });
-        } else {
-          navigate("/home", { replace: true });
-        }
-      }
-    } catch {
-      // not logged in → stay on login
-    }
-  };
-
-  checkAuth();
-}, [navigate]);
-
-
   return (
     <div className="login-bg">
-
-      <div className="container d-flex justify-content-center align-items-center vh-100 ">
+      <div className="container d-flex justify-content-center align-items-center vh-100">
         <form
           onSubmit={handleLogin}
-          className="border border-black p-4 rounded shadow login-form text-color"
+          className="border border-black p-4 rounded shadow login-form"
         >
           {error && (
-            <div className="alert alert-danger mt-0" role="alert">
-              {error}
-            </div>
+            <div className="alert alert-danger">{error}</div>
           )}
+
           <h2 className="text-center mb-4">Login to JPL</h2>
+
           <div className="mb-3">
             <label>Email</label>
             <input
               type="email"
-              className="form-control border-black"
+              className="form-control"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
             />
           </div>
+
           <div className="mb-3">
             <label>Password</label>
             <input
               type={showPassword ? "text" : "password"}
-              className="form-control border-black"
+              className="form-control"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
             />
             <button
               type="button"
-              className="btn btn-outline-secondary btn-bg"
+              className="btn btn-sm btn-outline-secondary mt-1"
               onClick={() => setShowPassword(!showPassword)}
             >
               {showPassword ? "Hide" : "Show"}
             </button>
-
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="btn btn-color border border-1 border-black w-100"
+            className="btn btn-primary w-100"
           >
             {loading ? "Logging in..." : "Login"}
           </button>
-
         </form>
       </div>
     </div>
