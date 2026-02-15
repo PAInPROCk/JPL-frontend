@@ -3,32 +3,18 @@ import "./Admin_auction.css";
 import fallbackImg from "../assets/images/PlAyer.png";
 import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
-import io from "socket.io-client";
+import { socket } from "../../src/socket";
 import useSyncedTimer from "../hooks/useSyncedTimer";
 import { api } from "../Config";
 import { API_BASE_URL } from "../Utils/constants";
 
 
 // Single socket instance (hook-like)
-const useSocket = () => {
-  const socketRef = useRef();
 
-  if (!socketRef.current) {
-    socketRef.current = io(API_BASE_URL, {
-      withCredentials: true,
-      autoConnect: false,
-      transports: ["websocket", "polling"],
-    });
-  }
-
-  return socketRef.current;
-};
 
 const Admin_auction = () => {
   const [player, setPlayer] = useState(null);
   const [notifications, setNotifications] = useState([]);
-  const [auctionData, setAuctionData] = useState(null);
   const [timeLeft, setTimeLeft] = useState(0);
   const [loading, setLoading] = useState(true);
   const [auctionActive, setAuctionActive] = useState(false);
@@ -40,7 +26,6 @@ const Admin_auction = () => {
     )
   );
   const navigate = useNavigate();
-  const socket = useSocket();
 
   // Keeps timer in sync with server events
   useSyncedTimer(socket, setTimeLeft, isPaused);
@@ -83,29 +68,18 @@ const Admin_auction = () => {
   useEffect(() => {
     let mounted = true;
 
-    socket.connect();
-
     const setup = async () => {
       try {
-        const authRes = await api.get("/check-auth", {
-          withCredentials: true,
-        });
-
-        if (!authRes.data.authenticated || authRes.data.role !== "admin") {
-          navigate("/");
-          return;
-        }
 
         await loadPlayer();
 
-        socket.emit("join_auction", {});
+        socket.emit("admin_join", {});
 
         // Auction started
         socket.on("auction_started", (data) => {
           setAuctionActive(true);
           setNotifications([]);
           setTimeLeft(Number(data.time_left ?? data.remaining_seconds ?? 0));
-          loadPlayer();
         });
 
         // Pause
@@ -146,97 +120,50 @@ const Admin_auction = () => {
 
         // MAIN REAL-TIME AUCTION UPDATE
         socket.on("auction_update", (data) => {
-          // time / pause
-          setTimeLeft(
-            data.time_left ?? data.remaining_seconds ?? data.timeLeft ?? 0
-          );
+          if (!data) return;
+
+          // ⏱ timer + pause
+          setTimeLeft(Number(data.time_left ?? 0));
           setIsPaused(Boolean(data.paused));
+          setAuctionActive(data.status === "auction_active");
 
-          // If server sent a full player object, use it but preserve/overwrite current_bid
+          // 👤 player (single source)
           if (data.player) {
-            const incomingPlayer = data.player;
-            const incomingCurrent =
-              data.currentBid ??
-              data.current_bid ??
-              data.highest_bid?.bid_amount ??
-              incomingPlayer.current_bid ??
-              incomingPlayer.base_price ??
-              0;
-            setPlayer((prev) => ({
-              ...(incomingPlayer || prev || {}),
-              current_bid: incomingCurrent,
-            }));
-          }
-
-          // If server sent only highest_bid (live bid), update player.current_bid and notifications
-          if (data.highest_bid) {
-            const hb = data.highest_bid;
-            // Update player.current_bid safely
-            setPlayer((prev) => {
-              if (!prev) return { current_bid: hb.bid_amount, ...{} };
-              return { ...prev, current_bid: hb.bid_amount };
+            setPlayer({
+              ...data.player,
+              current_bid:
+                data.currentBid ??
+                data.highest_bid?.bid_amount ??
+                data.player.base_price ??
+                0,
+              nextSteps: data.nextSteps ?? [],
+              teamBalance: data.teamBalance ?? 0,
+              canBid: Boolean(data.canBid),
             });
-
-            // notifications from backend + audio
-            if (Array.isArray(data.history)) {
-              const newHistory = data.history;
-
-              setNotifications((prev) => {
-                const prevLast = prev[prev.length - 1];
-                const newLast = newHistory[newHistory.length - 1];
-
-                const isNewBid =
-                  newLast &&
-                  (!prevLast ||
-                    prevLast.bid_amount !== newLast.bid_amount ||
-                    prevLast.team_id !== newLast.team_id ||
-                    prevLast.bid_time !== newLast.bid_time);
-
-                if (isNewBid) {
-                  setFlashIndex(newHistory.length - 1);
-                  try {
-                    audioRef.current.play();
-                  } catch {}
-                  setTimeout(() => setFlashIndex(null), 1500);
-                }
-
-                return newHistory;
-              });
-            }
           }
 
-          // If history or nextSteps come in, refresh them
-          if (Array.isArray(data.history) && data.history.length > 0) {
-            setNotifications(data.history);
+          // 🔔 notifications (single place)
+          if (Array.isArray(data.history)) {
+            setNotifications((prev) => {
+              const prevLast = prev[prev.length - 1];
+              const newLast = data.history[data.history.length - 1];
+
+              const isNewBid =
+                newLast &&
+                (!prevLast ||
+                  prevLast.bid_amount !== newLast.bid_amount ||
+                  prevLast.team_id !== newLast.team_id ||
+                  prevLast.bid_time !== newLast.bid_time);
+
+              if (isNewBid) {
+                setFlashIndex(data.history.length - 1);
+                try { audioRef.current.play(); } catch { }
+                setTimeout(() => setFlashIndex(null), 1500);
+              }
+
+              return data.history;
+            });
           }
-
-          if (data.nextSteps)
-            setPlayer((prev) => ({
-              ...(prev || {}),
-              nextSteps: data.nextSteps,
-            }));
-          if (typeof data.teamBalance !== "undefined")
-            setPlayer((prev) => ({
-              ...(prev || {}),
-              teamBalance: data.teamBalance,
-            }));
-        });
-
-        // Bid placed (separate push event)
-        socket.on("bid_placed", (payload) => {
-          console.log("🔔 ADMIN RECEIVED bid_placed:", payload);
-
-          setPlayer((prev) =>
-            prev ? { ...prev, current_bid: payload.bid_amount } : prev
-          );
-
-          setNotifications((prev) => [
-            ...prev,
-            {
-              team: payload.team_name,
-              amount: payload.bid_amount,
-            },
-          ]);
         });
 
         // Auction cleared
@@ -258,15 +185,17 @@ const Admin_auction = () => {
 
     return () => {
       mounted = false;
-      socket.removeAllListeners();
-      try {
-        socket.disconnect();
-      } catch (e) {
-        // ignore disconnect errors
-      }
+      socket.off("auction_started");
+      socket.off("auction_paused");
+      socket.off("auction_resumed");
+      socket.off("auction_ended");
+      socket.off("load_next_player");
+      socket.off("auction_update");
+      socket.off("bid_placed");
+      socket.off("auction_cleared");
     };
     // eslint-disable-next-line
-  }, [isPaused, navigate]);
+  }, [navigate]);
 
   useEffect(() => {
     const el = document.querySelector(".notifications");
@@ -497,17 +426,16 @@ const Admin_auction = () => {
                         i === notifications.length - 1
                           ? "gold"
                           : i === notifications.length - 2
-                          ? "silver"
-                          : i === notifications.length - 3
-                          ? "bronze"
-                          : "";
+                            ? "silver"
+                            : i === notifications.length - 3
+                              ? "bronze"
+                              : "";
 
                       return (
                         <p
                           key={i}
-                          className={`${
-                            flashIndex === i ? "flash" : ""
-                          } ${rankClass}`}
+                          className={`${flashIndex === i ? "flash" : ""
+                            } ${rankClass}`}
                         >
                           🕒 {note.bid_time} — {note.team_name} bid ₹
                           {note.bid_amount}

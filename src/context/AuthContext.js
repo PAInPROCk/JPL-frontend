@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { api } from "../Config";
+import { connectSocket, disconnectSocket } from "../socket";
 
 const AuthContext = createContext(null);
 
@@ -12,22 +13,29 @@ export const AuthProvider = ({ children }) => {
   const refreshAuth = async () => {
     try {
       const res = await api.get("/check-auth");
-      // console.log("🔐 AuthContext /check-auth:", res.data);
 
       if (res.data.authenticated) {
         setIsAuthenticated(true);
         setRole(res.data.role);
         setUser(res.data.user || null);
+
+        // 🔌 connect socket ONLY after auth
+        connectSocket();
       } else {
         setIsAuthenticated(false);
         setRole(null);
         setUser(null);
+
+        disconnectSocket();
       }
     } catch (err) {
       console.error("🔐 AuthContext error:", err);
+
       setIsAuthenticated(false);
       setRole(null);
       setUser(null);
+
+      disconnectSocket();
     } finally {
       setLoading(false);
     }
@@ -35,18 +43,21 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      await api.post("/logout"); // we’ll add this later
-    } catch (err){
-      console.error("Logout error:",err);
-    } finally{
-    setIsAuthenticated(false);
-    setRole(null);
-    setUser(null);
+      await api.post("/logout");
+    } catch (err) {
+      console.error("Logout error:", err);
+    } finally {
+      disconnectSocket();
+
+      setIsAuthenticated(false);
+      setRole(null);
+      setUser(null);
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    refreshAuth(); // 🔥 ONLY place check-auth is called
+    refreshAuth(); // ✅ ONLY place check-auth runs on boot
   }, []);
 
   return (

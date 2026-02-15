@@ -3,24 +3,12 @@ import "./Auction.css";
 import { useNavigate } from "react-router-dom";
 import fallbackImg from "../../assets/images/PlAyer.png";
 import { useEffect, useState, useRef } from "react";
-import axios from "axios";
-import io from "socket.io-client";
+import { socket } from "../../socket";
 import useSyncedTimer from "../../hooks/useSyncedTimer";
 import { api } from "../../Config";
 import { API_BASE_URL } from "../../Utils/constants";
+import { useAuth } from "../../context/AuthContext";
 
-// Always use one socket instance
-const useSocket = () => {
-  const socketRef = useRef();
-  if (!socketRef.current) {
-    socketRef.current = io(API_BASE_URL, {
-      withCredentials: true,
-      autoConnect: false,
-      transports: ["websocket", "polling"],
-    });
-  }
-  return socketRef.current;
-};
 
 const Auction = () => {
   const [auctionData, setAuctionData] = useState(null);
@@ -32,9 +20,9 @@ const Auction = () => {
   const [teamBalance, setTeamBalance] = useState(0);
   const [nextSteps, setNextSteps] = useState([]);
   const [isPaused, setIsPaused] = useState(false);
+  const { loading: authLoading, user } = useAuth();
 
   const navigate = useNavigate();
-  const socket = useSocket();
   const audioRef = useRef(
     new Audio(
       require("../../assets/Sounds/mixkit-software-interface-start-2574.wav")
@@ -46,80 +34,68 @@ const Auction = () => {
   const teamIdRef = useRef(null);
   const teamNameRef = useRef("Unknown Team");
 
-  // Load initial data (auth + current auction)
-  const loadInitial = async () => {
-    try {
-      setLoading(true);
+  // SOCKET HANDLERS
+  useEffect(() => {
+    if (authLoading) return;
+    if (!user) return;
+    let mounted = true;
 
-      const authRes = await api.get("/check-auth", {
-        withCredentials: true,
-      });
-      if (!authRes.data.authenticated) {
-        navigate("/");
-        return false;
-      }
+    const startRealtime = async () => {
+      try{
+        setLoading(true);
 
-      teamIdRef.current = authRes.data.user?.team_id || null;
-      teamNameRef.current = authRes.data.user?.team_name || "Unknown Team";
+      // 🔐 auth is already guaranteed by ProtectedRoute
+      teamIdRef.current = user.team_id;
+      teamNameRef.current = user.team_name || "Unknown Team";
 
       const auctionRes = await api.get("/current-auction", {
         withCredentials: true,
       });
 
+      if (!mounted) return;
+
       if (auctionRes.data?.status === "auction_active") {
         const data = auctionRes.data;
+
         setAuctionData(data);
         setNotifications(data.history || []);
         setNextSteps(data.nextSteps || []);
         setTeamBalance(data.teamBalance || 0);
         setCanBid(Boolean(data.canBid));
 
-        const seed =
-          data.remaining_seconds || data.time_left || data.timeLeft || 0;
-        setTimeLeft(Number(seed));
+        setTimeLeft(
+          Number(
+            data.remaining_seconds ??
+            data.time_left ??
+            data.timeLeft ??
+            0
+          )
+        );
       } else {
         setAuctionData(null);
       }
 
-      return true;
-    } catch (err) {
-      console.error("Initial load failed:", err);
-      navigate("/");
-      return false;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // SOCKET HANDLERS
-  useEffect(() => {
-    let mounted = true;
-    socket.connect();
-
-    const startRealtime = async () => {
-      const ok = await loadInitial();
-      if (!ok) return;
-
-      socket.emit("join_auction", {
-        team_id: teamIdRef.current,
-        team_name: teamNameRef.current,
-        purse: teamBalance,
-      });
-
-      // MAIN LIVE UPDATE
+      const purse = auctionRes.data?.teamBalance ?? 0;
+      setTeamBalance(purse);
+        socket.emit("join_auction", {
+          team_id: teamIdRef.current,
+          team_name: teamNameRef.current,
+          purse,
+        });
+        // MAIN LIVE UPDATE
       socket.on("auction_update", (data) => {
         if (!mounted) return;
 
         // Reset notifications if new player arrives
-        setAuctionData((prev) => {
-          if (prev?.player?.id !== data.player?.id) {
+        setAuctionData(prev => {
+        if (prev?.player?.id !== data.player?.id) {
             setNotifications([]);
             setFlashIndex(null);
           }
           return data;
         });
 
-        setAuctionData(data);
+
 
         setTimeLeft(
           Number(
@@ -148,7 +124,7 @@ const Auction = () => {
               setFlashIndex(newHistory.length - 1);
               try {
                 audioRef.current.play();
-              } catch {}
+              } catch { }
               setTimeout(() => setFlashIndex(null), 1500);
             }
 
@@ -257,26 +233,34 @@ const Auction = () => {
       socket.on("bid_rejected", (msg) => {
         alert(msg.error);
       });
+      }catch(err){
+        console.error("Initial load failed:", err);
+      } finally{
+        if (mounted) setLoading(false);
+      }
     };
 
     startRealtime();
 
     return () => {
       mounted = false;
-      socket.removeAllListeners();
-      socket.disconnect();
+      socket.off("auction_update");
+      socket.off("auction_started");
+      socket.off("auction_paused");
+      socket.off("auction_resumed");
+      socket.off("timer_update");
+      socket.off("auction_cleared");
+      socket.off("auction_ended");
+      socket.off("bid_placed");
+      socket.off("bid_rejected");
     };
-  }, []);
+  }, [authLoading, user]);
 
   useEffect(() => {
     const el = document.querySelector(".notifications");
     if (el) el.scrollTop = el.scrollHeight;
   }, [notifications]);
 
-  useEffect(() => {
-    const el = document.querySelector(".notifications");
-    if (el) el.scrollTop = el.scrollHeight;
-  }, [notifications]);
 
   const formatTime = (seconds) => {
     const s = Math.max(0, Math.floor(Number(seconds) || 0));
@@ -436,17 +420,16 @@ const Auction = () => {
                     i === notifications.length - 1
                       ? "gold"
                       : i === notifications.length - 2
-                      ? "silver"
-                      : i === notifications.length - 3
-                      ? "bronze"
-                      : "";
+                        ? "silver"
+                        : i === notifications.length - 3
+                          ? "bronze"
+                          : "";
 
                   return (
                     <p
                       key={i}
-                      className={`${
-                        flashIndex === i ? "flash" : ""
-                      } ${rankClass}`}
+                      className={`${flashIndex === i ? "flash" : ""
+                        } ${rankClass}`}
                     >
                       🕒 {note.bid_time} — {note.team_name} bid ₹
                       {note.bid_amount}
