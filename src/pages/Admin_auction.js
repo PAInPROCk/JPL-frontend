@@ -74,7 +74,43 @@ const Admin_auction = () => {
         await loadPlayer();
 
         socket.emit("admin_join", {});
+        socket.emit("join_auction");
 
+        socket.on("auction_state", (data) => {
+          if (!data) return;
+
+          if (data.status === "auction_active"){
+            setPlayer({
+              ...data.player,
+              current_bid:
+               data.highest_bid?.bid_amount ??
+               data.player.base_price ??
+               0
+            });
+
+            setAuctionActive(true);
+          }else{
+            setPlayer(null);
+            setAuctionActive(false);
+          }
+        });
+
+        socket.on("bid_placed", (data) => {
+            setNotifications((prev) => [
+              ...prev,
+              {
+                team_id: data.team_id,
+                team_name: data.team_name,
+                bid_amount: data.bid_amount,
+                bid_time: new Date().toISOString()
+              }
+            ]);
+
+            setPlayer((prev) => ({
+              ...prev,
+              current_bid: data.bid_amount
+            }));
+        });
         // Auction started
         socket.on("auction_started", (data) => {
           setAuctionActive(true);
@@ -114,9 +150,9 @@ const Admin_auction = () => {
           }
         });
 
-        socket.on("load_next_player", (data) => {
-          nextPlayer();
-        });
+        // socket.on("load_next_player", (data) => {
+        //   nextPlayer();
+        // });
 
         // MAIN REAL-TIME AUCTION UPDATE
         socket.on("auction_update", (data) => {
@@ -189,7 +225,7 @@ const Admin_auction = () => {
       socket.off("auction_paused");
       socket.off("auction_resumed");
       socket.off("auction_ended");
-      socket.off("load_next_player");
+      // socket.off("load_next_player");
       socket.off("auction_update");
       socket.off("bid_placed");
       socket.off("auction_cleared");
