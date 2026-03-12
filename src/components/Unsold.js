@@ -6,14 +6,13 @@ import axios from "axios";
 import { api } from "../Config";
 import { API_BASE_URL } from "../Utils/constants";
 
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "http://localhost:5000";
 
 const Unsold = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [player, setPlayer] = useState(location.state?.player || null);
-  const [basePrice, setBasePrice] = useState(
-    location.state?.base_price || null
-  );
+  const [basePrice, setBasePrice] = useState(location.state?.base_price || null);
 
   // 🧠 If player data missing (e.g. page reloaded), fetch it by ID
   useEffect(() => {
@@ -87,21 +86,13 @@ const Unsold = () => {
 
   return (
     <div className="bg">
-      
       <div className="unsold-page container text-white py-4">
-        <p className="text-muted mt-3 text-custom">
-          Redirecting back to auction page in 10 seconds...
-        </p>
         <div className="row align-items-center">
           {/* Player Image */}
           <div className="col-md-4 text-center">
             <div className="unsold-img-wrapper">
               <img
-                src={
-                  player.image_path
-                    ? `${API_BASE_URL}/${player.image_path}`
-                    : fallbackImg
-                }
+                src={player.image_path ? `${API_BASE_URL}/${player.image_path}` : fallbackImg}
                 alt={player.name}
                 className="img-fluid rounded-circle border border-4"
                 onError={(e) => (e.target.src = fallbackImg)}
