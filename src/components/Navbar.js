@@ -1,13 +1,10 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import axios from "axios";
 import "./Navbar.css";
-
-axios.defaults.withCredentials = true;
+import { useAuth } from "../context/AuthContext";
 
 const Navbar = () => {
-  const API_BASE_URL = process.env.REACT_API_BASE_URL || "http://localhost:5000";
-  const [auth, setAuth] = useState({ authenticated: false, user: null, role: null });
+  const { isAuthenticated, role, logout } = useAuth();
   const [expanded, setExpanded] = useState(false);
   const navRef = useRef();
   const navigate = useNavigate();
@@ -16,17 +13,6 @@ const Navbar = () => {
   const isActive = (path) => location.pathname === path;
 
   useEffect(() => {
-    axios
-      .get(`${API_BASE_URL}/check-auth`)
-      .then((res) => {
-        setAuth({
-          authenticated: res.data.authenticated,
-          user: res.data.user,
-          role: res.data.role,
-        });
-      })
-      .catch(() => setAuth({ authenticated: false, user: null, role: null }));
-
     const handleClickOutside = (event) => {
       if (expanded && navRef.current && !navRef.current.contains(event.target)) {
         setExpanded(false);
@@ -39,18 +25,15 @@ const Navbar = () => {
   const handleToggle = () => setExpanded((prev) => !prev);
   const handleClose = () => setExpanded(false);
 
-  const handleLogout = () => {
-    axios.post(`${API_BASE_URL}/logout`)
-      .then(() => {
-        setAuth({ authenticated: false, user: null, role: null });
-        navigate("/login");
-      });
+  const handleLogout = async () => {
+    await logout();           // ✅ context handles state
+    navigate("/login");       // ✅ redirect
   };
-
+  console.log("Auth State:", { isAuthenticated, role });
   return (
     <header ref={navRef}>
       <nav className="navbar fixed-top navbar-expand-lg navbar-dark bg-primary px-4">
-        <Link className="navbar-brand d-flex align-items-center" to="/home">
+        <Link className="navbar-brand d-flex align-items-center" to="/">
           <strong className="me-2">JPL</strong>
           <img
             src="/assets/images/cricket.png"
@@ -65,65 +48,53 @@ const Navbar = () => {
           className={`navbar-toggler ${expanded ? "" : "collapsed"}`}
           type="button"
           onClick={handleToggle}
-          aria-controls="navbarContent"
-          aria-expanded={expanded}
-          aria-label="Toggle navigation"
         >
           <span className="navbar-toggler-icon"></span>
         </button>
 
-        <div className={`collapse navbar-collapse ${expanded ? "show" : ""}`} id="navbarContent">
+        <div className={`collapse navbar-collapse ${expanded ? "show" : ""}`}>
           <ul className="navbar-nav ms-auto" onClick={handleClose}>
 
-            {/* Teams, Players always visible */}
             <li className="nav-item">
               <Link className={`nav-link ${isActive("/teams") ? "active" : ""}`} to="/teams">
                 Teams
               </Link>
             </li>
+
             <li className="nav-item">
               <Link className={`nav-link ${isActive("/players") ? "active" : ""}`} to="/players">
                 Players
               </Link>
             </li>
 
-            {/* Registration always for all */}
             <li className="nav-item">
               <Link className={`nav-link ${isActive("/register") ? "active" : ""}`} to="/register">
                 Registration
               </Link>
             </li>
 
-            {/* Auction: enabled if logged in, disabled for guest */}
+            {/* Auction */}
             <li className="nav-item">
-              {auth.authenticated ? (
+              {isAuthenticated ? (
                 <Link className={`nav-link ${isActive("/Auction_rule") ? "active" : ""}`} to="/Auction_rule">
                   Auction
                 </Link>
               ) : (
-                <span className="nav-link disabled" style={{ color: "#aaa", cursor: "not-allowed" }}>
-                  Auction
-                </span>
+                <span className="nav-link disabled">Auction</span>
               )}
             </li>
 
-            {/* Admin: visible and enabled only for role 'admin' */}
-            {auth.authenticated && auth.role === "admin" ? (
+            {/* Admin */}
+            {isAuthenticated && role === "admin" && (
               <li className="nav-item">
                 <Link className={`nav-link ${isActive("/admin") ? "active" : ""}`} to="/admin">
                   Admin
                 </Link>
               </li>
-            ) : (
-              <li className="nav-item">
-                <span className="nav-link disabled" style={{ color: "#aaa", cursor: "not-allowed" }}>
-                  Admin
-                </span>
-              </li>
             )}
 
-            {/* Login or Logout */}
-            {!auth.authenticated ? (
+            {/* Login / Logout */}
+            {!isAuthenticated ? (
               <li className="nav-item">
                 <Link className={`nav-link ${isActive("/login") ? "active" : ""}`} to="/login">
                   Login

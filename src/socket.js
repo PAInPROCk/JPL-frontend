@@ -1,10 +1,30 @@
-import {io} from "socket.io-client";
+import { io } from "socket.io-client";
 
+const SOCKET_URL =
+  process.env.REACT_APP_API_BASE_URL || "http://localhost:5000";
 
-const URL = process.env.APP_BASE_URL || "http://127.0.0.1:5000";
-const socket = io(URL, {
-    withCredentials: true,
-    autoConnect: false,
+export const socket = io(SOCKET_URL, {
+  withCredentials: true,
+  autoConnect: false,
+  transports: ["websocket"],
 });
 
-export default socket;
+/**
+ * Connect socket after successful login / auth refresh
+ */
+export const connectSocket = () => {
+  if (!socket.connected) {
+    console.log("🔌 Connecting socket...");
+    socket.connect();
+  }
+};
+
+/**
+ * Disconnect socket on logout
+ */
+export const disconnectSocket = () => {
+  if (socket.connected) {
+    console.log("🔌 Disconnecting socket...");
+    socket.disconnect();
+  }
+};

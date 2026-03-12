@@ -3,6 +3,8 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import fallbackImg from "../assets/images/PlAyer.png";
 import axios from "axios";
+import { api } from "../Config";
+import { API_BASE_URL } from "../Utils/constants";
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "http://localhost:5000";
 
@@ -20,7 +22,7 @@ const Unsold = () => {
       if (!playerId) return;
 
       try {
-        const res = await axios.get(`${API_BASE_URL}/players/${playerId}`, {
+        const res = await api.get("/players/${playerId}", {
           withCredentials: true,
         });
         if (res.data) {
@@ -37,10 +39,35 @@ const Unsold = () => {
   // 🕒 Auto return to auction after 10 seconds
   useEffect(() => {
     const timer = setTimeout(() => {
-      navigate("/Admin_auction");
-    }, 10000);
+      // Ask backend who this user is
+      api
+        .get("/check-auth", { withCredentials: true })
+        .then((res) => {
+          const role = res.data.user?.role;
+          if (role === "admin") {
+            navigate("/Admin_auction");
+          } else if (role === "team") {
+            navigate("/auction");
+          } else {
+            navigate("/");
+          }
+        })
+        .catch(() => navigate("/"));
+    }, 10000)
+
     return () => clearTimeout(timer);
   }, [navigate]);
+
+  useEffect(() => {
+  const audio = new Audio(require("../assets/Sounds/Fail/fail-234710.mp3"));
+
+  const timer = setTimeout(() => {
+    audio.play().catch(() => {});
+  }, 1500);
+
+  return () => clearTimeout(timer);
+}, []);
+
 
   // 🧩 If still no player info
   if (!player) {

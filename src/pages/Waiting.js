@@ -2,29 +2,36 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Waiting.css";
 import Spinner from "../components/Spinner";
-import socket from "../socket";
-import axios from "axios";
+import { socket } from "../socket";
+import { api } from "../Config";
+import { useAuth } from "../context/AuthContext";
+
+
 
 const Waiting = () => {
   const navigate = useNavigate();
-  const API_BASE_URL = process.env.REACT_API_BASE_URL || "http://localhost:5000";
   const [checking, setChecking] = useState(true);
+  const { isAuthenticated, user, loading } = useAuth();
+  
+  
 
   useEffect(() => {
+    if(loading || !user)return;
+    let mounted = true;
     // 1️⃣ Check if auction is already active on page load
     const checkAuction = async () => {
       try {
-        const res = await axios.get(`${API_BASE_URL}/auction-status`, {
+        const res = await api.get("/auction-status", {
           withCredentials: true,
         });
 
-        if (res.data.active) {
+        if (mounted && res.data.active) {
           navigate("/auction");
         }
       } catch (err) {
         console.error("Error checking auction:", err);
       } finally {
-        setChecking(false);
+        if(mounted) setChecking(false);
       }
     };
 
@@ -40,10 +47,11 @@ const Waiting = () => {
 
     // Cleanup
     return () => {
+      mounted = false;
       socket.off("auction_started");
       clearInterval(interval);
     };
-  }, [navigate]);
+  }, [loading, user, navigate]);
 
   if (checking)
     return (

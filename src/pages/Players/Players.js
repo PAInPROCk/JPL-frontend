@@ -13,7 +13,7 @@ const Players = () => {
   useEffect(() => {
         const loadPlayers = async () =>{
             const data = await fetchPlayers();
-            setPlayers(data);
+            setPlayers(data.players);
             setLoading(false);
         };
     loadPlayers();

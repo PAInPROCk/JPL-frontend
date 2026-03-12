@@ -57,5 +57,4 @@ const Home = () => {
   );
 };
 
-console.log("Home")
 export default Home;

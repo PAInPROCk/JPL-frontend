@@ -5,6 +5,7 @@ import jpl3 from "../../assets/images/jpl3.png";
 import Navbar from "../../components/Navbar";
 
 const HomePage = () => {
+      
   return (
     <>
       <Navbar/>

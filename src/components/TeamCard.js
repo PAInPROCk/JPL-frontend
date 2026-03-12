@@ -1,9 +1,9 @@
 import fallbackImg from "../assets/images/football-team_16848377.png"; // your alt image
 import { useNavigate} from "react-router-dom";
+import { API_BASE_URL } from "../Utils/constants";
 
 const TeamCard = ({ team }) => {
   const navigate = useNavigate();
-  const API_BASE_URL = process.env.APP_BASE_URL || "http://localhost:5000";
   const handleClick = () => {
     navigate(`/team_info/${team.id}`);
   };

@@ -29,6 +29,7 @@
 .info-box.red{
   width: 250px;
 }
+
 /* Label styles */
 .info-label {
   padding: 8px 12px;
@@ -47,7 +48,6 @@
   padding: 5px;
   border-radius: 12px;
 }
-
 
 .current-price{
   width: 300px;
@@ -82,9 +82,7 @@
 .btn-red-custom{
   background: #ef4444;
   color: white;
-  border: 2px;
-  border-style: groove;
-  border-color: black;
+  border: 2px groove black;
   width: 100px;
   height: 90px;
   border-radius: 45%;
@@ -94,9 +92,7 @@
 }
 
 .btn-yellow-custom{
-  border: 2px;
-  border-color: black;
-  border-style: groove;
+  border: 2px groove black;
   border-radius: 45%;
   color: white;
   font-weight: bold;
@@ -107,9 +103,7 @@
 }
 
 .btn-green-custom{
-  border: 2px;
-  border-color: black;
-  border-style: groove;
+  border: 2px groove black;
   border-radius: 45%;
   color: white;
   font-weight: bold;
@@ -120,8 +114,6 @@
 }
 
 .btn-black-custom{
-  border: 5px;
-  border-color: black;
   border-radius: 35%;
   color: white;
   font-weight: bold;
@@ -131,8 +123,6 @@
 }
 
 .btn-blue-custom{
-  border: 5px;
-  border-color: black;
   border-radius: 35%;
   color: white;
   font-weight: bold;
@@ -141,11 +131,67 @@
   width: 90px;
 }
 
-.btn-yellow-custom:hover{background: #ffc109;}
-.bid-btn.red:hover { background: #b91c1c; }
+/* ==============================
+   NOTIFICATIONS (FIXED VERSION)
+   ============================== */
 
-
-.notifications {
-  background: rgba(0, 0, 0, 0.8);
+/* Outer notification box – full width & fixed */
+.notifications-container {
+  background: rgba(0, 0, 0, 0.85);
+  border-radius: 12px;
+  padding: 12px;
+  margin-top: 12px;
   color: white;
+}
+
+/* Title stays fixed on top */
+.notifications-title {
+  margin: 0 0 10px 0;
+  font-size: 18px;
+  position: sticky;
+  border-radius: 10px;
+  top: 0;
+  background: rgba(0,0,0,0.85);
+  padding: 5px 0;
+  z-index: 2;
+}
+
+/* Only this part scrolls */
+.notifications-list {
+  max-height: 105px;
+  overflow-y: auto;
+  padding-right: 6px;
+}
+
+/* Scrollbar */
+.notifications-list::-webkit-scrollbar {
+  width: 6px;
+}
+.notifications-list::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.4);
+  border-radius: 10px;
+}
+
+/* Rank colors */
+.gold {
+  color: gold;
+  font-weight: bold;
+}
+.silver {
+  color: silver;
+  font-weight: bold;
+}
+.bronze {
+  color: #cd7f32;
+  font-weight: bold;
+}
+
+/* Flash highlight animation */
+.flash {
+  animation: flashAnim 0.7s ease-out;
+}
+
+@keyframes flashAnim {
+  0% { background: rgba(255,255,0,0.25); }
+  100% { background: transparent; }
 }
