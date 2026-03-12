@@ -29,7 +29,7 @@ const Navbar = () => {
     await logout();           // ✅ context handles state
     navigate("/login");       // ✅ redirect
   };
-
+  console.log("Auth State:", { isAuthenticated, role });
   return (
     <header ref={navRef}>
       <nav className="navbar fixed-top navbar-expand-lg navbar-dark bg-primary px-4">

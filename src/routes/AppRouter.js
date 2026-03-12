@@ -38,7 +38,7 @@ const AppRouter = () => {
 
       {/* PUBLIC (no guard) */}
       <Route path="/auction" element={<Auction />} />
-      <Route path="/teams" element={<Teams />} />
+      <Route path="/teams" element={<Teams/>} />
       <Route path="/players" element={<Players />} />
       <Route path="/player_info/:id" element={<Player_info />} />
       <Route path="/team_info/:id" element={<Team_Info />} />

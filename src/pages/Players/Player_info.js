@@ -27,7 +27,7 @@ const Player_info = () => {
   useEffect(() => {
     const loadPlayer = async ()=>{
       const allPlayers = await fetchPlayers();
-      const foundPlayer = allPlayers.find((p) => p.player_id === parseInt(id));
+      const foundPlayer = allPlayers?.find((p) => p.player_id === parseInt(id));
       setPlayer(foundPlayer);
       setLoading(false);
     };
@@ -123,7 +123,7 @@ const Player_info = () => {
                   <div className="d-flex gap-3 mt-2 flex-wrap">
                     
                      {player.teams_played
-                      ? player.teams_played.split(",").map((team, i) => (
+                      ? player.teams_played?.split(",").map((team, i) => (
                           <div key={i} className="text-center">
                           <img
                             key={i}

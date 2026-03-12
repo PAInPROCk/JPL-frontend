@@ -17,9 +17,9 @@ const Admin = () => {
 
   const requireAdmin = async (nextPath, extraState = {}) => {
     try {
-      const res = await api.get("/check-auth");
-      if (res.data.authenticated && res.data.role === "admin") {
-        navigate(nextPath, { state: extraState });
+      const res = await api.get("/check-auth", {withCredentials: true});
+      if (res.data.authenticated && res.data.user?.role === "admin") {
+        navigate(nextPath,  extraState );
       } else {
         alert("Access denied: admin login required");
         navigate("/"); // Or show an error modal

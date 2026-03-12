@@ -16,7 +16,7 @@ export const AuthProvider = ({ children }) => {
 
       if (res.data.authenticated) {
         setIsAuthenticated(true);
-        setRole(res.data.role);
+        setRole(res.data.user.role);
         setUser(res.data.user || null);
 
         // 🔌 connect socket ONLY after auth

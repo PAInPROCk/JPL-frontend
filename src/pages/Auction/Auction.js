@@ -41,201 +41,206 @@ const Auction = () => {
     let mounted = true;
 
     const startRealtime = async () => {
-      try{
+      try {
         setLoading(true);
 
-      // 🔐 auth is already guaranteed by ProtectedRoute
-      teamIdRef.current = user.team_id;
-      teamNameRef.current = user.team_name || "Unknown Team";
+        // 🔐 auth is already guaranteed by ProtectedRoute
+        teamIdRef.current = user.team_id;
+        teamNameRef.current = user.team_name || "Unknown Team";
 
-      const auctionRes = await api.get("/current-auction", {
-        withCredentials: true,
-      });
+        const auctionRes = await api.get("/current-auction", {
+          withCredentials: true,
+        });
 
-      if (!mounted) return;
+        if (!mounted) return;
 
-      if (auctionRes.data?.status === "auction_active") {
-        const data = auctionRes.data;
+        if (auctionRes.data?.status === "auction_active") {
+          const data = auctionRes.data;
 
-        setAuctionData(data);
-        setNotifications(data.history || []);
-        setNextSteps(data.nextSteps || []);
-        setTeamBalance(data.teamBalance || 0);
-        setCanBid(Boolean(data.canBid));
+          setAuctionData(data);
+          setNotifications(data.history || []);
+          setNextSteps(data.nextSteps || []);
+          setTeamBalance(data.teamBalance || 0);
+          setCanBid(Boolean(data.canBid));
 
-        setTimeLeft(
-          Number(
-            data.remaining_seconds ??
-            data.time_left ??
-            data.timeLeft ??
-            0
-          )
-        );
-      } else {
-        setAuctionData(null);
-      }
+          setTimeLeft(
+            Number(
+              data.remaining_seconds ??
+              data.time_left ??
+              data.timeLeft ??
+              0
+            )
+          );
+        } else {
+          setAuctionData(null);
+        }
 
-      const purse = auctionRes.data?.teamBalance ?? 0;
-      setTeamBalance(purse);
+        const purse = auctionRes.data?.teamBalance ?? 0;
+        setTeamBalance(purse);
         socket.emit("join_auction", {
           team_id: teamIdRef.current,
           team_name: teamNameRef.current,
           purse,
         });
         // MAIN LIVE UPDATE
-      socket.on("auction_update", (data) => {
-        if (!mounted) return;
+        socket.on("auction_update", (data) => {
+          if (!mounted) return;
 
-        // Reset notifications if new player arrives
-        setAuctionData(prev => {
-        if (prev?.player?.id !== data.player?.id) {
-            setNotifications([]);
-            setFlashIndex(null);
+          // Reset notifications if new player arrives
+          setAuctionData(prev => {
+            if (prev?.player?.id !== data.player?.id) {
+              setNotifications([]);
+              setFlashIndex(null);
+            }
+            return data;
+          });
+
+
+
+          setTimeLeft(
+            Number(
+              data.time_left ?? data.remaining_seconds ?? data.remaining ?? 0
+            )
+          );
+
+          setIsPaused(Boolean(data.paused));
+
+          // 💰 NEW WALLET LOGIC
+          if (data.teamBalances && user?.team_id) {
+            const myTeam = data.teamBalances[user.team_id];
+            if (myTeam) {
+              setTeamBalance(myTeam.purse);
+            }
           }
-          return data;
+
+          // --- notifications & audio (single source of truth) ---
+          if (Array.isArray(data.history)) {
+            const newHistory = data.history;
+
+            setNotifications((prev) => {
+              const prevLast = prev[prev.length - 1];
+              const newLast = newHistory[newHistory.length - 1];
+
+              const isNewBid =
+                newLast &&
+                (!prevLast ||
+                  prevLast.bid_amount !== newLast.bid_amount ||
+                  prevLast.team_id !== newLast.team_id ||
+                  prevLast.bid_time !== newLast.bid_time);
+
+              if (isNewBid) {
+                setFlashIndex(newHistory.length - 1);
+                try {
+                  audioRef.current.play();
+                } catch { }
+                setTimeout(() => setFlashIndex(null), 1500);
+              }
+
+              return newHistory; // always trust backend history
+            });
+          }
+          if (typeof data.canBid !== "undefined") setCanBid(data.canBid);
+
+          const MIN_INCREMENT = 500;
+
+          if (data.highest_bid) {
+            const current = Number(data.highest_bid.bid_amount) || 0;
+            setNextSteps([
+              current + MIN_INCREMENT,
+              current + MIN_INCREMENT * 2,
+              current + MIN_INCREMENT * 3,
+            ]);
+          } else if (data.player && data.player.base_price) {
+            const base = Number(data.player.base_price) || 0;
+            setNextSteps([
+              base + MIN_INCREMENT,
+              base + MIN_INCREMENT * 2,
+              base + MIN_INCREMENT * 3,
+            ]);
+          }
         });
 
+        socket.on("auction_started", (data) => {
+          if (!mounted) return;
+          setNotifications([]);
+          setAuctionData(data);
 
+          const t = Number(data.time_left ?? data.remaining_seconds ?? 0);
+          setTimeLeft(!Number.isNaN(t) ? t : 0);
+        });
 
-        setTimeLeft(
-          Number(
-            data.time_left ?? data.remaining_seconds ?? data.remaining ?? 0
-          )
-        );
+        socket.on("auction_paused", (data) => {
+          setIsPaused(true);
+          setTimeLeft(Number(data.remaining ?? 0));
+        });
 
-        setIsPaused(Boolean(data.paused));
+        socket.on("auction_resumed", (data) => {
+          setIsPaused(false);
+          setTimeLeft(Number(data.remaining ?? 0));
+        });
 
-        // --- notifications & audio (single source of truth) ---
-        if (Array.isArray(data.history)) {
-          const newHistory = data.history;
-
-          setNotifications((prev) => {
-            const prevLast = prev[prev.length - 1];
-            const newLast = newHistory[newHistory.length - 1];
-
-            const isNewBid =
-              newLast &&
-              (!prevLast ||
-                prevLast.bid_amount !== newLast.bid_amount ||
-                prevLast.team_id !== newLast.team_id ||
-                prevLast.bid_time !== newLast.bid_time);
-
-            if (isNewBid) {
-              setFlashIndex(newHistory.length - 1);
-              try {
-                audioRef.current.play();
-              } catch { }
-              setTimeout(() => setFlashIndex(null), 1500);
-            }
-
-            return newHistory; // always trust backend history
-          });
-        }
-
-        if (typeof data.teamBalance !== "undefined")
-          setTeamBalance(data.teamBalance);
-        if (typeof data.canBid !== "undefined") setCanBid(data.canBid);
-
-        const MIN_INCREMENT = 500;
-
-        if (data.highest_bid) {
-          const current = Number(data.highest_bid.bid_amount) || 0;
-          setNextSteps([
-            current + MIN_INCREMENT,
-            current + MIN_INCREMENT * 2,
-            current + MIN_INCREMENT * 3,
-          ]);
-        } else if (data.player && data.player.base_price) {
-          const base = Number(data.player.base_price) || 0;
-          setNextSteps([
-            base + MIN_INCREMENT,
-            base + MIN_INCREMENT * 2,
-            base + MIN_INCREMENT * 3,
-          ]);
-        }
-      });
-
-      socket.on("auction_started", (data) => {
-        if (!mounted) return;
-        setNotifications([]);
-        setAuctionData(data);
-
-        const t = Number(data.time_left ?? data.remaining_seconds ?? 0);
-        setTimeLeft(!Number.isNaN(t) ? t : 0);
-      });
-
-      socket.on("auction_paused", (data) => {
-        setIsPaused(true);
-        setTimeLeft(Number(data.remaining ?? 0));
-      });
-
-      socket.on("auction_resumed", (data) => {
-        setIsPaused(false);
-        setTimeLeft(Number(data.remaining ?? 0));
-      });
-
-      socket.on("timer_update", (data) => {
-        if (!data) return;
-        if (!isPaused) {
-          const r = Number(
-            data.remaining_seconds ?? data.time_left ?? data.remaining ?? 0
-          );
-          setTimeLeft(r);
-        }
-      });
-
-      socket.on("auction_cleared", () => {
-        setAuctionData(null);
-        setNotifications([]);
-        setTimeLeft(0);
-      });
-
-      socket.on("auction_ended", (data) => {
-        setTimeLeft(0);
-
-        if (data.status === "sold") {
-          navigate("/sold", {
-            state: {
-              player: data.player,
-              team: data.team,
-              base_price: data.player?.base_price,
-              finale_bid: data.team?.bid_amount,
-              message: data.message,
-            },
-          });
-        } else if (data.status === "unsold") {
-          navigate("/unsold", {
-            state: {
-              player: data.player,
-              base_price: data.player?.base_price,
-              message: data.message,
-            },
-          });
-        } else {
-          // reload auction status
-          api
-            .get("/current-auction", {
-              withCredentials: true,
-            })
-            .then((r) =>
-              r.data?.status === "auction_active"
-                ? setAuctionData(r.data)
-                : setAuctionData(null)
+        socket.on("timer_update", (data) => {
+          if (!data) return;
+          if (!isPaused) {
+            const r = Number(
+              data.remaining_seconds ?? data.time_left ?? data.remaining ?? 0
             );
-        }
-      });
+            setTimeLeft(r);
+          }
+        });
 
-      socket.on("bid_placed", (payload) => {
-        console.log("✅ Bid placed successfully:", payload);
-        console.info(`✅ ${payload.team_name} placed ₹${payload.bid_amount}`);
-      });
+        socket.on("auction_cleared", () => {
+          setAuctionData(null);
+          setNotifications([]);
+          setTimeLeft(0);
+        });
 
-      socket.on("bid_rejected", (msg) => {
-        alert(msg.error);
-      });
-      }catch(err){
+        socket.on("auction_ended", (data) => {
+          setTimeLeft(0);
+
+          if (data.status === "sold") {
+            navigate("/sold", {
+              state: {
+                player: data.player,
+                team: data.team,
+                base_price: data.player?.base_price,
+                finale_bid: data.team?.bid_amount,
+                message: data.message,
+              },
+            });
+          } else if (data.status === "unsold") {
+            navigate("/unsold", {
+              state: {
+                player: data.player,
+                base_price: data.player?.base_price,
+                message: data.message,
+              },
+            });
+          } else {
+            // reload auction status
+            api
+              .get("/current-auction", {
+                withCredentials: true,
+              })
+              .then((r) =>
+                r.data?.status === "auction_active"
+                  ? setAuctionData(r.data)
+                  : setAuctionData(null)
+              );
+          }
+        });
+
+        socket.on("bid_placed", (payload) => {
+          console.log("✅ Bid placed successfully:", payload);
+          console.info(`✅ ${payload.team_name} placed ₹${payload.bid_amount}`);
+        });
+
+        socket.on("bid_rejected", (msg) => {
+          alert(msg.error);
+        });
+      } catch (err) {
         console.error("Initial load failed:", err);
-      } finally{
+      } finally {
         if (mounted) setLoading(false);
       }
     };

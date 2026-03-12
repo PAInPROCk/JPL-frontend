@@ -31,14 +31,14 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const res = await api.post("/login", { email, password });
+      const res = await api.post("/login", { email, password }, {withCredentials: true});
 
       // console.log("Login response:", res.data);
 
-      if (res.data.authenticated) {
+      if (res.data.user) {
         await refreshAuth(); // 🔥 sync global auth state
 
-        if (res.data.role === "admin") {
+        if (res.data.user.role === "admin") {
           navigate("/admin", { replace: true });
         } else {
           navigate("/home", { replace: true });
