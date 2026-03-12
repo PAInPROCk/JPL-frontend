@@ -6,8 +6,8 @@ export const fetchPlayers = async () => {
 
   try {
     // ✅ Call the updated backend route
-    const response = await api.get("/players-with-teams");
-    return response.data;
+    const response = await api.get("/players");
+    return response.data.players;
   } catch (error) {
     console.error("Error fetching players:", error);
     return [];

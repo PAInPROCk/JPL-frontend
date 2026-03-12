@@ -41,7 +41,7 @@ const AppRouter = () => {
       <Route path="/teams" element={<Teams />} />
       <Route path="/players" element={<Players />} />
       <Route path="/player_info/:id" element={<Player_info />} />
-      <Route path="/team_info/:id" element={<Team_Info />} />
+      <Route path="/team_info/:team_id" element={<Team_Info />} />
       <Route path="/auction_rule" element={<Auction_rule />} />
 
       {/* ADMIN ONLY */}

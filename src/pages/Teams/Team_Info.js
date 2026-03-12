@@ -9,19 +9,19 @@ import { API_BASE_URL } from "../../Utils/constants";
 
 
 const Team_info = () => {
-  const {id} = useParams();
+  const {team_id} = useParams();
   const [team, setTeam] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() =>{
     const loadTeam = async () =>{
       const teams = await fetchTeams();
-      const foundTeam = teams.find((t) => t.team_id.toString() === id);
+      const foundTeam = teams.find((t) => t.team_id.toString() === team_id);
       setTeam(foundTeam || null);
       setLoading(false);
     };
     loadTeam();
-  }, [id]);
+  }, [team_id]);
 
   if(loading){
     return(
@@ -75,7 +75,7 @@ const Team_info = () => {
                 </div>
                 <div className="col-md-3 stat-box orange">
                   <div className="label">Current Season Budget</div>
-                  <div className="value">{team.current_budget || "--"}</div>
+                  <div className="value">{team.Season_Budget || "--"}</div>
                 </div>
                 <div className="col-md-3 stat-box orange">
                   <div className="label">Players Bought</div>
