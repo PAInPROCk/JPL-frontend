@@ -223,13 +223,30 @@ const Admin_auction = () => {
   };
 
   const nextPlayer = async () => {
+    if (isPaused) return; // ⛔ prevent clicking while paused
+
     try {
       const res = await api.post(
         "/next-auction",
         {},
         { withCredentials: true }
       );
-      if (res.data.status === "auction_moved") loadPlayer();
+
+      if (res.data.status === "auction_moved") {
+        console.log("Next player loaded:", res.data.message);
+
+        // ✅ Backend already emits auction_ended and auction_started
+        // So we just reload player to reflect latest data
+        await loadPlayer();
+      } else if (res.data.sold_status === "sold") {
+        // 🔁 Redirect to Sold page (backend triggered sale)
+        navigate("/sold", { state: res.data });
+      } else if (res.data.sold_status === "unsold") {
+        // 🔁 Redirect to Unsold page (backend marked unsold)
+        navigate("/unsold", { state: res.data });
+      } else {
+        alert(res.data.error || "Failed to move to next player");
+      }
     } catch (err) {
       console.error("Next player error:", err);
     }
@@ -408,6 +425,7 @@ const Admin_auction = () => {
                       <button
                         className="btn btn-primary m-2"
                         onClick={nextPlayer}
+                        disabled={isPaused || !auctionActive}
                       >
                         Next Player
                       </button>
