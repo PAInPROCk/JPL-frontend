@@ -1,0 +1,111 @@
+.color{
+    color: azure;
+}
+
+.register-bg{
+    background-image: url('/public/assets/images/stadium bg 4096x2867.jpg');
+    background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  height: 100vh;                        /* Full height */
+  width: 100%;                         /* Full width */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0px;  
+  /* Remove all overflow from body */
+  overflow: hidden;
+}
+
+.info-box, .stat-box {
+  background-color: white;
+  border-radius: 15px;
+  padding: 0px;
+  text-align: center;
+  font-weight: 500;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  margin-inline-end: 10px;
+}
+
+.green .label {
+  background-color: #22c55e; /* Tailwind green-500 */
+  color: white;
+  padding: 3px;
+  border-radius: 10px;
+  font-weight: bold;
+}
+
+.red .label {
+  background-color: #ef4444; /* Tailwind red-500 */
+  color: white;
+  padding: 3px;
+  border-radius: 10px;
+  font-weight: bold;
+}
+
+.orange .label {
+  background-color: #f97316; /* Tailwind orange-500 */
+  color: white;
+  padding: 3px;
+  border-radius: 10px;
+  font-weight: bold;
+}
+
+.value {
+  font-size: 1rem;
+  margin-top: 4px;
+}
+
+.team-logo1 {
+  width: 50px;
+  height: 50px;
+  object-fit: contain;
+}
+
+
+.btn-c{
+  width: 20%;
+}
+
+.custom-dropdown-menu {
+  max-height: 200px;
+  overflow-y: auto;
+  min-width: 220px;
+}
+
+.register-rg::-webkit-scrollbar {
+  width: 8px;
+}
+.register-rg::-webkit-scrollbar-thumb {
+  background-color: #aaa;
+  border-radius: 10px;
+}
+.register-rg::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.register-rg{
+  flex: 1;
+  overflow-y: auto;
+}
+
+.ph::placeholder{
+  font-size: 80%;
+}
+
+.ph1::placeholder{
+  font-size: 65%;
+  font-weight: bold;
+}
+
+.player-info-container1{
+  margin-top: 90px;
+  background-color: rgba(72, 89, 158, 0.45);
+}
+
+.custom-dropdown-menu {
+  max-height: 150px;  /* limit height */
+  overflow-y: auto;   /* enable vertical scroll */
+  position: absolute; /* keep inside viewport */
+  z-index: 1050;      /* above other elements */
+}

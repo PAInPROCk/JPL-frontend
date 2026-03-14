@@ -1,0 +1,42 @@
+
+.rules-bg {
+  background-image: url("../../assets/images/vecteezy_cricket-stadium_427062.jpg");
+  background-size: cover;
+  background-position: center;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  
+}
+
+.rules-container {
+  background-color: rgba(83, 98, 157, 0.35); /* transparent dark */
+  border-radius: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.col, .fw-bold{
+    color: black;
+    text-decoration: black;
+}
+
+
+.btn-success{
+    background-color: #25DE14;
+}
+
+.btn-success:hover{
+    background-color:  #1ca30f;
+}
+
+.rules-bg::-webkit-scrollbar {
+  width: 8px;
+}
+.rules-bg::-webkit-scrollbar-thumb {
+  background-color: #aaa;
+  border-radius: 10px;
+}
+.rules-bg::-webkit-scrollbar-track {
+  background: transparent;
+}

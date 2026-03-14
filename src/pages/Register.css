@@ -1,0 +1,33 @@
+.register-bg{
+    background-image: url("../assets/images/vecteezy_cricket-stadium_427062.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+.jr{
+    margin-top: 100px;
+}
+
+.registration-page {
+  min-height: 100vh;
+  padding: 100px 20px 40px;
+  background: linear-gradient(to right, #00416a, #e4e5e6);
+  color: white;
+}
+
+.form-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  background-color: white;
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+

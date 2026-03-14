@@ -1,0 +1,26 @@
+.home-bg{
+    background-image: url('/public/assets/images/stadium bg 4096x2867.jpg');
+}
+
+.cc{
+    justify-content: center;
+    align-items: center;
+}
+
+.carousel-inner img {
+ margin-top: 20px;
+  height: 450px;           /* Set a fixed height */
+  object-fit: cover;       /* Ensure image fills area without stretching */
+  width: 100%;             /* Full width */
+}
+
+   
+@media (max-width: 768px) {
+  .carousel-inner img {
+    height: 250px;
+  }
+}
+
+.alert{
+    margin-top: 63px;
+}
