@@ -92,7 +92,7 @@ const Auction = () => {
               setNotifications([]);
               setFlashIndex(null);
             }
-            return data;
+            return {...prev, ...data};
           });
 
 
@@ -160,13 +160,23 @@ const Auction = () => {
           }
         });
 
-        socket.on("auction_started", (data) => {
-          if (!mounted) return;
+        socket.on("auction_started", async () => {
           setNotifications([]);
-          setAuctionData(data);
-
-          const t = Number(data.time_left ?? data.remaining_seconds ?? 0);
-          setTimeLeft(!Number.isNaN(t) ? t : 0);
+          setFlashIndex(null);
+          try{
+            const res = await api.get("/current-auction",{
+              withCredentials: true,
+            });
+            if(res.data?.status === "auction_ative"){
+              setAuctionData(res.data);
+              setTimeLeft(res.data.remaining_seconds || 0);
+              setNextSteps(res.data.nextSteps || []);
+              setTeamBalance(res.data.teamBalance || 0);
+              setCanBid(Boolean(res.data.canBid));
+            }
+          }catch(err){
+            console.log("Reload auction failed: ", err);
+          }
         });
 
         socket.on("auction_paused", (data) => {
@@ -179,21 +189,21 @@ const Auction = () => {
           setTimeLeft(Number(data.remaining ?? 0));
         });
 
-        socket.on("timer_update", (data) => {
-          if (!data) return;
-          if (!isPaused) {
-            const r = Number(
-              data.remaining_seconds ?? data.time_left ?? data.remaining ?? 0
-            );
-            setTimeLeft(r);
-          }
-        });
+        // socket.on("timer_update", (data) => {
+        //   if (!data) return;
+        //   if (!isPaused) {
+        //     const r = Number(
+        //       data.remaining_seconds ?? data.time_left ?? data.remaining ?? 0
+        //     );
+        //     setTimeLeft(r);
+        //   }
+        // });
 
-        socket.on("auction_cleared", () => {
-          setAuctionData(null);
-          setNotifications([]);
-          setTimeLeft(0);
-        });
+        // socket.on("auction_cleared", () => {
+        //   setAuctionData(null);
+        //   setNotifications([]);
+        //   setTimeLeft(0);
+        // });
 
         socket.on("auction_ended", (data) => {
           setTimeLeft(0);
@@ -216,6 +226,7 @@ const Auction = () => {
                 message: data.message,
               },
             });
+            setNotifications([]);
           } else {
             // reload auction status
             api
@@ -230,10 +241,10 @@ const Auction = () => {
           }
         });
 
-        socket.on("bid_placed", (payload) => {
-          console.log("✅ Bid placed successfully:", payload);
-          console.info(`✅ ${payload.team_name} placed ₹${payload.bid_amount}`);
-        });
+        // socket.on("bid_placed", (payload) => {
+        //   console.log("✅ Bid placed successfully:", payload);
+        //   console.info(`✅ ${payload.team_name} placed ₹${payload.bid_amount}`);
+        // });
 
         socket.on("bid_rejected", (msg) => {
           alert(msg.error);
@@ -253,10 +264,10 @@ const Auction = () => {
       socket.off("auction_started");
       socket.off("auction_paused");
       socket.off("auction_resumed");
-      socket.off("timer_update");
-      socket.off("auction_cleared");
+      // socket.off("timer_update");
+      // socket.off("auction_cleared");
       socket.off("auction_ended");
-      socket.off("bid_placed");
+      // socket.off("bid_placed");
       socket.off("bid_rejected");
     };
   }, [authLoading, user]);
@@ -304,7 +315,7 @@ const Auction = () => {
   // UI Rendering
   if (loading) return <p>Loading player...</p>;
   if (!auctionData || !auctionData.player)
-    return <div className="alert alert-warning">No active auction player.</div>;
+    return <div className="alert alert-warning text-center mt-5">Waiting for next player...</div>;
 
   const player = auctionData.player;
   const basePrice =

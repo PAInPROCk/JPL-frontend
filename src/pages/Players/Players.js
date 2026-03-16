@@ -11,11 +11,17 @@ const Players = () => {
 
   const navigate = useNavigate();
   useEffect(() => {
-        const loadPlayers = async () =>{
-            const data = await fetchPlayers();
-            setPlayers(data.players);
-            setLoading(false);
-        };
+        const loadPlayers = async () => {
+      try {
+          const data = await fetchPlayers();
+          setPlayers(Array.isArray(data) ? data : []);
+      } catch (err) {
+          console.error("Failed to load players:", err);
+          setPlayers([]);
+      } finally {
+          setLoading(false);
+      }
+      };
     loadPlayers();
     },[]);
 
