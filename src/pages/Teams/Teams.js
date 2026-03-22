@@ -8,11 +8,14 @@ import { fetchTeams } from "./TeamData";
 const Teams = () =>{
   const [teams, setTeams] = useState([]);
   const [loading, setLoading] = useState(true);
+  
 
   const navigate = useNavigate();
     useEffect(() => {
           const loadTeams = async () =>{
               const data = await fetchTeams();
+
+              console.log("Fetched teams:", data);
               setTeams(data);
               setLoading(false);
           };
@@ -27,7 +30,7 @@ const Teams = () =>{
             <div className="row justify-content-center">
               {teams.map((team) => (
                 <div className="col-12 col-sm-6 col-md-4 col-lg-3" 
-                key={team.id}
+                key={team.team_id}
                 onClick={() => navigate(`/team_info/${team.team_id}`)}
                 style={{cursor: "pointer"}}
                 >

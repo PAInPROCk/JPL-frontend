@@ -66,12 +66,16 @@ const TeamRegister = () => {
 
     const data = new FormData();
     Object.keys(formData).forEach((key) => {
-      if (key === "teams") {
-        formData.teams.forEach((team) => data.append("teams[]", team));
-      } else {
-        data.append(key, formData[key]);
-      }
-    });
+  if (key === "image") {
+    if (formData.image) {
+      data.append("image", formData.image);
+    }
+  } else {
+    if (formData[key] !== "" && formData[key] !== null) {
+      data.append(key, formData[key]);
+    }
+  }
+});
 
     try {
       const res = await api.post(
@@ -84,7 +88,8 @@ const TeamRegister = () => {
       alert(res.data.message || "Team Added Successfully");
       console.log("Upload Image:", res.data.image);
     } catch (err) {
-      alert(err.response?.data?.error || "Something Went wrong");
+      console.log(err.response?.data);
+      alert(err.response?.data?.detail || "Something Went wrong");
     }
   };
   return (

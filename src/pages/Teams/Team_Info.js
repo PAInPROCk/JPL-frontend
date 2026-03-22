@@ -65,6 +65,10 @@ const Team_info = () => {
                   <div className="label">Team Name</div>
                   <div className="value">{team.name}</div>
                 </div>
+                <div className="col-md-6 info-box orange">
+                  <div className="label">Captain</div>
+                  <div className="value">{team.captain || "--"}</div>
+                </div>
                 <div className="col-md-3 info-box orange">
                   <div className="label">Team Rank</div>
                   <div className="value">{team.rank}</div>

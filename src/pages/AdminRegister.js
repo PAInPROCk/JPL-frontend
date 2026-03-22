@@ -47,7 +47,7 @@ const AdminRegister = () => {
     const fetchTeams = async () => {
       try {
         const res = await api.get("/teams");
-        setTeams(res.data);
+        setTeams(Array.isArray(res.data) ? res.data : []);
       } catch (err) {
         console.error("Error fetching teams:", err);
       } finally {
@@ -108,12 +108,20 @@ const AdminRegister = () => {
 
     const data = new FormData();
     Object.keys(formData).forEach((key) => {
-      if (key === "teams") {
-        formData.teams.forEach((teamId) => data.append("teams[]", teamId)); // ✅ team IDs
-      } else {
-        data.append(key, formData[key]);
-      }
-    });
+  if (key === "teams") {
+    formData.teams.forEach((teamId) =>
+      data.append("teams", Number(teamId))
+    );
+  } else if (key === "image") {
+    if (formData.image) {
+      data.append("image", formData.image);
+    }
+  } else {
+    if (formData[key] !== "" && formData[key] !== null) {
+      data.append(key, formData[key]);
+    }
+  }
+});
 
     try {
       const res = await api.post("/add-player", data, {
@@ -267,7 +275,7 @@ const AdminRegister = () => {
                         placeholder="Enter age of player"
                         name="age"
                         pattern="[0-9]"
-                        maxlength="2"
+                        maxLength="2"
                         value={formData.age}
                         onChange={handleChange}
                       ></input>
@@ -430,7 +438,7 @@ const AdminRegister = () => {
                           dropdownOpen ? " show" : ""
                         }`}
                       >
-                        {teams.map((team) => (
+                        {(Array.isArray(teams) ? teams : []).map((team) => (
                           <li key={team.id}>
                             <div className="form-check">
                               <input
