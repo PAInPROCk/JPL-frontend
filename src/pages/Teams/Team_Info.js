@@ -71,15 +71,15 @@ const Team_info = () => {
                 </div>
                 <div className="col-md-3 info-box orange">
                   <div className="label">Team Rank</div>
-                  <div className="value">{team.rank}</div>
+                  <div className="value">{team.rank || "--"}</div>
                 </div>
                 <div className="col-md-3 info-box green">
                   <div className="label">Total Budget</div>
-                  <div className="value">{team.total_budget || "--"}</div>
+                  <div className="value">{team.Total_Budget || "--"}</div>
                 </div>
                 <div className="col-md-3 stat-box orange">
                   <div className="label">Current Season Budget</div>
-                  <div className="value">{team.current_budget || "--"}</div>
+                  <div className="value">{team.Season_Budget || "--"}</div>
                 </div>
                 <div className="col-md-3 stat-box orange">
                   <div className="label">Players Bought</div>
