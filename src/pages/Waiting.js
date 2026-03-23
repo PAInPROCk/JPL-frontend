@@ -12,13 +12,14 @@ const Waiting = () => {
   const navigate = useNavigate();
   const [checking, setChecking] = useState(true);
   const { isAuthenticated, user, loading } = useAuth();
-  
-  
+
+
 
   useEffect(() => {
-    if(loading || !user)return;
+    if (loading || !user) return;
+
     let mounted = true;
-    // 1️⃣ Check if auction is already active on page load
+
     const checkAuction = async () => {
       try {
         const res = await api.get("/auction-status", {
@@ -31,28 +32,40 @@ const Waiting = () => {
       } catch (err) {
         console.error("Error checking auction:", err);
       } finally {
-        if(mounted) setChecking(false);
+        if (mounted) setChecking(false);
       }
     };
 
     checkAuction();
 
-    // 2️⃣ Listen for socket event when admin starts auction
+    // wait for socket connection
+    socket.on("connect", () => {
+
+      socket.emit("join_auction");
+
+    });
+
     socket.on("auction_started", () => {
       navigate("/auction");
     });
 
-    // 3️⃣ Optional: Poll every 10 seconds in case the socket missed the event
+    socket.on("auction_status", (data) => {
+      if (data.status === "auction_active") {
+        navigate("/auction");
+      }
+    });
+
     const interval = setInterval(checkAuction, 10000);
 
-    // Cleanup
     return () => {
       mounted = false;
+      socket.off("connect");
       socket.off("auction_started");
+      socket.off("auction_status");
       clearInterval(interval);
     };
-  }, [loading, user, navigate]);
 
+  }, [loading, user, navigate]);
   if (checking)
     return (
       <div className="waiting-bg d-flex flex-column justify-content-center align-items-center text-center vh-100 text-white">

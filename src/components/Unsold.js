@@ -10,29 +10,48 @@ import { API_BASE_URL } from "../Utils/constants";
 const Unsold = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const playerId =
+    location.state?.player?.id ||
+    location.state?.player_id;
+
   const [player, setPlayer] = useState(location.state?.player || null);
   const [basePrice, setBasePrice] = useState(location.state?.base_price || null);
 
   // 🧠 If player data missing (e.g. page reloaded), fetch it by ID
   useEffect(() => {
+
+    // const playerId =
+    //   location.state?.player?.id ||
+    //   location.state?.player_id;
+
+    if (!playerId) return;
+
     const loadPlayer = async () => {
-      if (!player?.id && location.state?.player?.id) return; // already present
-      const playerId = location.state?.player?.id;
-      if (!playerId) return;
 
       try {
-        const res = await api.get("/players/${playerId}", {
-          withCredentials: true,
-        });
+
+        const res = await api.get(
+          `/players/${playerId}`,
+          { withCredentials: true }
+        );
+
         if (res.data) {
           setPlayer(res.data);
           setBasePrice(res.data.base_price);
         }
+
       } catch (err) {
+
         console.error("Failed to fetch player info:", err);
+
       }
+
     };
-    if (!player) loadPlayer();
+
+    if (!player) {
+      loadPlayer();
+    }
+
   }, [player, location.state]);
 
   // 🕒 Auto return to auction after 10 seconds
@@ -58,14 +77,14 @@ const Unsold = () => {
   }, [navigate]);
 
   useEffect(() => {
-  const audio = new Audio(require("../assets/Sounds/Fail/fail-234710.mp3"));
+    const audio = new Audio(require("../assets/Sounds/Fail/fail-234710.mp3"));
 
-  const timer = setTimeout(() => {
-    audio.play().catch(() => {});
-  }, 1500);
+    const timer = setTimeout(() => {
+      audio.play().catch(() => { });
+    }, 1500);
 
-  return () => clearTimeout(timer);
-}, []);
+    return () => clearTimeout(timer);
+  }, []);
 
 
   // 🧩 If still no player info
