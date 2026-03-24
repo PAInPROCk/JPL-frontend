@@ -355,10 +355,10 @@ const Admin_auction = () => {
                         <div className="value">{player.name}</div>
                       </div>
 
-                      <div className="col-md-3 info-box green">
+                      {/*<div className="col-md-3 info-box green">
                         <div className="label">Jersey No</div>
                         <div className="value">{player.jersey}</div>
-                      </div>
+                      </div>*/}
 
                       <div className="col-md-6 info-box red">
                         <div className="label">Player Category</div>
@@ -370,10 +370,10 @@ const Admin_auction = () => {
                         <div className="value">{player.type}</div>
                       </div>
 
-                      <div className="col-md-3 stat-box orange">
+                      {/*<div className="col-md-3 stat-box orange">
                         <div className="label">Highest Runs</div>
                         <div className="value">{player.highest_runs}</div>
-                      </div>
+                      </div>*/}
                     </div>
                   </div>
                 </div>

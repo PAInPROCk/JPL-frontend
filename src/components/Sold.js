@@ -81,7 +81,11 @@ const Sold = () => {
           <div className="col-md-5 text-center">
             <div className="team-card bg-dark p-4 rounded-4 shadow-lg">
               <img
-                src="/team_icon.png"
+                src={
+                  team.image_path
+                  ? `${API_BASE_URL}/${team.image_path}`
+                  : "/team_icon.png"
+                }
                 alt={team.team_name}
                 className="img-fluid rounded-circle border border-4 border-info mb-3 team-img"
               />

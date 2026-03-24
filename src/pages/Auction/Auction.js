@@ -238,12 +238,12 @@ const Auction = () => {
                     <div className="value">{auction.player.name}</div>
                   </div>
 
-                  <div className="col-md-3 info-box green">
+                  {/*<div className="col-md-3 info-box green">
                     <div className="label">Jersey No</div>
                     <div className="value">
                       {auction.player.jersey ?? auction.player.jersey_number}
                     </div>
-                  </div>
+                  </div>*/}
 
                   <div className="col-md-6 info-box red">
                     <div className="label">Role</div>

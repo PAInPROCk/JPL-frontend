@@ -16,9 +16,9 @@
   margin-top: 10px;
 }
 
-.player-img {
-  width: 150px;
-  height: 150px;
+.player-image {
+  width: 260px;
+  height: 260px;
   object-fit: cover;
   border:0px solid black;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);

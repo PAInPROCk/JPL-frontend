@@ -167,7 +167,7 @@ const TeamRegister = () => {
                       ></input>
                     </div>
                   </div>
-                  <div className="col-md-3 info-box green">
+                  {/* <div className="col-md-3 info-box green">
                     <div className="label">Email Id</div>
                     <div className="value p-1">
                       <input
@@ -180,10 +180,10 @@ const TeamRegister = () => {
                         required
                       ></input>
                     </div>
-                  </div>
+                  </div>*/}
 
                   {/* Stats */}
-                  <div className="col-md-3 stat-box orange">
+                  {/*<div className="col-md-3 stat-box orange">
                     <div className="label">Team Rank</div>
                     <div className="value p-1">
                       <input
@@ -195,8 +195,8 @@ const TeamRegister = () => {
                         onChange={handleChange}
                       ></input>
                     </div>
-                  </div>
-                  <div className="col-md-3 stat-box orange">
+                  </div>*/}
+                  {/*<div className="col-md-3 stat-box orange">
                     <div className="label">Total Budget</div>
                     <div className="value p-1">
                       <input
@@ -208,9 +208,9 @@ const TeamRegister = () => {
                         onChange={handleChange}
                       ></input>
                     </div>
-                  </div>
+                  </div>*/}
                   <div className="col-md-3 stat-box orange">
-                    <div className="label">Current Season Budget</div>
+                    <div className="label">Current Season Budget</div>{/*Change to purse */}
                     <div className="value p-1">
                       <input
                         className="border-1 ph1"
@@ -223,7 +223,7 @@ const TeamRegister = () => {
                       ></input>
                     </div>
                   </div>
-                  <div className="col-md-3 stat-box orange">
+                  {/*<div className="col-md-3 stat-box orange">
                     <div className="label">Players Bought</div>
                     <div className="value p-1">
                       <input
@@ -236,7 +236,7 @@ const TeamRegister = () => {
                         onChange={handleChange}
                       ></input>
                     </div>
-                  </div>
+                  </div>*/}
                   <button
                     className="btn btn-primary btn-c"
                     type="submit"

@@ -79,10 +79,10 @@ const Player_info = () => {
                   <div className="label">Player Name</div>
                   <div className="value">{player.name}</div>
                 </div>
-                <div className="col-md-3 info-box green">
+                {/*<div className="col-md-3 info-box green">
                   <div className="label">Jersey No</div>
                   <div className="value">{player.jersey}</div>
-                </div>
+                </div>*/}
                 <div className="col-md-3 info-box green">
                   <div className="label">Nick Name</div>
                   <div className="value">{player.nickname || "--"}</div>
@@ -98,7 +98,7 @@ const Player_info = () => {
                 </div>
 
                 {/* Stats */}
-                <div className="col-md-3 stat-box orange">
+                {/*<div className="col-md-3 stat-box orange">
                   <div className="label">Total Runs</div>
                   <div className="value">{player.total_runs}</div>
                 </div>
@@ -113,7 +113,7 @@ const Player_info = () => {
                 <div className="col-md-3 stat-box orange">
                   <div className="label">Being Out</div>
                   <div className="value">{player.times_out}</div>
-                </div>
+                </div>*/}
 
                 {/* Teams */}
                 <div className="col-12 team-box">

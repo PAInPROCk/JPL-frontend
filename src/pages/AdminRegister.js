@@ -224,7 +224,7 @@ const AdminRegister = () => {
                     </div>
                   </div>
 
-                  <div className="col-md-3 info-box green">
+                  {/*<div className="col-md-3 info-box green">
                     <div className="label">Jersey No</div>
                     <div className="value p-1">
                       <input
@@ -237,7 +237,7 @@ const AdminRegister = () => {
                         required
                       ></input>
                     </div>
-                  </div>
+                  </div>*/}
                   <div className="col-md-3 info-box green">
                     <div className="label">Nick Name</div>
                     <div className="value p-1">
@@ -281,7 +281,7 @@ const AdminRegister = () => {
                       ></input>
                     </div>
                   </div>
-                  <div className="col-md-3 info-box green">
+                  {/*<div className="col-md-3 info-box green">
                     <div className="label">Email</div>
                     <div className="value p-1">
                       <input
@@ -294,7 +294,7 @@ const AdminRegister = () => {
                         required
                       ></input>
                     </div>
-                  </div>
+                  </div>*/}
                   <div className="col-md-3 info-box red">
                     <div className="label">Role</div>
                     <div className="value p-1">
@@ -356,7 +356,7 @@ const AdminRegister = () => {
                   </div>
 
                   {/* Stats */}
-                  <div className="col-md-3 stat-box orange">
+                  {/*<div className="col-md-3 stat-box orange">
                     <div className="label">Total Runs</div>
                     <div className="value p-1">
                       <input
@@ -368,8 +368,8 @@ const AdminRegister = () => {
                         onChange={handleChange}
                       ></input>
                     </div>
-                  </div>
-                  <div className="col-md-3 stat-box orange">
+                  </div>*/}
+                  {/*<div className="col-md-3 stat-box orange">
                     <div className="label">Highest Runs</div>
                     <div className="value p-1">
                       <input
@@ -381,8 +381,8 @@ const AdminRegister = () => {
                         onChange={handleChange}
                       ></input>
                     </div>
-                  </div>
-                  <div className="col-md-3 stat-box orange">
+                  </div>*/}
+                  {/*<div className="col-md-3 stat-box orange">
                     <div className="label">Wickets Taken</div>
                     <div className="value p-1">
                       <input
@@ -395,8 +395,8 @@ const AdminRegister = () => {
                         onChange={handleChange}
                       ></input>
                     </div>
-                  </div>
-                  <div className="col-md-3 stat-box orange">
+                  </div>*/}
+                  {/*<div className="col-md-3 stat-box orange">
                     <div className="label">Being Out</div>
                     <div className="value p-1">
                       <input
@@ -409,7 +409,7 @@ const AdminRegister = () => {
                         onChange={handleChange}
                       ></input>
                     </div>
-                  </div>
+                  </div>*/}
 
                   {/* Teams */}
                   <div className="col-6 team-box">
