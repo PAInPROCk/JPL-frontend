@@ -7,7 +7,7 @@ import { socket } from "../../src/socket";
 import useSyncedTimer from "../hooks/useSyncedTimer";
 import { api } from "../Config";
 import { API_BASE_URL } from "../Utils/constants";
-
+import { useAuth } from "../context/AuthContext";
 
 // Single socket instance (hook-like)
 
@@ -21,6 +21,7 @@ const Admin_auction = () => {
     paused: false,
     active: false
   });
+  const { user, loading: authLoading } = useAuth();
   const [loading, setLoading] = useState(true);
   const [flashIndex, setFlashIndex] = useState(null);
   const audioRef = useRef(
@@ -402,6 +403,7 @@ const Admin_auction = () => {
                     <div className="quick-bids mb-3">
                       <button
                         className="btn btn-danger m-2"
+                        // disabled={!auction.highestBid}
                         onClick={() => markPlayerAsSold(player.id)}
                       >
                         Sold

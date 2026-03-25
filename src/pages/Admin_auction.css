@@ -17,13 +17,15 @@
 }
 
 .player-image {
-  width: 260px;
-  height: 260px;
+  width: 100%;
+  max-width: 250px;
+  height: auto;
   object-fit: cover;
   border:0px solid black;
+  border-radius: 50%;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
   padding: 5px;
-  background: white;
+  background: #dbe1e3;
 }
 
 .info-box.red{

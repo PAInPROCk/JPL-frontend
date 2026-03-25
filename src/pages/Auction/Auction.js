@@ -32,7 +32,9 @@ const Auction = () => {
 
     if (authLoading || !user) return;
 
-    socket.emit("join_auction");
+    socket.emit("join_auction",{
+      team_id: user.team_id
+    });
 
     const handleAuctionStatus = (data) => {
 
@@ -47,7 +49,7 @@ const Auction = () => {
         currentBid: current,
         history: [],
         paused: false,
-        teamBalance: Number(user?.team_purse || 0)
+        teamBalance: Number(data.team_purse ?? user?.team_purse ?? 0)
       }));
 
       setLoading(false);
@@ -109,6 +111,13 @@ const Auction = () => {
       }
     };
 
+    const handlePurseUpdate = (data) =>{
+      setAuction(prev => ({
+        ...prev,
+        teamBalance: data.purse
+      }));
+    }
+
     socket.on("auction_status", handleAuctionStatus);
     socket.on("auction_started", handleAuctionStarted);
     socket.on("auction_update", handleAuctionUpdate);
@@ -116,6 +125,7 @@ const Auction = () => {
     socket.on("auction_paused", handlePaused);
     socket.on("auction_resumed", handleResumed);
     socket.on("auction_ended", handleEnded);
+    socket.on("purse_update", handlePurseUpdate);
 
     socket.on("bid_rejected", (msg) => {
       alert(msg?.error || "Bid rejected");
@@ -131,7 +141,7 @@ const Auction = () => {
       socket.off("auction_resumed", handleResumed);
       socket.off("auction_ended", handleEnded);
       socket.off("bid_rejected");
-
+      socket.off("purse_update", handlePurseUpdate);
     };
 
   }, [user, authLoading, navigate]);
@@ -205,9 +215,7 @@ const Auction = () => {
 
   const nextSteps = auction.player
   ? [
-      currentBid + MIN_INCREMENT,
-      currentBid + MIN_INCREMENT * 2,
-      currentBid + MIN_INCREMENT * 3
+      currentBid + MIN_INCREMENT
     ]
   : [];
   console.log("Team purse:", user.team_purse)
@@ -298,8 +306,15 @@ const Auction = () => {
                 </div>
 
                 <div className="p-3 mb-1 rounded bg-light shadow base-price">
-                  <strong>Your Purse</strong>
                   <p>₹{auction.teamBalance}</p>
+                </div>
+                <div className="p-3 mb-2 rounded bg-light shadow d-flex align-items-center">
+                  <img src={user?.team_logo ? `${API_BASE_URL}/${user.team_logo}` : fallbackImg}
+                    alt="team logo"
+                    width="50"
+                    height="50"
+                    className="me-2"/>
+                    <strong>{user.team_name} Purse</strong>
                 </div>
               </div>
             </div>
