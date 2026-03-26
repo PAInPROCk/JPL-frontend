@@ -1,6 +1,7 @@
 import "./Sold.css";
 import React, { useEffect } from "react";
 import axios from "axios";
+import fallBackImage from "../assets/images/football-team_16848377.png"
 import { useNavigate, useLocation } from "react-router-dom";
 import { api } from "../Config";
 import { API_BASE_URL } from "../Utils/constants";
@@ -64,7 +65,7 @@ const Sold = () => {
                 <div className="sold-stamp">SOLD</div>
               </div>
 
-              <h2 className="fw-bold">{player.name}</h2>
+              <h2 className="fw-bold text-info">{player.name}</h2>
               <p className="mb-1">
                 <strong>Category:</strong> {player.category}
               </p>
@@ -84,7 +85,7 @@ const Sold = () => {
                 src={
                   team.image_path
                   ? `${API_BASE_URL}/${team.image_path}`
-                  : "/team_icon.png"
+                  : fallBackImage
                 }
                 alt={team.team_name}
                 className="img-fluid rounded-circle border border-4 border-info mb-3 team-img"
