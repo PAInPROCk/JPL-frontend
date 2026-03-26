@@ -65,7 +65,7 @@ const Unsold = () => {
           if (role === "admin") {
             navigate("/Admin_auction");
           } else if (role === "team") {
-            navigate("/auction");
+            navigate("/waiting");
           } else {
             navigate("/");
           }

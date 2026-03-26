@@ -41,7 +41,9 @@ const Waiting = () => {
     // wait for socket connection
     socket.on("connect", () => {
 
-      socket.emit("join_auction");
+      socket.emit("join_auction", {
+        team_id: user.team_id
+      });
 
     });
 
