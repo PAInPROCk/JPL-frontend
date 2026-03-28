@@ -1,7 +1,8 @@
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import "./Player_info.css";
 import {fetchPlayers} from "./PlayerData";
+import { api } from "../../Config";
 import fallbackImg from "../../assets/images/PlAyer.png";
 import teamIcon from "../../assets/images/football-team_16848377.png";
 import { useEffect, useState } from "react";
@@ -21,18 +22,26 @@ const teamLogos = {
 
 const Player_info = () => {
   const { id } = useParams();
+  const [searcParams] = useSearchParams();
+  const role = searcParams.get("role")
   const [player, setPlayer] = useState(null);
   const [loading, setLoading] = useState(true); 
 
   useEffect(() => {
-    const loadPlayer = async ()=>{
-      const allPlayers = await fetchPlayers();
-      const foundPlayer = allPlayers?.find((p) => p.player_id === parseInt(id));
-      setPlayer(foundPlayer);
+  const loadPlayer = async () => {
+    try {
+      const res = await api.get(`/players/${id}?role=${role}`);
+      setPlayer(res.data.data);
+    } catch (err) {
+      console.error(err);
+      setPlayer(null);
+    } finally {
       setLoading(false);
-    };
-    loadPlayer();
-  }, [id]);
+    }
+  };
+
+  loadPlayer();
+}, [id, role]);
 
   if(loading){
     return (

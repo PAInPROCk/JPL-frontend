@@ -34,7 +34,7 @@ const Players = () => {
                 <div
                   className="col-12 col-sm-6 col-md-4 col-lg-3"
                   key={player.player_id}
-                  onClick={() => navigate(`/Player_info/${player.player_id}`)}
+                  onClick={() => navigate(`/Player_info/${player.player_id}?role=${player.role}`)}
                   
                   style={{ cursor: "pointer" }}
                 >
