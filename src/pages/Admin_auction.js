@@ -7,18 +7,22 @@ import { socket } from "../../src/socket";
 import useSyncedTimer from "../hooks/useSyncedTimer";
 import { api } from "../Config";
 import { API_BASE_URL } from "../Utils/constants";
-
+import { useAuth } from "../context/AuthContext";
 
 // Single socket instance (hook-like)
 
 
 const Admin_auction = () => {
-  const [player, setPlayer] = useState(null);
-  const [notifications, setNotifications] = useState([]);
-  const [timeLeft, setTimeLeft] = useState(0);
+  const [auction, setAuction] = useState({
+    player: null,
+    history: [],
+    currentBid: 0,
+    timer: 0,
+    paused: false,
+    active: false
+  });
+  const { user, loading: authLoading } = useAuth();
   const [loading, setLoading] = useState(true);
-  const [auctionActive, setAuctionActive] = useState(false);
-  const [isPaused, setIsPaused] = useState(false);
   const [flashIndex, setFlashIndex] = useState(null);
   const audioRef = useRef(
     new Audio(
@@ -28,264 +32,194 @@ const Admin_auction = () => {
   const navigate = useNavigate();
 
   // Keeps timer in sync with server events
-  useSyncedTimer(socket, setTimeLeft, isPaused);
-
-  // Load current auction player from API
-  const loadPlayer = async () => {
-    try {
-      const res = await api.get("/current-auction", {
-        withCredentials: true,
-      });
-
-      if (res.data.status === "auction_active") {
-        const p = res.data.player || {};
-
-        // embed correct current bid
-        p.current_bid = Number(
-          p.current_bid ?? res.data.currentBid ?? p.base_price ?? 0
-        );
-
-        console.log("🔍 Loaded player:", p);
-
-        setPlayer(p);
-        setTimeLeft(res.data.remaining_seconds || 0);
-        setNotifications(res.data.history || []);
-        setAuctionActive(true);
-      } else {
-        setPlayer(null);
-        setTimeLeft(0);
-        setAuctionActive(false);
-      }
-    } catch (err) {
-      console.error("Error loading player:", err);
-      setPlayer(null);
-      setTimeLeft(0);
-      setAuctionActive(false);
-    }
-  };
+  useSyncedTimer(socket, (t) => {
+    setAuction(prev => ({ ...prev, timer: t }));
+  });
 
   // Authentication + socket listeners
   useEffect(() => {
-    let mounted = true;
 
-    const setup = async () => {
-      try {
-
-        await loadPlayer();
-
-        socket.emit("admin_join", {});
-        socket.emit("join_auction");
-
-        socket.on("auction_state", (data) => {
-          if (!data) return;
-
-          if (data.status === "auction_active"){
-            setPlayer({
-              ...data.player,
-              current_bid:
-               data.highest_bid?.bid_amount ??
-               data.player.base_price ??
-               0
-            });
-
-            setAuctionActive(true);
-          }else{
-            setPlayer(null);
-            setAuctionActive(false);
-          }
-        });
-
-        socket.on("bid_placed", (data) => {
-            setNotifications((prev) => [
-              ...prev,
-              {
-                team_id: data.team_id,
-                team_name: data.team_name,
-                bid_amount: data.bid_amount,
-                bid_time: new Date().toISOString()
-              }
-            ]);
-
-            setPlayer((prev) => ({
-              ...prev,
-              current_bid: data.bid_amount
-            }));
-        });
-        // Auction started
-        socket.on("auction_started", (data) => {
-          setAuctionActive(true);
-          setNotifications([]);
-          setTimeLeft(Number(data.time_left ?? data.remaining_seconds ?? 0));
-        });
-
-        // Pause
-        socket.on("auction_paused", (data) => {
-          setIsPaused(true);
-          setTimeLeft(Number(data.remaining ?? data.remaining_seconds ?? 0));
-        });
-
-        // Resume
-        socket.on("auction_resumed", (data) => {
-          setIsPaused(false);
-          setTimeLeft(Number(data.remaining ?? data.remaining_seconds ?? 0));
-        });
-
-        // Auction ended (sold/unsold)
-        socket.on("auction_ended", (data) => {
-          if (!data) return;
-
-          setTimeLeft(0);
-          setAuctionActive(false);
-
-          if (data.status === "sold") {
-            navigate("/sold", { state: data });
-          } else if (data.status === "unsold") {
-            navigate("/unsold", {
-              state: {
-                player: data.player,
-                base_price: data.player?.base_price,
-                message: data.message,
-              },
-            });
-          }
-        });
-
-        // socket.on("load_next_player", (data) => {
-        //   nextPlayer();
-        // });
-
-        // MAIN REAL-TIME AUCTION UPDATE
-        socket.on("auction_update", (data) => {
-          if (!data) return;
-
-          // ⏱ timer + pause
-          setTimeLeft(Number(data.time_left ?? 0));
-          setIsPaused(Boolean(data.paused));
-          setAuctionActive(data.status === "auction_active");
-
-          // 👤 player (single source)
-          if (data.player) {
-            setPlayer({
-              ...data.player,
-              current_bid:
-                data.currentBid ??
-                data.highest_bid?.bid_amount ??
-                data.player.base_price ??
-                0,
-              nextSteps: data.nextSteps ?? [],
-              teamBalance: data.teamBalance ?? 0,
-              canBid: Boolean(data.canBid),
-            });
-          }
-
-          // 🔔 notifications (single place)
-          if (Array.isArray(data.history)) {
-            setNotifications((prev) => {
-              const prevLast = prev[prev.length - 1];
-              const newLast = data.history[data.history.length - 1];
-
-              const isNewBid =
-                newLast &&
-                (!prevLast ||
-                  prevLast.bid_amount !== newLast.bid_amount ||
-                  prevLast.team_id !== newLast.team_id ||
-                  prevLast.bid_time !== newLast.bid_time);
-
-              if (isNewBid) {
-                setFlashIndex(data.history.length - 1);
-                try { audioRef.current.play(); } catch { }
-                setTimeout(() => setFlashIndex(null), 1500);
-              }
-
-              return data.history;
-            });
-          }
-        });
-
-        // Auction cleared
-        socket.on("auction_cleared", () => {
-          setPlayer(null);
-          setNotifications([]);
-          setTimeLeft(0);
-          setAuctionActive(false);
-        });
-      } catch (err) {
-        console.error("Auth setup error:", err);
-        navigate("/");
-      } finally {
-        if (mounted) setLoading(false);
-      }
+    const joinAuction = () => {
+      console.log("Joining auction room...");
+      socket.emit("admin_join");
+      socket.emit("join_auction");
     };
 
-    setup();
+    if (socket.connected) {
+      joinAuction();
+    } else {
+      socket.on("connect", joinAuction);
+    }
+
+    // No auction running
+    socket.on("auction_state", (data) => {
+
+      console.log("auction_state:", data);
+
+      if (data.status === "no_active_auction") {
+
+        setAuction({
+          player: null,
+          history: [],
+          currentBid: 0,
+          timer: 0,
+          paused: false,
+          active: false
+        });
+
+        setLoading(false);
+      }
+
+    });
+
+    // Auction already running
+    socket.on("auction_status", (data) => {
+
+      console.log("auction_status:", data);
+
+      const base = Number(data.player.base_price);
+      const current = data.highest_bid?.bid_amount || base;
+
+      setAuction({
+        player: data.player,
+        history: [],
+        currentBid: current,
+        timer: 0,
+        paused: false,
+        active: true
+      });
+
+      setLoading(false);
+
+    });
+
+    // Auction started
+    socket.on("auction_started", (data) => {
+
+      console.log("auction_started:", data);
+
+      setAuction({
+        player: data.player,
+        history: [],
+        currentBid: data.current_bid || data.player.base_price,
+        timer: data.duration,
+        paused: false,
+        active: true
+      });
+
+      setLoading(false);
+
+    });
+
+    // Bid update
+    socket.on("auction_update", (data) => {
+
+      setAuction(prev => ({
+        ...prev,
+        currentBid: data.current_bid ?? prev.currentBid,
+        history: Array.isArray(data.history) ? data.history : prev.history
+      }));
+
+    });
+
+    // Pause
+    socket.on("auction_paused", (data) => {
+
+      setAuction(prev => ({
+        ...prev,
+        paused: true,
+        timer: data.remaining_seconds
+      }));
+
+    });
+
+    // Resume
+    socket.on("auction_resumed", (data) => {
+
+      setAuction(prev => ({
+        ...prev,
+        paused: false,
+        timer: data.remaining_seconds
+      }));
+
+    });
+
+    // Auction ended
+    socket.on("auction_ended", (data) => {
+
+      console.log("auction_ended:", data);
+
+      if (data.status === "sold") {
+        navigate("/sold", { state: data });
+      } else {
+        navigate("/unsold", { state: data });
+      }
+
+    });
+    socket.onAny((event, data) => {
+      console.log("Socket event:", event, data);
+    });
 
     return () => {
-      mounted = false;
+      socket.off("connect", joinAuction);
+      socket.off("auction_state");
+      socket.off("auction_status");
       socket.off("auction_started");
+      socket.off("auction_update");
+      socket.off("timer_update");
       socket.off("auction_paused");
       socket.off("auction_resumed");
       socket.off("auction_ended");
-      // socket.off("load_next_player");
-      socket.off("auction_update");
-      socket.off("bid_placed");
-      socket.off("auction_cleared");
+
     };
-    // eslint-disable-next-line
+
   }, [navigate]);
 
   useEffect(() => {
-    const el = document.querySelector(".notifications");
+    const el = document.querySelector(".notifications-list");
     if (el) el.scrollTop = el.scrollHeight;
-  }, [notifications]);
+  }, [auction.history]);
 
   // Admin actions
   const startAuction = async () => {
+
     try {
-      const res = await api.post(
+
+      await api.post(
         "/start-auction",
         { mode: "random" },
         { withCredentials: true }
       );
 
-      if (res.data.status === "auction_started") {
-        setAuctionActive(true);
-        await loadPlayer();
-      } else {
-        alert(res.data.message || "Failed to start auction");
-      }
     } catch (err) {
-      alert(err.response?.data?.error || "Start failed");
+
+      console.error(err);
+      alert("Failed to start auction");
+
     }
+
   };
 
+
   const nextPlayer = async () => {
-    if (isPaused) return; // ⛔ prevent clicking while paused
+
+    if (auction.paused) return;
 
     try {
-      const res = await api.post(
+
+      await api.post(
         "/next-auction",
         {},
         { withCredentials: true }
       );
 
-      if (res.data.status === "auction_moved") {
-        console.log("Next player loaded:", res.data.message);
-
-        // ✅ Backend already emits auction_ended and auction_started
-        // So we just reload player to reflect latest data
-        await loadPlayer();
-      } else if (res.data.sold_status === "sold") {
-        // 🔁 Redirect to Sold page (backend triggered sale)
-        navigate("/sold", { state: res.data });
-      } else if (res.data.sold_status === "unsold") {
-        // 🔁 Redirect to Unsold page (backend marked unsold)
-        navigate("/unsold", { state: res.data });
-      } else {
-        alert(res.data.error || "Failed to move to next player");
-      }
     } catch (err) {
-      console.error("Next player error:", err);
+
+      console.error(err);
+      alert("Failed to move to next player");
+
     }
+
   };
 
   const markPlayerAsSold = async (id) => {
@@ -302,30 +236,31 @@ const Admin_auction = () => {
   };
 
   const handlePause = async () => {
+
     try {
-      setIsPaused(true);
-      await api.post(
-        "/pause-auction",
-        {},
-        { withCredentials: true }
-      );
+
+      await api.post("/pause-auction", {}, { withCredentials: true });
+
     } catch (err) {
+
       console.error("Pause failed:", err);
-      setIsPaused(false);
+
     }
+
   };
 
   const handleResume = async () => {
+
     try {
-      await api.post(
-        "/resume-auction",
-        {},
-        { withCredentials: true }
-      );
-      setIsPaused(false);
+
+      await api.post("/resume-auction", {}, { withCredentials: true });
+
     } catch (err) {
+
       console.error("Resume failed:", err);
+
     }
+
   };
 
   const handleCancel = async () => {
@@ -336,10 +271,14 @@ const Admin_auction = () => {
         { withCredentials: true }
       );
 
-      setPlayer(null);
-      setNotifications([]);
-      setTimeLeft(0);
-      setAuctionActive(false);
+      setAuction({
+        player: null,
+        history: [],
+        currentBid: 0,
+        timer: 0,
+        paused: false,
+        active: false
+      });
     } catch (err) {
       console.error("Cancel failed:", err);
       alert("Cancel failed");
@@ -352,8 +291,38 @@ const Admin_auction = () => {
     const secs = String(s % 60).padStart(2, "0");
     return `${mins}:${secs}`;
   };
+  useEffect(() => {
 
-  if (loading) return <p>Loading player...</p>;
+    if (!auction.history.length) return;
+
+    const lastIndex = auction.history.length - 1;
+
+    setFlashIndex(lastIndex);
+
+    try {
+      audioRef.current.currentTime = 0;
+      audioRef.current.play();
+    } catch { }
+
+    const timeout = setTimeout(() => {
+      setFlashIndex(null);
+    }, 1500);
+
+    return () => clearTimeout(timeout);
+
+  }, [auction.history]);
+  const player = auction.player;
+
+  if (loading) {
+    return (
+      <>
+        <NavbarComponent />
+        <div className="text-center mt-5">
+          <h5>Connecting to auction server...</h5>
+        </div>
+      </>
+    );
+  }
 
   return (
     <>
@@ -387,10 +356,10 @@ const Admin_auction = () => {
                         <div className="value">{player.name}</div>
                       </div>
 
-                      <div className="col-md-3 info-box green">
+                      {/*<div className="col-md-3 info-box green">
                         <div className="label">Jersey No</div>
                         <div className="value">{player.jersey}</div>
-                      </div>
+                      </div>*/}
 
                       <div className="col-md-6 info-box red">
                         <div className="label">Player Category</div>
@@ -402,10 +371,10 @@ const Admin_auction = () => {
                         <div className="value">{player.type}</div>
                       </div>
 
-                      <div className="col-md-3 stat-box orange">
+                      {/*<div className="col-md-3 stat-box orange">
                         <div className="label">Highest Runs</div>
                         <div className="value">{player.highest_runs}</div>
-                      </div>
+                      </div>*/}
                     </div>
                   </div>
                 </div>
@@ -420,13 +389,13 @@ const Admin_auction = () => {
 
                     <div className="p-2 ms-3 mb-1 rounded-circle bg-warning shadow current-price">
                       <strong>Current Price</strong>
-                      <h4>₹{player.current_bid || player.base_price}</h4>
+                      <h4>₹{auction.currentBid || auction.player?.base_price}</h4>
                     </div>
                   </div>
 
                   <div className="col-md-4 d-flex justify-content-center align-items-center">
                     <div className="timer bg-warning text-dark p-3 rounded">
-                      {formatTime(timeLeft)}
+                      {formatTime(auction.timer)}
                     </div>
                   </div>
 
@@ -434,6 +403,7 @@ const Admin_auction = () => {
                     <div className="quick-bids mb-3">
                       <button
                         className="btn btn-danger m-2"
+                        // disabled={!auction.highestBid}
                         onClick={() => markPlayerAsSold(player.id)}
                       >
                         Sold
@@ -441,14 +411,14 @@ const Admin_auction = () => {
                       <button
                         className="btn btn-warning m-2"
                         onClick={handlePause}
-                        disabled={isPaused || !auctionActive}
+                        disabled={auction.paused || !auction.active}
                       >
                         Pause
                       </button>
                       <button
                         className="btn btn-success m-2"
                         onClick={handleResume}
-                        disabled={!isPaused}
+                        disabled={!auction.paused}
                       >
                         Resume
                       </button>
@@ -461,7 +431,7 @@ const Admin_auction = () => {
                       <button
                         className="btn btn-primary m-2"
                         onClick={nextPlayer}
-                        disabled={isPaused || !auctionActive}
+                        disabled={auction.paused || !auction.active}
                       >
                         Next Player
                       </button>
@@ -474,14 +444,14 @@ const Admin_auction = () => {
                 <h5 className="notifications-title">Notifications</h5>
 
                 <div className="notifications-list">
-                  {notifications.length ? (
-                    notifications.map((note, i) => {
+                  {auction.history.length ? (
+                    auction.history.map((note, i) => {
                       const rankClass =
-                        i === notifications.length - 1
+                        i === auction.history.length - 1
                           ? "gold"
-                          : i === notifications.length - 2
+                          : i === auction.history.length - 2
                             ? "silver"
-                            : i === notifications.length - 3
+                            : i === auction.history.length - 3
                               ? "bronze"
                               : "";
 
@@ -506,11 +476,11 @@ const Admin_auction = () => {
             <div className="text-center">
               <p>No Player Found or Auction Not Started</p>
 
-              {!auctionActive && (
-                <button className="btn btn-success mt-3" onClick={startAuction}>
-                  Start Auction
-                </button>
-              )}
+
+              <button className="btn btn-success mt-3" onClick={startAuction}>
+                Start Auction
+              </button>
+
             </div>
           )}
         </div>

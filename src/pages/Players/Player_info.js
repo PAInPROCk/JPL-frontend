@@ -1,7 +1,8 @@
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import "./Player_info.css";
 import {fetchPlayers} from "./PlayerData";
+import { api } from "../../Config";
 import fallbackImg from "../../assets/images/PlAyer.png";
 import teamIcon from "../../assets/images/football-team_16848377.png";
 import { useEffect, useState } from "react";
@@ -21,18 +22,26 @@ const teamLogos = {
 
 const Player_info = () => {
   const { id } = useParams();
+  const [searcParams] = useSearchParams();
+  const role = searcParams.get("role")
   const [player, setPlayer] = useState(null);
   const [loading, setLoading] = useState(true); 
 
   useEffect(() => {
-    const loadPlayer = async ()=>{
-      const allPlayers = await fetchPlayers();
-      const foundPlayer = allPlayers?.find((p) => p.player_id === parseInt(id));
-      setPlayer(foundPlayer);
+  const loadPlayer = async () => {
+    try {
+      const res = await api.get(`/players/${id}?role=${role}`);
+      setPlayer(res.data.data);
+    } catch (err) {
+      console.error(err);
+      setPlayer(null);
+    } finally {
       setLoading(false);
-    };
-    loadPlayer();
-  }, [id]);
+    }
+  };
+
+  loadPlayer();
+}, [id, role]);
 
   if(loading){
     return (
@@ -79,10 +88,10 @@ const Player_info = () => {
                   <div className="label">Player Name</div>
                   <div className="value">{player.name}</div>
                 </div>
-                <div className="col-md-3 info-box green">
+                {/*<div className="col-md-3 info-box green">
                   <div className="label">Jersey No</div>
                   <div className="value">{player.jersey}</div>
-                </div>
+                </div>*/}
                 <div className="col-md-3 info-box green">
                   <div className="label">Nick Name</div>
                   <div className="value">{player.nickname || "--"}</div>
@@ -98,7 +107,7 @@ const Player_info = () => {
                 </div>
 
                 {/* Stats */}
-                <div className="col-md-3 stat-box orange">
+                {/*<div className="col-md-3 stat-box orange">
                   <div className="label">Total Runs</div>
                   <div className="value">{player.total_runs}</div>
                 </div>
@@ -113,7 +122,7 @@ const Player_info = () => {
                 <div className="col-md-3 stat-box orange">
                   <div className="label">Being Out</div>
                   <div className="value">{player.times_out}</div>
-                </div>
+                </div>*/}
 
                 {/* Teams */}
                 <div className="col-12 team-box">

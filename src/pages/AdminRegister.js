@@ -47,7 +47,7 @@ const AdminRegister = () => {
     const fetchTeams = async () => {
       try {
         const res = await api.get("/teams");
-        setTeams(res.data);
+        setTeams(Array.isArray(res.data) ? res.data : []);
       } catch (err) {
         console.error("Error fetching teams:", err);
       } finally {
@@ -108,12 +108,20 @@ const AdminRegister = () => {
 
     const data = new FormData();
     Object.keys(formData).forEach((key) => {
-      if (key === "teams") {
-        formData.teams.forEach((teamId) => data.append("teams[]", teamId)); // ✅ team IDs
-      } else {
-        data.append(key, formData[key]);
-      }
-    });
+  if (key === "teams") {
+    formData.teams.forEach((teamId) =>
+      data.append("teams", Number(teamId))
+    );
+  } else if (key === "image") {
+    if (formData.image) {
+      data.append("image", formData.image);
+    }
+  } else {
+    if (formData[key] !== "" && formData[key] !== null) {
+      data.append(key, formData[key]);
+    }
+  }
+});
 
     try {
       const res = await api.post("/add-player", data, {
@@ -216,7 +224,7 @@ const AdminRegister = () => {
                     </div>
                   </div>
 
-                  <div className="col-md-3 info-box green">
+                  {/*<div className="col-md-3 info-box green">
                     <div className="label">Jersey No</div>
                     <div className="value p-1">
                       <input
@@ -229,7 +237,7 @@ const AdminRegister = () => {
                         required
                       ></input>
                     </div>
-                  </div>
+                  </div>*/}
                   <div className="col-md-3 info-box green">
                     <div className="label">Nick Name</div>
                     <div className="value p-1">
@@ -267,13 +275,13 @@ const AdminRegister = () => {
                         placeholder="Enter age of player"
                         name="age"
                         pattern="[0-9]"
-                        maxlength="2"
+                        maxLength="2"
                         value={formData.age}
                         onChange={handleChange}
                       ></input>
                     </div>
                   </div>
-                  <div className="col-md-3 info-box green">
+                  {/*<div className="col-md-3 info-box green">
                     <div className="label">Email</div>
                     <div className="value p-1">
                       <input
@@ -286,7 +294,7 @@ const AdminRegister = () => {
                         required
                       ></input>
                     </div>
-                  </div>
+                  </div>*/}
                   <div className="col-md-3 info-box red">
                     <div className="label">Role</div>
                     <div className="value p-1">
@@ -348,7 +356,7 @@ const AdminRegister = () => {
                   </div>
 
                   {/* Stats */}
-                  <div className="col-md-3 stat-box orange">
+                  {/*<div className="col-md-3 stat-box orange">
                     <div className="label">Total Runs</div>
                     <div className="value p-1">
                       <input
@@ -360,8 +368,8 @@ const AdminRegister = () => {
                         onChange={handleChange}
                       ></input>
                     </div>
-                  </div>
-                  <div className="col-md-3 stat-box orange">
+                  </div>*/}
+                  {/*<div className="col-md-3 stat-box orange">
                     <div className="label">Highest Runs</div>
                     <div className="value p-1">
                       <input
@@ -373,8 +381,8 @@ const AdminRegister = () => {
                         onChange={handleChange}
                       ></input>
                     </div>
-                  </div>
-                  <div className="col-md-3 stat-box orange">
+                  </div>*/}
+                  {/*<div className="col-md-3 stat-box orange">
                     <div className="label">Wickets Taken</div>
                     <div className="value p-1">
                       <input
@@ -387,8 +395,8 @@ const AdminRegister = () => {
                         onChange={handleChange}
                       ></input>
                     </div>
-                  </div>
-                  <div className="col-md-3 stat-box orange">
+                  </div>*/}
+                  {/*<div className="col-md-3 stat-box orange">
                     <div className="label">Being Out</div>
                     <div className="value p-1">
                       <input
@@ -401,7 +409,7 @@ const AdminRegister = () => {
                         onChange={handleChange}
                       ></input>
                     </div>
-                  </div>
+                  </div>*/}
 
                   {/* Teams */}
                   <div className="col-6 team-box">
@@ -430,7 +438,7 @@ const AdminRegister = () => {
                           dropdownOpen ? " show" : ""
                         }`}
                       >
-                        {teams.map((team) => (
+                        {(Array.isArray(teams) ? teams : []).map((team) => (
                           <li key={team.id}>
                             <div className="form-check">
                               <input

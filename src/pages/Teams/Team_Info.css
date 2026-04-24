@@ -80,13 +80,14 @@
 }
 
 .team-image {
-  height: 100%;
-  width: 100%;
-  max-width: 270px;
+  height: 250px;
+  width: 250px;
   border-radius: 50%;
+  object-fit: contain;
   border: 0px solid #163FA7;
   background-color: rgba(39, 216, 78, 0.35);
   padding: 1px;
+  flex-shrink: 0;
 }
 
 .row{
@@ -136,4 +137,12 @@
   width: 50px;
   height: 50px;
   object-fit: contain;
+}
+
+.player-card-fixed {
+  width: 180px;
+  height: 230px;   /* 🔥 fixed height */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }

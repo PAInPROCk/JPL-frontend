@@ -66,12 +66,16 @@ const TeamRegister = () => {
 
     const data = new FormData();
     Object.keys(formData).forEach((key) => {
-      if (key === "teams") {
-        formData.teams.forEach((team) => data.append("teams[]", team));
-      } else {
-        data.append(key, formData[key]);
-      }
-    });
+  if (key === "image") {
+    if (formData.image) {
+      data.append("image", formData.image);
+    }
+  } else {
+    if (formData[key] !== "" && formData[key] !== null) {
+      data.append(key, formData[key]);
+    }
+  }
+});
 
     try {
       const res = await api.post(
@@ -84,7 +88,8 @@ const TeamRegister = () => {
       alert(res.data.message || "Team Added Successfully");
       console.log("Upload Image:", res.data.image);
     } catch (err) {
-      alert(err.response?.data?.error || "Something Went wrong");
+      console.log(err.response?.data);
+      alert(err.response?.data?.detail || "Something Went wrong");
     }
   };
   return (
@@ -162,7 +167,7 @@ const TeamRegister = () => {
                       ></input>
                     </div>
                   </div>
-                  <div className="col-md-3 info-box green">
+                  {/* <div className="col-md-3 info-box green">
                     <div className="label">Email Id</div>
                     <div className="value p-1">
                       <input
@@ -175,10 +180,10 @@ const TeamRegister = () => {
                         required
                       ></input>
                     </div>
-                  </div>
+                  </div>*/}
 
                   {/* Stats */}
-                  <div className="col-md-3 stat-box orange">
+                  {/*<div className="col-md-3 stat-box orange">
                     <div className="label">Team Rank</div>
                     <div className="value p-1">
                       <input
@@ -190,8 +195,8 @@ const TeamRegister = () => {
                         onChange={handleChange}
                       ></input>
                     </div>
-                  </div>
-                  <div className="col-md-3 stat-box orange">
+                  </div>*/}
+                  {/*<div className="col-md-3 stat-box orange">
                     <div className="label">Total Budget</div>
                     <div className="value p-1">
                       <input
@@ -203,9 +208,9 @@ const TeamRegister = () => {
                         onChange={handleChange}
                       ></input>
                     </div>
-                  </div>
+                  </div>*/}
                   <div className="col-md-3 stat-box orange">
-                    <div className="label">Current Season Budget</div>
+                    <div className="label">Current Season Budget</div>{/*Change to purse */}
                     <div className="value p-1">
                       <input
                         className="border-1 ph1"
@@ -218,7 +223,7 @@ const TeamRegister = () => {
                       ></input>
                     </div>
                   </div>
-                  <div className="col-md-3 stat-box orange">
+                  {/*<div className="col-md-3 stat-box orange">
                     <div className="label">Players Bought</div>
                     <div className="value p-1">
                       <input
@@ -231,7 +236,7 @@ const TeamRegister = () => {
                         onChange={handleChange}
                       ></input>
                     </div>
-                  </div>
+                  </div>*/}
                   <button
                     className="btn btn-primary btn-c"
                     type="submit"

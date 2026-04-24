@@ -13,7 +13,7 @@ const Players = () => {
   useEffect(() => {
         const loadPlayers = async () =>{
             const data = await fetchPlayers();
-            setPlayers(data.players);
+            setPlayers(data);
             setLoading(false);
         };
     loadPlayers();
@@ -30,11 +30,11 @@ const Players = () => {
             ) : (
             
             <div className="row justify-content-center">
-              {players.map((player) => (
+              {(Array.isArray(players)? players :[]).map((player) => (
                 <div
                   className="col-12 col-sm-6 col-md-4 col-lg-3"
                   key={player.player_id}
-                  onClick={() => navigate(`/Player_info/${player.player_id}`)}
+                  onClick={() => navigate(`/Player_info/${player.player_id}?role=${player.role}`)}
                   
                   style={{ cursor: "pointer" }}
                 >

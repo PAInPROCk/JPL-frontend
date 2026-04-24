@@ -1,1 +1,3 @@
-export const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+const host = window.location.hostname;
+
+export const API_BASE_URL = `http://${host}:5000`;
