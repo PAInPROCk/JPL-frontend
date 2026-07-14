@@ -1,48 +1,215 @@
 import NavbarComponent from "../components/Navbar";
 import "./Admin_auction.css";
 import fallbackImg from "../assets/images/PlAyer.png";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback, useReducer } from "react";
 import { useNavigate } from "react-router-dom";
 import { socket } from "../../src/socket";
 import useSyncedTimer from "../hooks/useSyncedTimer";
 import { api } from "../Config";
 import { API_BASE_URL } from "../Utils/constants";
-import { useAuth } from "../context/AuthContext";
 
 // Single socket instance (hook-like)
 
 
+const startAuction = async () => {
+  try {
+    await api.post(
+      "/start-auction",
+      { mode: "random" },
+      { withCredentials: true }
+    );
+  } catch (err) {
+    console.error(err);
+    alert("Failed to start auction");
+  }
+};
+
+const markPlayerAsSold = async (id) => {
+  try {
+    const res = await api.post(
+      "/mark-sold",
+      { player_id: id },
+      { withCredentials: true }
+    );
+    alert(res.data.message);
+  } catch (err) {
+    alert(err.response?.data?.error || "Failed to mark SOLD");
+  }
+};
+
+const handlePause = async () => {
+  try {
+    await api.post("/pause-auction", {}, { withCredentials: true });
+  } catch (err) {
+    console.error("Pause failed:", err);
+  }
+};
+
+const handleResume = async () => {
+  try {
+    await api.post("/resume-auction", {}, { withCredentials: true });
+  } catch (err) {
+    console.error("Resume failed:", err);
+  }
+};
+
+const formatTime = (seconds) => {
+  const s = Math.max(0, Math.floor(Number(seconds) || 0));
+  const mins = String(Math.floor(s / 60)).padStart(2, "0");
+  const secs = String(s % 60).padStart(2, "0");
+  return `${mins}:${secs}`;
+};
+
+const adminAuctionReducer = (state, action) => {
+  switch (action.type) {
+    case "STATE":
+      return {
+        ...state,
+        player: null,
+        history: [],
+        currentBid: 0,
+        timer: 0,
+        paused: false,
+        active: false,
+        loading: false
+      };
+    case "STATUS":
+      return {
+        ...state,
+        player: action.player,
+        history: [],
+        currentBid: action.currentBid,
+        timer: 0,
+        paused: false,
+        active: true,
+        loading: false
+      };
+    case "STARTED":
+      return {
+        ...state,
+        player: action.player,
+        history: [],
+        currentBid: action.currentBid,
+        timer: action.timer,
+        paused: false,
+        active: true,
+        loading: false
+      };
+    case "UPDATE":
+      return {
+        ...state,
+        currentBid: action.currentBid ?? state.currentBid,
+        history: Array.isArray(action.history) ? action.history : state.history
+      };
+    case "PAUSE":
+      return {
+        ...state,
+        paused: true,
+        timer: action.timer
+      };
+    case "RESUME":
+      return {
+        ...state,
+        paused: false,
+        timer: action.timer
+      };
+    case "TIMER_SYNC":
+      return {
+        ...state,
+        timer: action.timer
+      };
+    default:
+      return state;
+  }
+};
+
 const Admin_auction = () => {
-  const [auction, setAuction] = useState({
+  const [auction, dispatch] = useReducer(adminAuctionReducer, {
     player: null,
     history: [],
     currentBid: 0,
     timer: 0,
     paused: false,
-    active: false
+    active: false,
+    loading: true
   });
-  const { user, loading: authLoading } = useAuth();
-  const [loading, setLoading] = useState(true);
   const [flashIndex, setFlashIndex] = useState(null);
-  const audioRef = useRef(
-    new Audio(
-      require("../assets/Sounds/mixkit-software-interface-start-2574.wav")
-    )
-  );
+  const audioRef = useRef(null);
+  if (audioRef.current === null) {
+    audioRef.current = new Audio(require("../assets/Sounds/mixkit-software-interface-start-2574.wav"));
+  }
   const navigate = useNavigate();
 
   // Keeps timer in sync with server events
   useSyncedTimer(socket, (t) => {
-    setAuction(prev => ({ ...prev, timer: t }));
+    dispatch({ type: "TIMER_SYNC", timer: t });
   });
 
   // Authentication + socket listeners
   useEffect(() => {
-
     const joinAuction = () => {
       console.log("Joining auction room...");
       socket.emit("admin_join");
       socket.emit("join_auction");
+    };
+
+    const handleAuctionState = (data) => {
+      console.log("auction_state:", data);
+      if (data.status === "no_active_auction") {
+        dispatch({ type: "STATE" });
+      }
+    };
+
+    const handleAuctionStatus = (data) => {
+      console.log("auction_status:", data);
+      const base = Number(data.player.base_price);
+      const current = data.highest_bid?.bid_amount || base;
+      dispatch({
+        type: "STATUS",
+        player: data.player,
+        currentBid: current
+      });
+    };
+
+    const handleAuctionStarted = (data) => {
+      console.log("auction_started:", data);
+      dispatch({
+        type: "STARTED",
+        player: data.player,
+        currentBid: data.current_bid || data.player.base_price,
+        timer: data.duration
+      });
+    };
+
+    const handleAuctionUpdate = (data) => {
+      dispatch({
+        type: "UPDATE",
+        currentBid: data.current_bid,
+        history: data.history
+      });
+    };
+
+    const handleAuctionPaused = (data) => {
+      dispatch({
+        type: "PAUSE",
+        timer: data.remaining_seconds
+      });
+    };
+
+    const handleAuctionResumed = (data) => {
+      dispatch({
+        type: "RESUME",
+        timer: data.remaining_seconds
+      });
+    };
+
+    const handleAuctionEnded = (data) => {
+      console.log("auction_ended:", data);
+      if (data.status === "sold") {
+        navigate("/sold", { state: data });
+      } else {
+        navigate("/unsold", { state: data });
+      }
     };
 
     if (socket.connected) {
@@ -52,125 +219,40 @@ const Admin_auction = () => {
     }
 
     // No auction running
-    socket.on("auction_state", (data) => {
-
-      console.log("auction_state:", data);
-
-      if (data.status === "no_active_auction") {
-
-        setAuction({
-          player: null,
-          history: [],
-          currentBid: 0,
-          timer: 0,
-          paused: false,
-          active: false
-        });
-
-        setLoading(false);
-      }
-
-    });
+    socket.on("auction_state", handleAuctionState);
 
     // Auction already running
-    socket.on("auction_status", (data) => {
-
-      console.log("auction_status:", data);
-
-      const base = Number(data.player.base_price);
-      const current = data.highest_bid?.bid_amount || base;
-
-      setAuction({
-        player: data.player,
-        history: [],
-        currentBid: current,
-        timer: 0,
-        paused: false,
-        active: true
-      });
-
-      setLoading(false);
-
-    });
+    socket.on("auction_status", handleAuctionStatus);
 
     // Auction started
-    socket.on("auction_started", (data) => {
-
-      console.log("auction_started:", data);
-
-      setAuction({
-        player: data.player,
-        history: [],
-        currentBid: data.current_bid || data.player.base_price,
-        timer: data.duration,
-        paused: false,
-        active: true
-      });
-
-      setLoading(false);
-
-    });
+    socket.on("auction_started", handleAuctionStarted);
 
     // Bid update
-    socket.on("auction_update", (data) => {
-
-      setAuction(prev => ({
-        ...prev,
-        currentBid: data.current_bid ?? prev.currentBid,
-        history: Array.isArray(data.history) ? data.history : prev.history
-      }));
-
-    });
+    socket.on("auction_update", handleAuctionUpdate);
 
     // Pause
-    socket.on("auction_paused", (data) => {
-
-      setAuction(prev => ({
-        ...prev,
-        paused: true,
-        timer: data.remaining_seconds
-      }));
-
-    });
+    socket.on("auction_paused", handleAuctionPaused);
 
     // Resume
-    socket.on("auction_resumed", (data) => {
-
-      setAuction(prev => ({
-        ...prev,
-        paused: false,
-        timer: data.remaining_seconds
-      }));
-
-    });
+    socket.on("auction_resumed", handleAuctionResumed);
 
     // Auction ended
-    socket.on("auction_ended", (data) => {
+    socket.on("auction_ended", handleAuctionEnded);
 
-      console.log("auction_ended:", data);
-
-      if (data.status === "sold") {
-        navigate("/sold", { state: data });
-      } else {
-        navigate("/unsold", { state: data });
-      }
-
-    });
     socket.onAny((event, data) => {
       console.log("Socket event:", event, data);
     });
 
     return () => {
       socket.off("connect", joinAuction);
-      socket.off("auction_state");
-      socket.off("auction_status");
-      socket.off("auction_started");
-      socket.off("auction_update");
+      socket.off("auction_state", handleAuctionState);
+      socket.off("auction_status", handleAuctionStatus);
+      socket.off("auction_started", handleAuctionStarted);
+      socket.off("auction_update", handleAuctionUpdate);
       socket.off("timer_update");
-      socket.off("auction_paused");
-      socket.off("auction_resumed");
-      socket.off("auction_ended");
-
+      socket.off("auction_paused", handleAuctionPaused);
+      socket.off("auction_resumed", handleAuctionResumed);
+      socket.off("auction_ended", handleAuctionEnded);
     };
 
   }, [navigate]);
@@ -181,24 +263,6 @@ const Admin_auction = () => {
   }, [auction.history]);
 
   // Admin actions
-  const startAuction = async () => {
-
-    try {
-
-      await api.post(
-        "/start-auction",
-        { mode: "random" },
-        { withCredentials: true }
-      );
-
-    } catch (err) {
-
-      console.error(err);
-      alert("Failed to start auction");
-
-    }
-
-  };
 
 
   const nextPlayer = async () => {
@@ -222,48 +286,9 @@ const Admin_auction = () => {
 
   };
 
-  const markPlayerAsSold = async (id) => {
-    try {
-      const res = await api.post(
-        "/mark-sold",
-        { player_id: id },
-        { withCredentials: true }
-      );
-      alert(res.data.message);
-    } catch (err) {
-      alert(err.response?.data?.error || "Failed to mark SOLD");
-    }
-  };
 
-  const handlePause = async () => {
 
-    try {
-
-      await api.post("/pause-auction", {}, { withCredentials: true });
-
-    } catch (err) {
-
-      console.error("Pause failed:", err);
-
-    }
-
-  };
-
-  const handleResume = async () => {
-
-    try {
-
-      await api.post("/resume-auction", {}, { withCredentials: true });
-
-    } catch (err) {
-
-      console.error("Resume failed:", err);
-
-    }
-
-  };
-
-  const handleCancel = async () => {
+  const handleCancel = useCallback(async () => {
     try {
       await api.post(
         "/cancel-auction",
@@ -271,26 +296,14 @@ const Admin_auction = () => {
         { withCredentials: true }
       );
 
-      setAuction({
-        player: null,
-        history: [],
-        currentBid: 0,
-        timer: 0,
-        paused: false,
-        active: false
-      });
+      dispatch({ type: "STATE" });
     } catch (err) {
       console.error("Cancel failed:", err);
       alert("Cancel failed");
     }
-  };
+  }, []);
 
-  const formatTime = (seconds) => {
-    const s = Math.max(0, Math.floor(Number(seconds) || 0));
-    const mins = String(Math.floor(s / 60)).padStart(2, "0");
-    const secs = String(s % 60).padStart(2, "0");
-    return `${mins}:${secs}`;
-  };
+
   useEffect(() => {
 
     if (!auction.history.length) return;
@@ -313,7 +326,7 @@ const Admin_auction = () => {
   }, [auction.history]);
   const player = auction.player;
 
-  if (loading) {
+  if (auction.loading) {
     return (
       <>
         <NavbarComponent />
@@ -402,6 +415,7 @@ const Admin_auction = () => {
                   <div className="col-md-4 d-flex flex-column align-items-center">
                     <div className="quick-bids mb-3">
                       <button
+                        type="button"
                         className="btn btn-danger m-2"
                         // disabled={!auction.highestBid}
                         onClick={() => markPlayerAsSold(player.id)}
@@ -409,6 +423,7 @@ const Admin_auction = () => {
                         Sold
                       </button>
                       <button
+                        type="button"
                         className="btn btn-warning m-2"
                         onClick={handlePause}
                         disabled={auction.paused || !auction.active}
@@ -416,6 +431,7 @@ const Admin_auction = () => {
                         Pause
                       </button>
                       <button
+                        type="button"
                         className="btn btn-success m-2"
                         onClick={handleResume}
                         disabled={!auction.paused}
@@ -423,12 +439,14 @@ const Admin_auction = () => {
                         Resume
                       </button>
                       <button
+                        type="button"
                         className="btn btn-dark m-2"
                         onClick={handleCancel}
                       >
                         Cancel
                       </button>
                       <button
+                        type="button"
                         className="btn btn-primary m-2"
                         onClick={nextPlayer}
                         disabled={auction.paused || !auction.active}
@@ -457,7 +475,7 @@ const Admin_auction = () => {
 
                       return (
                         <p
-                          key={i}
+                          key={`${note.team_name}-${note.bid_amount}-${note.bid_time}`}
                           className={`${flashIndex === i ? "flash" : ""
                             } ${rankClass}`}
                         >
@@ -477,7 +495,7 @@ const Admin_auction = () => {
               <p>No Player Found or Auction Not Started</p>
 
 
-              <button className="btn btn-success mt-3" onClick={startAuction}>
+              <button type="button" className="btn btn-success mt-3" onClick={startAuction}>
                 Start Auction
               </button>
 

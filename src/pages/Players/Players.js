@@ -31,15 +31,15 @@ const Players = () => {
             
             <div className="row justify-content-center">
               {(Array.isArray(players)? players :[]).map((player) => (
-                <div
-                  className="col-12 col-sm-6 col-md-4 col-lg-3"
+                <button
+                  type="button"
+                  className="col-12 col-sm-6 col-md-4 col-lg-3 text-start"
                   key={player.player_id}
                   onClick={() => navigate(`/Player_info/${player.player_id}?role=${player.role}`)}
-                  
-                  style={{ cursor: "pointer" }}
+                  style={{ cursor: "pointer", background: "none", border: "none", padding: 0, display: "block" }}
                 >
                   <PlayerCard player={player} />
-                </div>
+                </button>
               ))}  
             </div>
             )}

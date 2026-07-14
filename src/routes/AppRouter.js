@@ -6,14 +6,14 @@ import Auction from "../pages/Auction/Auction";
 import Players from "../pages/Players/Players";
 import Teams from "../pages/Teams/Teams";
 import Register from "../pages/Register";
-import Team_Info from "../pages/Teams/Team_Info";
-import Player_info from "../pages/Players/Player_info";
-import Auction_rule from "../pages/Auction/Auction_rule";
+import TeamInfo from "../pages/Teams/Team_Info";
+import PlayerInfo from "../pages/Players/Player_info";
+import AuctionRule from "../pages/Auction/Auction_rule";
 import Sold from "../components/Sold";
 import Unsold from "../components/Unsold";
 import Waiting from "../pages/Waiting";
 import HomePage from "../pages/HomePage/HomePage";
-import Admin_auction from "../pages/Admin_auction";
+import AdminAuction from "../pages/Admin_auction";
 import AdminRegister from "../pages/AdminRegister";
 import TeamRegister from "../pages/TeamRegister";
 
@@ -40,14 +40,14 @@ const AppRouter = () => {
       <Route path="/auction" element={<Auction />} />
       <Route path="/teams" element={<Teams/>} />
       <Route path="/players" element={<Players />} />
-      <Route path="/player_info/:id" element={<Player_info />} />
-      <Route path="/team_info/:id" element={<Team_Info />} />
-      <Route path="/auction_rule" element={<Auction_rule />} />
+      <Route path="/player_info/:id" element={<PlayerInfo />} />
+      <Route path="/team_info/:id" element={<TeamInfo />} />
+      <Route path="/auction_rule" element={<AuctionRule />} />
 
       {/* ADMIN ONLY */}
       <Route element={<AdminProtectedRoute allowedRoles={["admin"]} />}>
         <Route path="/admin" element={<Admin />}/>
-        <Route path="/admin_auction" element={<Admin_auction />} />
+        <Route path="/admin_auction" element={<AdminAuction />} />
         <Route path="/admin_register" element={<AdminRegister />} />
         <Route path="/team_register" element={<TeamRegister />} />
       </Route>

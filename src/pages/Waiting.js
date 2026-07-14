@@ -11,7 +11,7 @@ import { useAuth } from "../context/AuthContext";
 const Waiting = () => {
   const navigate = useNavigate();
   const [checking, setChecking] = useState(true);
-  const { isAuthenticated, user, loading } = useAuth();
+  const { user, loading } = useAuth();
 
 
 

@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, use, useMemo, useCallback, useEffect, useState } from "react";
 import { api } from "../Config";
 import { connectSocket, disconnectSocket } from "../socket";
 
@@ -6,24 +6,21 @@ const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [role, setRole] = useState(null);
   const [user, setUser] = useState(null);
 
-  const refreshAuth = async () => {
+  const isAuthenticated = !!user;
+  const role = user?.role || null;
+
+  const refreshAuth = useCallback(async () => {
     try {
       const res = await api.get("/check-auth");
 
       if (res.data.authenticated) {
-        setIsAuthenticated(true);
-        setRole(res.data.user.role);
         setUser(res.data.user || null);
 
         // 🔌 connect socket ONLY after auth
         connectSocket();
       } else {
-        setIsAuthenticated(false);
-        setRole(null);
         setUser(null);
 
         disconnectSocket();
@@ -31,17 +28,15 @@ export const AuthProvider = ({ children }) => {
     } catch (err) {
       console.error("🔐 AuthContext error:", err);
 
-      setIsAuthenticated(false);
-      setRole(null);
       setUser(null);
 
       disconnectSocket();
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const logout = async () => {
+  const logout = useCallback(async () => {
     try {
       await api.post("/logout");
     } catch (err) {
@@ -49,31 +44,35 @@ export const AuthProvider = ({ children }) => {
     } finally {
       disconnectSocket();
 
-      setIsAuthenticated(false);
-      setRole(null);
       setUser(null);
       setLoading(false);
     }
-  };
-
-  useEffect(() => {
-    refreshAuth(); // ✅ ONLY place check-auth runs on boot
   }, []);
 
+  useEffect(() => {
+    let ignore = false;
+    if (!ignore) {
+      refreshAuth();
+    }
+    return () => {
+      ignore = true;
+    };
+  }, [refreshAuth]);
+
+  const contextValue = useMemo(() => ({
+    loading,
+    isAuthenticated,
+    role,
+    user,
+    refreshAuth,
+    logout,
+  }), [loading, isAuthenticated, role, user, refreshAuth, logout]);
+
   return (
-    <AuthContext.Provider
-      value={{
-        loading,
-        isAuthenticated,
-        role,
-        user,
-        refreshAuth,
-        logout,
-      }}
-    >
+    <AuthContext.Provider value={contextValue}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-export const useAuth = () => useContext(AuthContext);
+export const useAuth = () => use(AuthContext);

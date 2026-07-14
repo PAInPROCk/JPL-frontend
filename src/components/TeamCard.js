@@ -23,7 +23,7 @@ const TeamCard = ({ team }) => {
       </p>
       
     <p className="text-muted">{team.rank}</p>
-      <button onClick={handleClick} className="btn btn-primary btn-sm">Info</button>
+      <button type="button" onClick={handleClick} className="btn btn-primary btn-sm">Info</button>
     </div>
   );
 };

@@ -1,4 +1,3 @@
-import axios from "axios";
 import { api } from "../../Config";
 
 export const fetchTeams = async () => {
@@ -8,5 +7,15 @@ export const fetchTeams = async () => {
     }catch(error){
         console.error("Error Fetching Teams", error);
         return[];
+    }
+};
+
+export const fetchTeamPlayers = async (id) => {
+    try {
+        const response = await api.get(`/team/${id}`);
+        return response.data.players || [];
+    } catch (error) {
+        console.error("Error Fetching Team Players", error);
+        return [];
     }
 };

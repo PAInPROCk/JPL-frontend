@@ -22,3 +22,22 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# VSCode
+.vscode/
+
+# Local tools & agents
+.agents/
+.claude/
+
+# Installers & binary files
+*.exe
+*.msi
+
+# Database Dumps
+*.sql
+
+# Local spreadsheets / template data
+*.xlsx
+*.xls
+*.csv

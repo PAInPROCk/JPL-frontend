@@ -1,6 +1,5 @@
 import "./Sold.css";
 import React, { useEffect } from "react";
-import axios from "axios";
 import fallBackImage from "../assets/images/football-team_16848377.png"
 import { useNavigate, useLocation } from "react-router-dom";
 import { api } from "../Config";

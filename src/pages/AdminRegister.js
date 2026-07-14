@@ -1,19 +1,11 @@
 import "./AdminRegister.css";
-import axios from "axios";
-import { useState, useEffect } from "react";
+import { useReducer, useEffect } from "react";
 import fallbackImg from "../assets/images/PlAyer.png";
 import NavbarComponent from "../components/Navbar";
 import { api } from "../Config";
-import { API_BASE_URL } from "../Utils/constants";
 
-const AdminRegister = () => {
-  const [text, setText] = useState("");
-  const handleClickUpper = () => {
-    let newText = text.toUpperCase();
-    setText(newText);
-  };
-
-  const [formData, setFormData] = useState({
+const initialState = {
+  formData: {
     playerName: "",
     fatherName: "",
     surName: "",
@@ -33,40 +25,73 @@ const AdminRegister = () => {
     gender: "",
     image: null,
     teams: [],
-  });
+  },
+  loading: true,
+  teams: [],
+  preview: null,
+  dropdownOpen: false,
+  error: "",
+};
 
-  const [loading, setLoading] = useState(true);
-  const [teams, setTeams] = useState([]);
-  const [preview, setPreview] = useState(null);
-  const [dropdownOpen, setdropDownOpen] = useState(false);
-  const [error, setError] = useState("");
+function adminRegisterReducer(state, action) {
+  switch (action.type) {
+    case "SET_FORM_DATA":
+      return { ...state, formData: action.value };
+    case "SET_LOADING":
+      return { ...state, loading: action.value };
+    case "SET_TEAMS":
+      return { ...state, teams: action.value };
+    case "SET_PREVIEW":
+      return { ...state, preview: action.value };
+    case "TOGGLE_DROPDOWN":
+      return { ...state, dropdownOpen: !state.dropdownOpen };
+    case "SET_ERROR":
+      return { ...state, error: action.value };
+    default:
+      return state;
+  }
+}
 
-  const toggleDropdown = () => setdropDownOpen((open) => !open);
+const AdminRegister = () => {
+  const [state, dispatch] = useReducer(adminRegisterReducer, initialState);
+  const { formData, teams, preview, dropdownOpen, error } = state;
+
+  const handleClickUpper = () => {
+    dispatch({
+      type: "SET_FORM_DATA",
+      value: {
+        ...formData,
+        category: formData.category.toUpperCase(),
+      },
+    });
+  };
+
+  const toggleDropdown = () => dispatch({ type: "TOGGLE_DROPDOWN" });
 
   useEffect(() => {
     const fetchTeams = async () => {
       try {
         const res = await api.get("/teams");
-        setTeams(Array.isArray(res.data) ? res.data : []);
+        dispatch({ type: "SET_TEAMS", value: Array.isArray(res.data) ? res.data : [] });
       } catch (err) {
         console.error("Error fetching teams:", err);
       } finally {
-        setLoading(false);
+        dispatch({ type: "SET_LOADING", value: false });
       }
     };
     fetchTeams();
-  }, [API_BASE_URL]);
+  }, []);
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
 
     if (name === "emailId") {
-      setError("");
+      dispatch({ type: "SET_ERROR", value: "" });
       const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!value) {
-        setError("Please Enter Email Address");
+        dispatch({ type: "SET_ERROR", value: "Please Enter Email Address" });
       } else if (!emailPattern.test(value)) {
-        setError("Invalid Email Format");
+        dispatch({ type: "SET_ERROR", value: "Invalid Email Format" });
       }
     }
 
@@ -80,26 +105,33 @@ const AdminRegister = () => {
         alert("Please upload a valid image file");
         return;
       }
-      setFormData({
-        ...formData,
-        image: file,
+      dispatch({
+        type: "SET_FORM_DATA",
+        value: {
+          ...formData,
+          image: file,
+        },
       });
-      setPreview(URL.createObjectURL(file));
+      dispatch({ type: "SET_PREVIEW", value: URL.createObjectURL(file) });
     } else {
-      setFormData({
-        ...formData,
-        [name]: value,
+      dispatch({
+        type: "SET_FORM_DATA",
+        value: {
+          ...formData,
+          [name]: value,
+        },
       });
     }
   };
 
   const handleTeamCheckboxChange = (e) => {
     const { value, checked } = e.target;
-    setFormData((prev) => {
-      const newTeams = checked
-        ? [...prev.teams, value]
-        : prev.teams.filter((teamId) => teamId !== value);
-      return { ...prev, teams: newTeams };
+    const newTeams = checked
+      ? [...formData.teams, value]
+      : formData.teams.filter((teamId) => teamId !== value);
+    dispatch({
+      type: "SET_FORM_DATA",
+      value: { ...formData, teams: newTeams },
     });
   };
 
@@ -130,7 +162,7 @@ const AdminRegister = () => {
       });
       alert(res.data.message || "Player Added Successfully");
     } catch (err) {
-      alert(err.response?.data?.error || "Something Went Wrong");
+      alert(err.response?.data?.detail || err.response?.data?.error || "Something Went Wrong");
     }
   };
   return (
@@ -159,6 +191,8 @@ const AdminRegister = () => {
                   accept="image/*"
                   onChange={handleChange}
                   className="form-control mt-2"
+                  id="playerImage"
+                  aria-label="Upload Player Photo"
                 />
               </div>
 
@@ -166,13 +200,14 @@ const AdminRegister = () => {
               <div className="col-md-9 ">
                 <div className="row g-3">
                   <div className="col-md-3 info-box green">
-                    <div className="label">Player Name</div>
+                    <label className="label" htmlFor="playerName">Player Name</label>
                     <div className="value p-1">
                       <input
                         className="border-1"
                         placeholder="Enter Player Name"
                         type="text"
                         name="playerName"
+                        id="playerName"
                         value={formData.playerName}
                         onChange={handleChange}
                         required
@@ -180,26 +215,28 @@ const AdminRegister = () => {
                     </div>
                   </div>
                   <div className="col-md-3 info-box green">
-                    <div className="label">Father Name</div>
+                    <label className="label" htmlFor="fatherName">Father Name</label>
                     <div className="value p-1">
                       <input
                         className="border-1"
                         placeholder="Enter father name"
                         type="text"
                         name="fatherName"
+                        id="fatherName"
                         value={formData.fatherName}
                         onChange={handleChange}
                       ></input>
                     </div>
                   </div>
                   <div className="col-md-3 info-box green">
-                    <div className="label">Surname</div>
+                    <label className="label" htmlFor="surName">Surname</label>
                     <div className="value p-1">
                       <input
                         className="border-1"
                         placeholder="Enter Surname"
                         type="text"
                         name="surName"
+                        id="surName"
                         value={formData.surName}
                         onChange={handleChange}
                         required
@@ -207,11 +244,12 @@ const AdminRegister = () => {
                     </div>
                   </div>
                   <div className="col-md-3 info-box green">
-                    <div className="label">Gender</div>
+                    <label className="label" htmlFor="gender">Gender</label>
                     <div className="value p-1">
                       <select
                         className="form-select border-1 border-black"
                         name="gender"
+                        id="gender"
                         value={formData.gender}
                         onChange={handleChange}
                         required
@@ -239,13 +277,14 @@ const AdminRegister = () => {
                     </div>
                   </div>*/}
                   <div className="col-md-3 info-box green">
-                    <div className="label">Nick Name</div>
+                    <label className="label" htmlFor="nickName">Nick Name</label>
                     <div className="value p-1">
                       <input
                         className="border-1"
                         type="text"
                         placeholder="Enter Nick Name"
                         name="nickName"
+                        id="nickName"
                         pattern="[A-Z]"
                         value={formData.nickName}
                         onChange={handleChange}
@@ -253,13 +292,14 @@ const AdminRegister = () => {
                     </div>
                   </div>
                   <div className="col-md-3 info-box green">
-                    <div className="label">Mobile Number</div>
+                    <label className="label" htmlFor="mobile">Mobile Number</label>
                     <div className="value p-1">
                       <input
                         className="border-1 ph1"
                         type="number"
                         placeholder="Enter Mobile Number without +91"
                         name="mobile"
+                        id="mobile"
                         pattern="[0-9]"
                         value={formData.mobile}
                         onChange={handleChange}
@@ -267,13 +307,14 @@ const AdminRegister = () => {
                     </div>
                   </div>
                   <div className="col-md-3 info-box green">
-                    <div className="label">Age</div>
+                    <label className="label" htmlFor="age">Age</label>
                     <div className="value p-1">
                       <input
                         className="border-1 ph1"
                         type="number"
                         placeholder="Enter age of player"
                         name="age"
+                        id="age"
                         pattern="[0-9]"
                         maxLength="2"
                         value={formData.age}
@@ -296,13 +337,14 @@ const AdminRegister = () => {
                     </div>
                   </div>*/}
                   <div className="col-md-3 info-box red">
-                    <div className="label">Role</div>
+                    <label className="label" htmlFor="role">Role</label>
                     <div className="value p-1">
                       <input
                         className="border-1"
                         placeholder="Enter Role of player"
                         type="text"
                         name="role"
+                        id="role"
                         value={formData.role}
                         onChange={handleChange}
                         required
@@ -310,12 +352,13 @@ const AdminRegister = () => {
                     </div>
                   </div>
                   <div className="col-md-6 info-box red">
-                    <div className="label">Player Category</div>
+                    <label className="label" htmlFor="category">Player Category</label>
                     <div className="value p-1">
                       <input
                         className="border-1 ph"
                         type="text"
                         name="category"
+                        id="category"
                         maxLength="1"
                         pattern="[A-Z]"
                         placeholder="Enter Category (A,B,C,D,...)"
@@ -327,12 +370,13 @@ const AdminRegister = () => {
                     </div>
                   </div>
                   <div className="col-md-6 info-box red">
-                    <div className="label">Style</div>
+                    <label className="label" htmlFor="style">Style</label>
                     <div className="value p-1">
                       <input
                         className="border-1 ph1"
                         type="text"
                         name="style"
+                        id="style"
                         placeholder="Enter Playing style (ex: Right Hand Spinner)"
                         value={formData.style}
                         onChange={handleChange}
@@ -341,12 +385,13 @@ const AdminRegister = () => {
                     </div>
                   </div>
                   <div className="col-md-6 info-box red">
-                    <div className="label">Base Price</div>
+                    <label className="label" htmlFor="basePrice">Base Price</label>
                     <div className="value p-1">
                       <input
                         className="border-1 ph1"
                         type="text"
                         name="basePrice"
+                        id="basePrice"
                         placeholder="Enter Base Price (in INR ₹)"
                         value={formData.basePrice}
                         onChange={handleChange}
@@ -445,6 +490,7 @@ const AdminRegister = () => {
                                 className="form-check-input"
                                 type="checkbox"
                                 id={`team-${team.team_id}`}
+                                aria-label={team.name}
                                 value={team.team_id}
                                 checked={formData.teams.includes(String(team.team_id))}
                                 onChange={handleTeamCheckboxChange}

@@ -2,12 +2,12 @@ import Navbar from "../../components/Navbar";
 import './Teams.css';
 import TeamCard from "../../components/TeamCard";
 import { useEffect, useState } from "react";
-import { data, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { fetchTeams } from "./TeamData";
 
 const Teams = () =>{
   const [teams, setTeams] = useState([]);
-  const [loading, setLoading] = useState(true);
+
   
 
   const navigate = useNavigate();
@@ -17,7 +17,7 @@ const Teams = () =>{
 
               console.log("Fetched teams:", data);
               setTeams(data);
-              setLoading(false);
+
           };
       loadTeams();
       },[]);
@@ -29,13 +29,15 @@ const Teams = () =>{
           <div className="container py-5">
             <div className="row justify-content-center">
               {teams.map((team) => (
-                <div className="col-12 col-sm-6 col-md-4 col-lg-3" 
-                key={team.team_id}
-                onClick={() => navigate(`/team_info/${team.team_id}`)}
-                style={{cursor: "pointer"}}
+                <button
+                  type="button"
+                  className="col-12 col-sm-6 col-md-4 col-lg-3 text-start" 
+                  key={team.team_id}
+                  onClick={() => navigate(`/team_info/${team.team_id}`)}
+                  style={{cursor: "pointer", background: "none", border: "none", padding: 0, display: "block"}}
                 >
                   <TeamCard team={team} />
-                </div>
+                </button>
               ))}
             </div>
           </div>

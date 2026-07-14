@@ -114,3 +114,15 @@
   margin-top: 12px;
   font-weight: 700;
 }
+
+.clear-file-btn {
+  font-size: 1.1rem;
+  line-height: 1;
+  background-color: #e3e3da;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+  justify-content: center;
+  margin-top: 0px;
+  border-radius: 30%;
+}

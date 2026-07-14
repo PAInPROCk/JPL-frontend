@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useReducer } from "react";
 import "./Admin.css";
 import Papa from "papaparse";
 import * as XLSX from "xlsx";
@@ -6,14 +6,29 @@ import NavbarComponent from "../components/Navbar";
 import { useNavigate } from "react-router-dom";
 import { api } from "../Config";
 
+const initialState = {
+  customFile: null,
+  auctionMode: null,
+  playerList: [],
+  batchFile: null,
+  batchPlayerList: [],
+};
+
+function adminReducer(state, action) {
+  switch (action.type) {
+    case "SET_FIELD":
+      return { ...state, [action.field]: action.value };
+    case "RESET_BATCH_FILE":
+      return { ...state, batchFile: null, batchPlayerList: [] };
+    default:
+      return state;
+  }
+}
+
 const Admin = () => {
   const navigate = useNavigate();
-
-  const [customFile, setCustomFile] = useState(null);
-  const [auctionMode, setAuctionMode] = useState(null);
-  const [playerList, setPlayerList] = useState([]);
-  const [batchFile, setBatchFile] = useState(null);
-  const [batchPlayerList, setBatchPlayerList] = useState([]);
+  const [state, dispatch] = useReducer(adminReducer, initialState);
+  const { customFile, auctionMode, playerList, batchFile, batchPlayerList } = state;
 
   const requireAdmin = async (nextPath, extraState = {}) => {
     try {
@@ -33,6 +48,7 @@ const Admin = () => {
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
+    dispatch({ type: "SET_FIELD", field: "customFile", value: file });
     const fileExtension = file.name.split(".").pop().toLowerCase();
 
     if (fileExtension === "csv") {
@@ -42,7 +58,7 @@ const Admin = () => {
           const sorted = results.data.sort((a, b) =>
             a.name.localeCompare(b.name)
           );
-          setPlayerList(sorted);
+          dispatch({ type: "SET_FIELD", field: "playerList", value: sorted });
         },
       });
     } else if (fileExtension === "xlsx" || fileExtension === "xls") {
@@ -53,7 +69,7 @@ const Admin = () => {
         const sheet = workbook.Sheets[workbook.SheetNames[0]];
         const json = XLSX.utils.sheet_to_json(sheet);
         const sorted = json.sort((a, b) => a.name.localeCompare(b.name));
-        setPlayerList(sorted);
+        dispatch({ type: "SET_FIELD", field: "playerList", value: sorted });
       };
       reader.readAsArrayBuffer(file);
     } else {
@@ -64,7 +80,7 @@ const Admin = () => {
   const handleBatchUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    setBatchFile(file);
+    dispatch({ type: "SET_FIELD", field: "batchFile", value: file });
     const fileExtension = file.name.split(".").pop().toLowerCase();
 
     if (fileExtension === "csv") {
@@ -74,7 +90,7 @@ const Admin = () => {
           const sorted = result.data.sort((a, b) =>
             a.name.localeCompare(b.name)
           );
-          setBatchPlayerList(sorted);
+          dispatch({ type: "SET_FIELD", field: "batchPlayerList", value: sorted });
         },
       });
     } else if (fileExtension === "xlsx" || fileExtension === "xls") {
@@ -85,7 +101,7 @@ const Admin = () => {
         const sheet = workbook.Sheets[workbook.SheetNames[0]];
         const json = XLSX.utils.sheet_to_json(sheet);
         const sorted = json.sort((a, b) => a.name.localeCompare(b.name));
-        setBatchPlayerList(sorted);
+        dispatch({ type: "SET_FIELD", field: "batchPlayerList", value: sorted });
       };
       reader.readAsArrayBuffer(file);
     } else {
@@ -94,8 +110,7 @@ const Admin = () => {
   };
 
   const clearBatchFile = () => {
-  setBatchFile(null);
-  setBatchPlayerList([]);
+    dispatch({ type: "RESET_BATCH_FILE" });
   };
 
 
@@ -151,7 +166,7 @@ const Admin = () => {
                 <input
                   type="checkbox"
                   checked={auctionMode === "custom"}
-                  onChange={() => setAuctionMode("custom")}
+                  onChange={() => dispatch({ type: "SET_FIELD", field: "auctionMode", value: "custom" })}
                   id="useCustomList"
                 />
                 <label htmlFor="useCustomList">Use Custom Player List</label>
@@ -182,7 +197,7 @@ const Admin = () => {
                       <h6 style={{ fontWeight: 600 }}>Player Preview</h6>
                       <ul className="list-group">
                         {playerList.map((player, index) => (
-                          <li key={index} className="list-group-item">
+                          <li key={`${player.name}-${player.jerseyNo || index}`} className="list-group-item">
                             {player.name}
                           </li>
                         ))}
@@ -196,7 +211,7 @@ const Admin = () => {
                 <input
                   type="checkbox"
                   checked={auctionMode === "random"}
-                  onChange={() => setAuctionMode("random")}
+                  onChange={() => dispatch({ type: "SET_FIELD", field: "auctionMode", value: "random" })}
                   id="randomMode"
                 />
                 <label htmlFor="randomMode">Random Mode</label>
@@ -205,13 +220,14 @@ const Admin = () => {
                 <input
                   type="checkbox"
                   checked={auctionMode === "unsold"}
-                  onChange={() => setAuctionMode("unsold")}
+                  onChange={() => dispatch({ type: "SET_FIELD", field: "auctionMode", value: "unsold" })}
                   id="unsoldPlayers"
                 />
                 <label htmlFor="unsoldPlayers">Use Unsold Players Only</label>
               </div>
 
               <button
+                type="button"
                 className="btn btn-success w-100"
                 onClick={startAuction}
                 disabled={!auctionMode}
@@ -220,12 +236,14 @@ const Admin = () => {
               </button>
 
               <button
+                type="button"
                 className="btn btn-info w-100 mt-3"
                 onClick={handleTeamRegistration}
               >
                 New Team Registration
               </button>
               <button
+                type="button"
                 className="btn btn-info w-100 mt-2"
                 onClick={handlePlayerRegistration}
               >
@@ -236,13 +254,13 @@ const Admin = () => {
               <div className="admin-action-card">
                 <div className="mb-2 ms-3">
                   <label
-                    htmlFor="bacthFile"
+                    htmlFor="batchFile"
                     className="form-label"
                     style={{ fontSize: 16 }}
                   >
                     Batch Player Upload 
                   </label>
-                  <label className="bg-warning form-label">Beta</label>
+                  <span className="bg-warning badge ms-1">Beta</span>
                   <input
                     type="file"
                     className="form-control"
@@ -257,20 +275,9 @@ const Admin = () => {
                     </p>
                     <button
                       type="button"
-                      className="btn btn-sm btn-link text-danger ms-2"
+                      className="btn btn-sm btn-link text-danger ms-2 clear-file-btn"
                       onClick={clearBatchFile}
                       aria-label="Remove File"
-                      style={{
-                        fontSize: "1.1rem",
-                        lineHeight: 1,
-                        background: "#e3e3da",
-                        border: "none",
-                        cursor: "pointer",
-                        padding: "5px",
-                        justifyContent:"center",
-                        marginTop: "0px",
-                        borderRadius: "30%"
-                      }}
                       title="Remove selected file"
                     >
                       x
@@ -282,7 +289,7 @@ const Admin = () => {
                       <h6 style={{ fontWeight: 600 }}>Player Preview</h6>
                       <ul className="list-group">
                         {batchPlayerList.map((player, index) => (
-                          <li key={index} className="list-group-item">
+                          <li key={`${player.name}-${player.jerseyNo || index}`} className="list-group-item">
                             {player.name}
                           </li>
                         ))}
@@ -290,6 +297,7 @@ const Admin = () => {
                     </div>
                   )}
                   <button
+                    type="button"
                     className="btn btn-warning mt-3 w-100"
                     onClick={submitBatchPlayers}
                     disabled={!batchFile}

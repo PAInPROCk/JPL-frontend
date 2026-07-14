@@ -1,5 +1,4 @@
 import "./AdminRegister.css";
-import axios from "axios";
 import { useState } from "react";
 import fallbackImg from "../assets/images/football-team_16848377.png"
 import NavbarComponent from "../components/Navbar";
@@ -118,6 +117,7 @@ const TeamRegister = () => {
                   accept="image/*"
                   onChange={handleChange}
                   className="form-control mt-2"
+                  aria-label="Upload Team Logo"
                 />
               </div>
 
@@ -125,47 +125,50 @@ const TeamRegister = () => {
               <div className="col-md-9 ">
                 <div className="row g-3">
                   <div className="col-md-3 info-box green">
-                    <div className="label">Team Name</div>
-                    <div className="value p-1">
-                      <input
-                        className="border-1"
-                        placeholder="Enter Team Name"
-                        type="text"
-                        name="teamName"
-                        value={formData.teamName}
-                        onChange={handleChange}
-                        required
-                      ></input>
-                    </div>
+                     <label htmlFor="teamName" className="label">Team Name</label>
+                     <div className="value p-1">
+                       <input
+                         id="teamName"
+                         className="border-1"
+                         placeholder="Enter Team Name"
+                         type="text"
+                         name="teamName"
+                         value={formData.teamName}
+                         onChange={handleChange}
+                         required
+                       ></input>
+                     </div>
                   </div>
 
                   <div className="col-md-3 info-box green">
-                    <div className="label">Captain Name</div>
-                    <div className="value p-1">
-                      <input
-                        className="border-1"
-                        placeholder="Enter Captain Name"
-                        type="text"
-                        name="captain"
-                        value={formData.captain}
-                        onChange={handleChange}
-                        required
-                      ></input>
-                    </div>
+                     <label htmlFor="captain" className="label">Captain Name</label>
+                     <div className="value p-1">
+                       <input
+                         id="captain"
+                         className="border-1"
+                         placeholder="Enter Captain Name"
+                         type="text"
+                         name="captain"
+                         value={formData.captain}
+                         onChange={handleChange}
+                         required
+                       ></input>
+                     </div>
                   </div>
                   <div className="col-md-3 info-box green">
-                    <div className="label">Mobile Number</div>
-                    <div className="value p-1">
-                      <input
-                        className="border-1"
-                        placeholder="Enter Team Mobile Number"
-                        type="text"
-                        name="mobile"
-                        value={formData.mobile}
-                        onChange={handleChange}
-                        required
-                      ></input>
-                    </div>
+                     <label htmlFor="mobile" className="label">Mobile Number</label>
+                     <div className="value p-1">
+                       <input
+                         id="mobile"
+                         className="border-1"
+                         placeholder="Enter Team Mobile Number"
+                         type="text"
+                         name="mobile"
+                         value={formData.mobile}
+                         onChange={handleChange}
+                         required
+                       ></input>
+                     </div>
                   </div>
                   {/* <div className="col-md-3 info-box green">
                     <div className="label">Email Id</div>
@@ -210,18 +213,19 @@ const TeamRegister = () => {
                     </div>
                   </div>*/}
                   <div className="col-md-3 stat-box orange">
-                    <div className="label">Current Season Budget</div>{/*Change to purse */}
-                    <div className="value p-1">
-                      <input
-                        className="border-1 ph1"
-                        type="number"
-                        name="seasonBudget"
-                        pattern="[0-9]{3}"
-                        placeholder="Enter Current Season Budget"
-                        value={formData.seasonBudget}
-                        onChange={handleChange}
-                      ></input>
-                    </div>
+                     <label htmlFor="seasonBudget" className="label">Current Season Budget</label>{/*Change to purse */}
+                     <div className="value p-1">
+                       <input
+                         id="seasonBudget"
+                         className="border-1"
+                         type="number"
+                         name="seasonBudget"
+                         pattern="[0-9]{3}"
+                         placeholder="Enter Current Season Budget"
+                         value={formData.seasonBudget}
+                         onChange={handleChange}
+                       ></input>
+                     </div>
                   </div>
                   {/*<div className="col-md-3 stat-box orange">
                     <div className="label">Players Bought</div>

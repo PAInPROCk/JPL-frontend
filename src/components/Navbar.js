@@ -27,6 +27,7 @@ const Navbar = () => {
 
   const handleLogout = async () => {
     await logout();           // ✅ context handles state
+    handleClose();
     navigate("/login");       // ✅ redirect
   };
   console.log("Auth State:", { isAuthenticated, role });
@@ -48,27 +49,29 @@ const Navbar = () => {
           className={`navbar-toggler ${expanded ? "" : "collapsed"}`}
           type="button"
           onClick={handleToggle}
+          aria-label="Toggle navigation"
+          aria-expanded={expanded}
         >
           <span className="navbar-toggler-icon"></span>
         </button>
 
         <div className={`collapse navbar-collapse ${expanded ? "show" : ""}`}>
-          <ul className="navbar-nav ms-auto" onClick={handleClose}>
+          <ul className="navbar-nav ms-auto">
 
             <li className="nav-item">
-              <Link className={`nav-link ${isActive("/teams") ? "active" : ""}`} to="/teams">
+              <Link className={`nav-link ${isActive("/teams") ? "active" : ""}`} to="/teams" onClick={handleClose}>
                 Teams
               </Link>
             </li>
 
             <li className="nav-item">
-              <Link className={`nav-link ${isActive("/players") ? "active" : ""}`} to="/players">
+              <Link className={`nav-link ${isActive("/players") ? "active" : ""}`} to="/players" onClick={handleClose}>
                 Players
               </Link>
             </li>
 
             <li className="nav-item">
-              <Link className={`nav-link ${isActive("/register") ? "active" : ""}`} to="/register">
+              <Link className={`nav-link ${isActive("/register") ? "active" : ""}`} to="/register" onClick={handleClose}>
                 Registration
               </Link>
             </li>
@@ -76,7 +79,7 @@ const Navbar = () => {
             {/* Auction */}
             <li className="nav-item">
               {isAuthenticated ? (
-                <Link className={`nav-link ${isActive("/Auction_rule") ? "active" : ""}`} to="/Auction_rule">
+                <Link className={`nav-link ${isActive("/Auction_rule") ? "active" : ""}`} to="/Auction_rule" onClick={handleClose}>
                   Auction
                 </Link>
               ) : (
@@ -87,7 +90,7 @@ const Navbar = () => {
             {/* Admin */}
             {isAuthenticated && role === "admin" && (
               <li className="nav-item">
-                <Link className={`nav-link ${isActive("/admin") ? "active" : ""}`} to="/admin">
+                <Link className={`nav-link ${isActive("/admin") ? "active" : ""}`} to="/admin" onClick={handleClose}>
                   Admin
                 </Link>
               </li>
@@ -96,13 +99,13 @@ const Navbar = () => {
             {/* Login / Logout */}
             {!isAuthenticated ? (
               <li className="nav-item">
-                <Link className={`nav-link ${isActive("/login") ? "active" : ""}`} to="/login">
+                <Link className={`nav-link ${isActive("/login") ? "active" : ""}`} to="/login" onClick={handleClose}>
                   Login
                 </Link>
               </li>
             ) : (
               <li className="nav-item">
-                <button className="btn btn-link nav-link" onClick={handleLogout}>
+                <button type="button" className="btn btn-link nav-link" onClick={handleLogout}>
                   Logout
                 </button>
               </li>

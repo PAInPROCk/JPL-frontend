@@ -1,32 +1,173 @@
 import Navbar from "../../components/Navbar";
 import "./Auction.css";
 import fallbackImg from "../../assets/images/PlAyer.png";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback, useReducer } from "react";
 import { socket } from "../../socket";
 import { useNavigate } from "react-router-dom";
 import { API_BASE_URL } from "../../Utils/constants";
 import { useAuth } from "../../context/AuthContext";
+
+const formatTime = (seconds) => {
+  const s = Math.max(0, Math.floor(Number(seconds) || 0));
+  const mins = String(Math.floor(s / 60)).padStart(2, "0");
+  const secs = String(s % 60).padStart(2, "0");
+  return `${mins}:${secs}`;
+};
+
+const auctionReducer = (state, action) => {
+  switch (action.type) {
+    case "STATUS":
+      return {
+        ...state,
+        player: action.player,
+        currentBid: action.currentBid,
+        history: [],
+        paused: false,
+        teamBalance: action.teamBalance,
+        loading: false
+      };
+    case "STARTED":
+      return {
+        ...state,
+        player: action.player,
+        history: [],
+        currentBid: action.currentBid,
+        timer: action.timer,
+        paused: false
+      };
+    case "UPDATE":
+      return {
+        ...state,
+        currentBid: action.currentBid ?? state.currentBid,
+        history: action.history ?? state.history
+      };
+    case "TIMER":
+      return {
+        ...state,
+        timer: action.timer
+      };
+    case "PAUSE":
+      return {
+        ...state,
+        paused: true,
+        timer: action.timer
+      };
+    case "RESUME":
+      return {
+        ...state,
+        paused: false,
+        timer: action.timer
+      };
+    case "PURSE":
+      return {
+        ...state,
+        teamBalance: action.purse
+      };
+    default:
+      return state;
+  }
+};
 
 const Auction = () => {
 
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
 
-  const [auction, setAuction] = useState({
+  const [auction, dispatch] = useReducer(auctionReducer, {
     player: null,
     history: [],
     currentBid: 0,
     timer: 0,
     paused: false,
-    teamBalance: 0
+    teamBalance: 0,
+    loading: true
   });
   const [flashIndex, setFlashIndex] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const audioRef = useRef(new Audio(require("../../assets/Sounds/mixkit-software-interface-start-2574.wav")));
+  const audioRef = useRef(null);
+  if (audioRef.current === null) {
+    audioRef.current = new Audio(require("../../assets/Sounds/mixkit-software-interface-start-2574.wav"));
+  }
 
   const MIN_INCREMENT = 500;
 
-  // ---------------- SOCKET LISTENERS ----------------
+  const handleAuctionStatus = useCallback((data) => {
+    if (data.status !== "auction_active") return;
+
+    const base = Number(data.player.base_price);
+    const current = Number(data.highest_bid?.bid_amount || base);
+
+    dispatch({
+      type: "STATUS",
+      player: data.player,
+      currentBid: current,
+      teamBalance: Number(data.team_purse ?? user?.team_purse ?? 0)
+    });
+  }, [user]);
+
+  const handleAuctionStarted = useCallback((data) => {
+    dispatch({
+      type: "STARTED",
+      player: data.player,
+      currentBid: data.current_bid || data.player?.base_price,
+      timer: data.duration
+    });
+  }, []);
+
+  const handleAuctionUpdate = useCallback((data) => {
+    dispatch({
+      type: "UPDATE",
+      currentBid: data.current_bid,
+      history: data.history
+    });
+  }, []);
+
+  const handleTimer = useCallback((data) => {
+    dispatch({
+      type: "TIMER",
+      timer: data.remaining_seconds
+    });
+  }, []);
+
+  const handlePaused = useCallback((data) => {
+    dispatch({
+      type: "PAUSE",
+      timer: data.remaining_seconds
+    });
+  }, []);
+
+  const handleResumed = useCallback((data) => {
+    dispatch({
+      type: "RESUME",
+      timer: data.remaining_seconds
+    });
+  }, []);
+
+  const handleEnded = useCallback((data) => {
+    if (data.status === "sold") {
+      navigate("/sold", { state: data });
+    } else {
+      navigate("/unsold", { state: data });
+    }
+  }, [navigate]);
+
+  const handlePurseUpdate = useCallback((data) => {
+    dispatch({
+      type: "PURSE",
+      purse: data.purse
+    });
+  }, []);
+
+  const handlersRef = useRef({});
+  handlersRef.current = {
+    handleAuctionStatus,
+    handleAuctionStarted,
+    handleAuctionUpdate,
+    handleTimer,
+    handlePaused,
+    handleResumed,
+    handleEnded,
+    handlePurseUpdate
+  };
 
   useEffect(() => {
 
@@ -36,112 +177,38 @@ const Auction = () => {
       team_id: user.team_id
     });
 
-    const handleAuctionStatus = (data) => {
+    const onStatus = (data) => handlersRef.current.handleAuctionStatus(data);
+    const onStarted = (data) => handlersRef.current.handleAuctionStarted(data);
+    const onUpdate = (data) => handlersRef.current.handleAuctionUpdate(data);
+    const onTimer = (data) => handlersRef.current.handleTimer(data);
+    const onPaused = (data) => handlersRef.current.handlePaused(data);
+    const onResumed = (data) => handlersRef.current.handleResumed(data);
+    const onEnded = (data) => handlersRef.current.handleEnded(data);
+    const onPurse = (data) => handlersRef.current.handlePurseUpdate(data);
 
-      if (data.status !== "auction_active") return;
-
-      const base = Number(data.player.base_price);
-      const current = Number(data.highest_bid?.bid_amount || base);
-
-      setAuction(prev => ({
-        ...prev,
-        player: data.player,
-        currentBid: current,
-        history: [],
-        paused: false,
-        teamBalance: Number(data.team_purse ?? user?.team_purse ?? 0)
-      }));
-
-      setLoading(false);
-    };
-
-    const handleAuctionStarted = (data) => {
-
-      setAuction(prev => ({
-        ...prev,
-        player: data.player,
-        history: [],
-        currentBid: data.current_bid || data.player?.base_price,
-        timer: data.duration,
-        paused: false
-      }));
-    };
-
-    const handleAuctionUpdate = (data) => {
-
-      setAuction(prev => ({
-        ...prev,
-        currentBid: data.current_bid ?? prev.currentBid,
-        history: data.history ?? prev.history
-      }));
-    };
-
-    const handleTimer = (data) => {
-
-      setAuction(prev => ({
-        ...prev,
-        timer: data.remaining_seconds
-      }));
-    };
-
-    const handlePaused = (data) => {
-
-      setAuction(prev => ({
-        ...prev,
-        paused: true,
-        timer: data.remaining_seconds
-      }));
-    };
-
-    const handleResumed = (data) => {
-
-      setAuction(prev => ({
-        ...prev,
-        paused: false,
-        timer: data.remaining_seconds
-      }));
-    };
-
-    const handleEnded = (data) => {
-
-      if (data.status === "sold") {
-        navigate("/sold", { state: data });
-      } else {
-        navigate("/unsold", { state: data });
-      }
-    };
-
-    const handlePurseUpdate = (data) =>{
-      setAuction(prev => ({
-        ...prev,
-        teamBalance: data.purse
-      }));
-    }
-
-    socket.on("auction_status", handleAuctionStatus);
-    socket.on("auction_started", handleAuctionStarted);
-    socket.on("auction_update", handleAuctionUpdate);
-    socket.on("timer_update", handleTimer);
-    socket.on("auction_paused", handlePaused);
-    socket.on("auction_resumed", handleResumed);
-    socket.on("auction_ended", handleEnded);
-    socket.on("purse_update", handlePurseUpdate);
+    socket.on("auction_status", onStatus);
+    socket.on("auction_started", onStarted);
+    socket.on("auction_update", onUpdate);
+    socket.on("timer_update", onTimer);
+    socket.on("auction_paused", onPaused);
+    socket.on("auction_resumed", onResumed);
+    socket.on("auction_ended", onEnded);
+    socket.on("purse_update", onPurse);
 
     socket.on("bid_rejected", (msg) => {
       alert(msg?.error || "Bid rejected");
     });
 
     return () => {
-
-      socket.off("auction_status", handleAuctionStatus);
-      socket.off("auction_started", handleAuctionStarted);
-      socket.off("auction_update", handleAuctionUpdate);
-      socket.off("timer_update", handleTimer);
-      socket.off("auction_paused", handlePaused);
-      socket.off("auction_resumed", handleResumed);
-      socket.off("auction_ended", handleEnded);
+      socket.off("auction_status", onStatus);
+      socket.off("auction_started", onStarted);
+      socket.off("auction_update", onUpdate);
+      socket.off("timer_update", onTimer);
+      socket.off("auction_paused", onPaused);
+      socket.off("auction_resumed", onResumed);
+      socket.off("auction_ended", onEnded);
       socket.off("bid_rejected");
-      socket.off("purse_update", handlePurseUpdate);
+      socket.off("purse_update", onPurse);
     };
 
   }, [user, authLoading, navigate]);
@@ -193,16 +260,7 @@ const Auction = () => {
 
   // ---------------- TIMER FORMAT ----------------
 
-  const formatTime = (seconds) => {
-
-    const s = Math.max(0, Math.floor(Number(seconds) || 0));
-    const mins = String(Math.floor(s / 60)).padStart(2, "0");
-    const secs = String(s % 60).padStart(2, "0");
-
-    return `${mins}:${secs}`;
-  };
-
-  if (loading) return <p>Loading auction...</p>;
+  if (auction.loading) return <p>Loading auction...</p>;
 
   if (!auction.player) {
 
@@ -289,9 +347,10 @@ const Auction = () => {
               {/* BIDDING BUTTONS */}
               <div className="col-md-4 d-flex flex-column align-items-center">
                 <div className="quick-bids mb-1">
-                  {nextSteps.map((b, i) => (
+                  {nextSteps.map((b) => (
                     <button
-                      key={i}
+                      type="button"
+                      key={b}
                       className="btn btn-danger m-1 bit-btn"
                       disabled={
                         auction.paused ||
@@ -338,7 +397,7 @@ const Auction = () => {
 
                   return (
                     <p
-                      key={i}
+                      key={`${note.team_name}-${note.bid_amount}-${note.bid_time}`}
                       className={`${flashIndex === i ? "flash" : ""
                         } ${rankClass}`}
                     >

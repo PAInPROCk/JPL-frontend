@@ -2,7 +2,6 @@ import "./Unsold.css";
 import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import fallbackImg from "../assets/images/PlAyer.png";
-import axios from "axios";
 import { api } from "../Config";
 import { API_BASE_URL } from "../Utils/constants";
 
@@ -19,40 +18,33 @@ const Unsold = () => {
 
   // 🧠 If player data missing (e.g. page reloaded), fetch it by ID
   useEffect(() => {
-
-    // const playerId =
-    //   location.state?.player?.id ||
-    //   location.state?.player_id;
-
+    let ignore = false;
     if (!playerId) return;
 
     const loadPlayer = async () => {
-
       try {
-
         const res = await api.get(
           `/players/${playerId}`,
           { withCredentials: true }
         );
 
-        if (res.data) {
+        if (res.data && !ignore) {
           setPlayer(res.data);
           setBasePrice(res.data.base_price);
         }
-
       } catch (err) {
-
         console.error("Failed to fetch player info:", err);
-
       }
-
     };
 
     if (!player) {
       loadPlayer();
     }
 
-  }, [player, location.state]);
+    return () => {
+      ignore = true;
+    };
+  }, [player, playerId]);
 
   // 🕒 Auto return to auction after 10 seconds
   useEffect(() => {
@@ -93,6 +85,7 @@ const Unsold = () => {
       <div className="bg text-white text-center py-5">
         <h2>No player data available</h2>
         <button
+          type="button"
           className="btn btn-light mt-3"
           onClick={() => navigate("/Admin_auction")}
         >

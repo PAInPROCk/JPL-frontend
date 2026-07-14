@@ -28,7 +28,7 @@ const Home = () => {
           <p className="card-text">
             
           </p>
-          <button onClick={handleClick} className="btn btn-primary">View Teams</button>
+          <button type="button" onClick={handleClick} className="btn btn-primary">View Teams</button>
           
         </div>
       </div>
@@ -39,7 +39,7 @@ const Home = () => {
           <p className="card-text">
             
           </p>
-          <button onClick={auctionClick} className="btn btn-primary">Auction</button>
+          <button type="button" onClick={auctionClick} className="btn btn-primary">Auction</button>
           
         </div>
       </div>
@@ -48,7 +48,7 @@ const Home = () => {
         <div className="card-body">
           <p className="card-text">
           </p>
-          <button onClick={playersClick} className="btn btn-primary">Players</button>
+          <button type="button" onClick={playersClick} className="btn btn-primary">Players</button>
         </div>
       </div>
     </div>

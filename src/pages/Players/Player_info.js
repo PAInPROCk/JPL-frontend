@@ -1,7 +1,6 @@
 import { useParams, useSearchParams } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import "./Player_info.css";
-import {fetchPlayers} from "./PlayerData";
 import { api } from "../../Config";
 import fallbackImg from "../../assets/images/PlAyer.png";
 import teamIcon from "../../assets/images/football-team_16848377.png";
@@ -132,10 +131,9 @@ const Player_info = () => {
                   <div className="d-flex gap-3 mt-2 flex-wrap">
                     
                      {player.teams_played
-                      ? player.teams_played?.split(",").map((team, i) => (
-                          <div key={i} className="text-center">
+                      ? player.teams_played?.split(",").map((team) => (
+                          <div key={team.trim()} className="text-center">
                           <img
-                            key={i}
                             src={teamLogos[team.trim()] || teamIcon}
                             className="team-logo1"
                             alt={team}

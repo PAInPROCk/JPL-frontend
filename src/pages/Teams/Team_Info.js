@@ -2,9 +2,8 @@ import Navbar from "../../components/Navbar";
 import "./Team_Info.css";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { fetchTeams } from "./TeamData";
+import { fetchTeams, fetchTeamPlayers } from "./TeamData";
 import fallbackImg from "../../assets/images/football-team_16848377.png";
-
 import { API_BASE_URL } from "../../Utils/constants";
 
 const Team_info = () => {
@@ -14,26 +13,27 @@ const Team_info = () => {
   const [players, setPlayers] = useState([]);
 
   useEffect(() => {
+    let ignore = false;
     const loadTeam = async () => {
+      if (ignore) return;
       const teams = await fetchTeams();
-      const foundTeam = teams.find((t) => t.team_id.toString() === id);
+      if (!ignore) {
+        const foundTeam = teams.find((t) => t.team_id.toString() === id);
+        setTeam(foundTeam || null);
 
-      setTeam(foundTeam || null);
-
-      // ✅ NEW: fetch players of this team
-      try {
-        const res = await fetch(`${API_BASE_URL}/team/${id}`);
-        const data = await res.json();
-        setPlayers(data.players || []);
-      } catch (err) {
-        console.error("Error fetching players:", err);
-        setPlayers([]);
+        const playersData = await fetchTeamPlayers(id);
+        if (!ignore) {
+          setPlayers(playersData);
+        }
       }
 
-      setLoading(false);
+      if (!ignore) setLoading(false);
     };
 
     loadTeam();
+    return () => {
+      ignore = true;
+    };
   }, [id]);
 
   if (loading) {

@@ -47,7 +47,7 @@ const Auction_rule = () => {
           </div>
           {/* Add more rules similarly */}
           <div className="text-center mt-5">
-            <button onClick={handleClick} className="btn btn-success px-4 py-2 fw-bold">
+            <button type="button" onClick={handleClick} className="btn btn-success px-4 py-2 fw-bold">
               Proceed
             </button>
           </div>
