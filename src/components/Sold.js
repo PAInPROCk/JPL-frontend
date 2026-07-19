@@ -3,7 +3,7 @@ import React, { useEffect } from "react";
 import fallBackImage from "../assets/images/football-team_16848377.png"
 import { useNavigate, useLocation } from "react-router-dom";
 import { api } from "../Config";
-import { API_BASE_URL } from "../Utils/constants";
+import { getImageUrl } from "../Utils/constants";
 
 const Sold = () => {
   const navigate = useNavigate();
@@ -53,11 +53,7 @@ const Sold = () => {
             <div className="player-card bg-dark p-4 rounded-4 shadow-lg">
               <div className="position-relative">
                 <img
-                  src={
-                    player.image_path
-                      ? `${API_BASE_URL}/${player.image_path}`
-                      : "/fallback_player.png"
-                  }
+                  src={getImageUrl(player.image_path) || "/fallback_player.png"}
                   alt={player.name}
                   className="img-fluid rounded-circle border border-4 border-success mb-3 player-img"
                 />
@@ -81,11 +77,7 @@ const Sold = () => {
           <div className="col-md-5 text-center">
             <div className="team-card bg-dark p-4 rounded-4 shadow-lg">
               <img
-                src={
-                  team.image_path
-                  ? `${API_BASE_URL}/${team.image_path}`
-                  : fallBackImage
-                }
+                src={getImageUrl(team.image_path) || fallBackImage}
                 alt={team.team_name}
                 className="img-fluid rounded-circle border border-4 border-info mb-3 team-img"
               />

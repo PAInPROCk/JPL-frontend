@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import fallbackImg from "../assets/images/PlAyer.png";
 import { api } from "../Config";
-import { API_BASE_URL } from "../Utils/constants";
+import { getImageUrl } from "../Utils/constants";
 
 
 const Unsold = () => {
@@ -103,7 +103,7 @@ const Unsold = () => {
           <div className="col-md-4 text-center">
             <div className="unsold-img-wrapper">
               <img
-                src={player.image_path ? `${API_BASE_URL}/${player.image_path}` : fallbackImg}
+                src={getImageUrl(player.image_path) || fallbackImg}
                 alt={player.name}
                 className="img-fluid rounded-circle border border-4"
                 onError={(e) => (e.target.src = fallbackImg)}

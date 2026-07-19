@@ -10,7 +10,7 @@ import titansLogo from "../../assets/teams/Team2.png";
 import warriorsLogo from "../../assets/teams/Team1.png";
 import kingsLogo from "../../assets/teams/Team3.png";
 import knightsLogo from "../../assets/teams/Team4.png";
-import { API_BASE_URL } from "../../Utils/constants";
+import { getImageUrl } from "../../Utils/constants";
 
 const teamLogos = {
   "JPL Titan": titansLogo,
@@ -73,7 +73,7 @@ const Player_info = () => {
             {/* Player Image */}
             <div className="col-md-3 text-center">
               <img
-                src={player.image_path ? `${API_BASE_URL}/${player.image_path}` : fallbackImg}
+                src={getImageUrl(player.image_path) || fallbackImg}
                 alt={player.name}
                 className="player-image img-fluid"
                 onError={(e) => (e.target.src = fallbackImg)}

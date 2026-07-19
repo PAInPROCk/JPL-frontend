@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { fetchTeams, fetchTeamPlayers } from "./TeamData";
 import fallbackImg from "../../assets/images/football-team_16848377.png";
-import { API_BASE_URL } from "../../Utils/constants";
+import { getImageUrl } from "../../Utils/constants";
 
 const Team_info = () => {
   const { id } = useParams();
@@ -65,11 +65,7 @@ const Team_info = () => {
           <div className="row g-4">
             <div className="col-md-3 text-center">
               <img
-                src={
-                  team.image_path
-                    ? `${API_BASE_URL}/${team.image_path}`
-                    : fallbackImg
-                }
+                src={getImageUrl(team.image_path) || fallbackImg}
                 alt={team.name}
                 className="team-image img-fluid"
                 onError={(e) => (e.target.src = fallbackImg)}
@@ -114,11 +110,7 @@ const Team_info = () => {
                         <div key={p.player_id} className="col-auto d-flex">
                           <div className="card shadow-sm text-center p-2 h-100 player-card-fixed">
                             <img
-                              src={
-                                p.image_path
-                                  ? `${API_BASE_URL}/${p.image_path}`
-                                  : fallbackImg
-                              }
+                              src={getImageUrl(p.image_path) || fallbackImg}
                               alt={p.name}
                               className="img-fluid rounded"
                               style={{ height: "120px", objectFit: "cover" }}

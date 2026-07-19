@@ -4,8 +4,9 @@ import fallbackImg from "../../assets/images/PlAyer.png";
 import { useEffect, useState, useRef, useCallback, useReducer } from "react";
 import { socket } from "../../socket";
 import { useNavigate } from "react-router-dom";
-import { API_BASE_URL } from "../../Utils/constants";
+import { getImageUrl } from "../../Utils/constants";
 import { useAuth } from "../../context/AuthContext";
+import { API_BASE_URL } from "../../Utils/constants";
 
 const formatTime = (seconds) => {
   const s = Math.max(0, Math.floor(Number(seconds) || 0));
@@ -286,11 +287,7 @@ const Auction = () => {
             <div className="row g-4">
               <div className="col-md-3 text-center">
                 <img
-                  src={
-                    auction.player.image_path
-                      ? `${API_BASE_URL}/${auction.player.image_path}`
-                      : fallbackImg
-                  }
+                  src={getImageUrl(auction.player.image_path) || fallbackImg}
                   alt={auction.player.name}
                   className="player-image img-fluid"
                   onError={(e) => (e.target.src = fallbackImg)}

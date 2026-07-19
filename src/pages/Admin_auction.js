@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { socket } from "../../src/socket";
 import useSyncedTimer from "../hooks/useSyncedTimer";
 import { api } from "../Config";
-import { API_BASE_URL } from "../Utils/constants";
+import { getImageUrl } from "../Utils/constants";
 
 // Single socket instance (hook-like)
 
@@ -350,11 +350,7 @@ const Admin_auction = () => {
                   {/* PLAYER IMAGE */}
                   <div className="col-md-3 text-center">
                     <img
-                      src={
-                        player.image_path
-                          ? `${API_BASE_URL}/${player.image_path}`
-                          : fallbackImg
-                      }
+                      src={getImageUrl(player.image_path) || fallbackImg}
                       alt={player.name}
                       className="player-image img-fluid"
                       onError={(e) => (e.target.src = fallbackImg)}

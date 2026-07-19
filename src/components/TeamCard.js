@@ -1,6 +1,6 @@
 import fallbackImg from "../assets/images/football-team_16848377.png"; // your alt image
 import { useNavigate} from "react-router-dom";
-import { API_BASE_URL } from "../Utils/constants";
+import { getImageUrl } from "../Utils/constants";
 
 const TeamCard = ({ team }) => {
   const navigate = useNavigate();
@@ -11,7 +11,7 @@ const TeamCard = ({ team }) => {
   return (
     <div className="player-card text-center p-3" >
       <img
-        src={ team.image_path ? `${API_BASE_URL}/${team.image_path}`: fallbackImg }
+        src={ getImageUrl(team.image_path) || fallbackImg }
         onError={(e) => (e.target.src = fallbackImg)}
         alt={team.img}
         className="img-fluid rounded-circle mb-2"
