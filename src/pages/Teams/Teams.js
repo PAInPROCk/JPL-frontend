@@ -29,15 +29,14 @@ const Teams = () =>{
           <div className="container py-5">
             <div className="row justify-content-center">
               {teams.map((team) => (
-                <button
-                  type="button"
+                <div
                   className="col-12 col-sm-6 col-md-4 col-lg-3 text-start" 
                   key={team.team_id}
                   onClick={() => navigate(`/team_info/${team.team_id}`)}
-                  style={{cursor: "pointer", background: "none", border: "none", padding: 0, display: "block"}}
+                  style={{cursor: "pointer"}}
                 >
                   <TeamCard team={team} />
-                </button>
+                </div>
               ))}
             </div>
           </div>
