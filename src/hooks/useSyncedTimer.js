@@ -1,9 +1,19 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 export default function useSyncedTimer(socket, setTimeLeft) {
+  const isPausedRef = useRef(false);
 
   useEffect(() => {
-    if (!socket) return;
+    // ⏱️ Smooth 1-second local countdown interval on the client
+    const interval = setInterval(() => {
+      if (!isPausedRef.current) {
+        setTimeLeft((prev) => (prev > 0 ? prev - 1 : 0));
+      }
+    }, 1000);
+
+    if (!socket) {
+      return () => clearInterval(interval);
+    }
 
     const handleTimerUpdate = (payload) => {
       if (!payload) return;
@@ -21,6 +31,7 @@ export default function useSyncedTimer(socket, setTimeLeft) {
     };
 
     const handlePaused = (data) => {
+      isPausedRef.current = true;
       const remaining = Number(
         data?.remaining_seconds ?? data?.remaining ?? 0
       );
@@ -28,6 +39,7 @@ export default function useSyncedTimer(socket, setTimeLeft) {
     };
 
     const handleResumed = (data) => {
+      isPausedRef.current = false;
       const remaining = Number(
         data?.remaining_seconds ?? data?.remaining ?? 0
       );
@@ -39,6 +51,7 @@ export default function useSyncedTimer(socket, setTimeLeft) {
     socket.on("auction_resumed", handleResumed);
 
     return () => {
+      clearInterval(interval);
       socket.off("timer_update", handleTimerUpdate);
       socket.off("auction_paused", handlePaused);
       socket.off("auction_resumed", handleResumed);
