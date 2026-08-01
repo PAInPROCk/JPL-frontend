@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Image Upload Auth Tester</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 30px; background: #121212; color: #fff; }
+    .card { background: #1e1e1e; padding: 20px; border-radius: 8px; max-width: 600px; margin: auto; }
+    button { background: #0d6efd; color: white; border: none; padding: 10px 20px; font-size: 16px; border-radius: 5px; cursor: pointer; margin: 10px 5px 10px 0; }
+    button:hover { background: #0b5ed7; }
+    pre { background: #000; padding: 15px; border-radius: 5px; color: #00ff00; overflow-x: auto; white-space: pre-wrap; word-break: break-all; }
+    .status { font-weight: bold; font-size: 18px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>🧪 Image Upload Authentication Tester</h2>
+    <p>Click the button below to send a POST request to <code>http://localhost:5000/upload-player-image</code>.</p>
+    
+    <button onclick="runTest()">Run Auth Test</button>
+
+    <div style="margin-top: 20px;">
+      <div class="status" id="statusCode">Status: -</div>
+      <pre id="output">Click button to run test...</pre>
+    </div>
+  </div>
+
+  <script>
+    // Valid 1x1 PNG image byte array
+    const validPngBytes = new Uint8Array([
+      0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d,
+      0x49, 0x48, 0x44, 0x52, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,
+      0x08, 0x06, 0x00, 0x00, 0x00, 0x1f, 0x15, 0xc4, 0x89, 0x00, 0x00, 0x00,
+      0x0d, 0x49, 0x44, 0x41, 0x54, 0x78, 0x9c, 0x63, 0x00, 0x01, 0x00, 0x00,
+      0x05, 0x00, 0x01, 0x0d, 0x0a, 0x2d, 0xb4, 0x00, 0x00, 0x00, 0x00, 0x49,
+      0x45, 0x4e, 0x44, 0xae, 0x42, 0x60, 0x82
+    ]);
+
+    async function runTest() {
+      const statusDiv = document.getElementById("statusCode");
+      const outputPre = document.getElementById("output");
+      
+      statusDiv.textContent = "Status: Sending request...";
+      outputPre.textContent = "Processing...";
+
+      const formData = new FormData();
+      const validImageBlob = new Blob([validPngBytes], { type: "image/png" });
+      formData.append("image", validImageBlob, "test_valid.png");
+
+      try {
+        const response = await fetch("http://localhost:5000/upload-player-image", {
+          method: "POST",
+          credentials: "include",
+          body: formData
+        });
+
+        statusDiv.textContent = "Status Code: " + response.status;
+        if (response.status === 401) {
+          statusDiv.style.color = "#ffc107";
+        } else if (response.status === 403) {
+          statusDiv.style.color = "#dc3545";
+        } else if (response.status === 200) {
+          statusDiv.style.color = "#198754";
+        } else {
+          statusDiv.style.color = "#fff";
+        }
+
+        const data = await response.text();
+        outputPre.textContent = data;
+      } catch (err) {
+        statusDiv.textContent = "Error: Failed to connect";
+        statusDiv.style.color = "#dc3545";
+        outputPre.textContent = err.toString() + "\nMake sure Uvicorn backend is running on port 5000!";
+      }
+    }
+  </script>
+</body>
+</html>

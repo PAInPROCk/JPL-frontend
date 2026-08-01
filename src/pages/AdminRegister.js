@@ -97,8 +97,8 @@ const AdminRegister = () => {
 
     if (name === "image" && files && files[0]) {
       const file = files[0];
-      if (file.size > 1 * 1024 * 1024) {
-        alert("Image size should be less than 1MB");
+      if (file.size > 5 * 1024 * 1024) {
+        alert("Image size should be less than 5MB");
         return;
       }
       if (!file.type.startsWith("image/")) {
