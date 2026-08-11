@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Players.css";
 import PlayerCard from "../../components/PlayerCard";
+import Spinner from "../../components/Spinner";
 import { fetchPlayers } from "./PlayerData";
 
 const Players = () => {
@@ -26,7 +27,7 @@ const Players = () => {
         <div className="players-page pt-5">
           <div className="container py-5">
             {loading ? (
-              <p className="text-center">Loading Players</p>
+              <Spinner />
             ) : (
             
             <div className="row justify-content-center">

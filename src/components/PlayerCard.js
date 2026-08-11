@@ -14,7 +14,7 @@ const PlayerCard = ({ player }) => {
         className="img-fluid rounded-circle mb-2"
         style={{ width: "150px", height: "150px", objectFit: "cover" }}
       />
-      <h5>{player.name}</h5>
+      <h5 className="truncate-text" title={player.name}>{player.name}</h5>
       <p className="text-muted fw-bold">{player.jersey}</p>
     </div>
   );

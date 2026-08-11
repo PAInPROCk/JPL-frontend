@@ -52,7 +52,8 @@
 }
 
 .current-price{
-  width: 300px;
+  width: 100%;
+  max-width: 300px;
   background: yellow;
   padding: 15px;
   border-radius: 20px;

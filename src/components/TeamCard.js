@@ -17,7 +17,7 @@ const TeamCard = ({ team }) => {
         className="img-fluid rounded-circle mb-2"
         style={{width: "150px", height: "150px", objectFit: "cover"}}
       />
-      <h5>{team.name}</h5>
+      <h5 className="truncate-text" title={team.name}>{team.name}</h5>
       <p className="text-white small mb-1">
         Captain: {team.captain || "N/A"}
       </p>
