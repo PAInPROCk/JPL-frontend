@@ -16,7 +16,8 @@ const TeamRegister = () => {
     imagePath: "",
     captain: "",
     mobile: "",
-    emailId: ""
+    emailId: "",
+    password: ""
   });
 
   const [preview, setPreview] = useState(null);
@@ -170,20 +171,37 @@ const TeamRegister = () => {
                        ></input>
                      </div>
                   </div>
-                  {/* <div className="col-md-3 info-box green">
-                    <div className="label">Email Id</div>
-                    <div className="value p-1">
-                      <input
-                        className="border-1"
-                        placeholder="Enter Teams Email Id"
-                        type="text"
-                        name="emailId"
-                        value={formData.emailId}
-                        onChange={handleChange}
-                        required
-                      ></input>
-                    </div>
-                  </div>*/}
+                  <div className="col-md-3 info-box green">
+                     <label htmlFor="emailId" className="label">Email Address</label>
+                     <div className="value p-1">
+                       <input
+                         id="emailId"
+                         className="border-1"
+                         placeholder="Enter Team Email Address"
+                         type="email"
+                         name="emailId"
+                         value={formData.emailId}
+                         onChange={handleChange}
+                         required
+                       ></input>
+                     </div>
+                  </div>
+
+                  <div className="col-md-3 info-box green">
+                     <label htmlFor="password" className="label">Login Password</label>
+                     <div className="value p-1">
+                       <input
+                         id="password"
+                         className="border-1"
+                         placeholder="Enter Team Password"
+                         type="password"
+                         name="password"
+                         value={formData.password}
+                         onChange={handleChange}
+                         required
+                       ></input>
+                     </div>
+                  </div>
 
                   {/* Stats */}
                   {/*<div className="col-md-3 stat-box orange">
