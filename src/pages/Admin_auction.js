@@ -53,6 +53,16 @@ const handleResume = async () => {
   }
 };
 
+const handleUndoSale = async () => {
+  if (!window.confirm("Are you sure you want to undo the last player sale?")) return;
+  try {
+    const res = await api.post("/undo-sale", {}, { withCredentials: true });
+    alert(res.data.message || "Player sale undone successfully!");
+  } catch (err) {
+    alert(err.response?.data?.detail || err.response?.data?.error || "Failed to undo sale");
+  }
+};
+
 const formatTime = (seconds) => {
   const s = Math.max(0, Math.floor(Number(seconds) || 0));
   const mins = String(Math.floor(s / 60)).padStart(2, "0");
@@ -440,6 +450,13 @@ const Admin_auction = () => {
                         onClick={handleCancel}
                       >
                         Cancel
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-secondary m-2"
+                        onClick={handleUndoSale}
+                      >
+                        Undo Sale
                       </button>
                       <button
                         type="button"
