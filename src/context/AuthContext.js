@@ -21,6 +21,7 @@ export const AuthProvider = ({ children }) => {
         // 🔌 connect socket ONLY after auth
         connectSocket();
       } else {
+        localStorage.removeItem("token");
         setUser(null);
 
         disconnectSocket();
@@ -28,6 +29,7 @@ export const AuthProvider = ({ children }) => {
     } catch (err) {
       console.error("🔐 AuthContext error:", err);
 
+      localStorage.removeItem("token");
       setUser(null);
 
       disconnectSocket();
@@ -42,6 +44,7 @@ export const AuthProvider = ({ children }) => {
     } catch (err) {
       console.error("Logout error:", err);
     } finally {
+      localStorage.removeItem("token");
       disconnectSocket();
 
       setUser(null);

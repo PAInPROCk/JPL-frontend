@@ -56,6 +56,10 @@ const Login = () => {
       // console.log("Login response:", res.data);
 
       if (res.data.user) {
+
+        if (res.data.token) {
+          localStorage.setItem("token", res.data.token);
+        }
         await refreshAuth(); // 🔥 sync global auth state
 
         if (res.data.user.role === "admin") {
