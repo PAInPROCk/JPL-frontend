@@ -54,6 +54,7 @@ const Sold = () => {
               <div className="position-relative">
                 <img
                   src={getImageUrl(player.image_path) || "/fallback_player.png"}
+                  onError={(e) => (e.target.src = "/fallback_player.png")}
                   alt={player.name}
                   className="img-fluid rounded-circle border border-4 border-success mb-3 player-img"
                 />
@@ -78,6 +79,7 @@ const Sold = () => {
             <div className="team-card bg-dark p-4 rounded-4 shadow-lg">
               <img
                 src={getImageUrl(team.image_path) || fallBackImage}
+                onError={(e) => (e.target.src = fallBackImage)}
                 alt={team.team_name}
                 className="img-fluid rounded-circle border border-4 border-info mb-3 team-img"
               />
