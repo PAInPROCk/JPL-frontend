@@ -63,6 +63,21 @@ const handleUndoSale = async () => {
   }
 };
 
+const handleRestartPlayer = async (playerId) => {
+  if (!window.confirm("Do you want to re-auction this player now?")) return;
+
+  try {
+    const res = await api.post(
+      "/restart-player",
+      { player_id: playerId, duration: 120 },
+      { withCredentials: true }
+    );
+    alert(res.data.message || "Auction restarted successfully!");
+  } catch (err) {
+    alert(err.response?.data?.detail || err.response?.data?.error || "Failed to restart auction");
+  }
+};
+
 const formatTime = (seconds) => {
   const s = Math.max(0, Math.floor(Number(seconds) || 0));
   const mins = String(Math.floor(s / 60)).padStart(2, "0");
@@ -465,6 +480,12 @@ const Admin_auction = () => {
                         disabled={auction.paused || !auction.active}
                       >
                         Next Player
+                      </button>
+                      <button
+                        className="btn btn-warning btn-sm m-1"
+                        onClick={() => handleRestartPlayer(player.id)}
+                      >
+                        Re-Auction Player
                       </button>
                     </div>
                   </div>
