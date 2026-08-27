@@ -1,6 +1,5 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import Login from "../components/Login";
-import Home from "../pages/Home";
 import Admin from "../pages/Admin";
 import Auction from "../pages/Auction/Auction";
 import Players from "../pages/Players/Players";
@@ -25,12 +24,12 @@ const AppRouter = () => {
     <Routes>
       {/* PUBLIC */}
       <Route path="/" element={<HomePage />} />
+      <Route path="/home" element={<Navigate to="/" replace />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
 
       {/* TEAM / LOGGED IN */}
       <Route element={<ProtectedRoute allowedRoles={["team", "admin"]} />}>
-        <Route path="/home" element={<Home />} />
         <Route path="/sold" element={<Sold />} />
         <Route path="/unsold" element={<Unsold />} />
         <Route path="/waiting" element={<Waiting />} />

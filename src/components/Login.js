@@ -65,7 +65,7 @@ const Login = () => {
         if (res.data.user.role === "admin") {
           navigate("/admin", { replace: true });
         } else {
-          navigate("/home", { replace: true });
+          navigate("/", { replace: true });
         }
       } else {
         dispatch({ type: "SET_ERROR", error: "Authentication Failed" });
