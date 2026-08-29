@@ -74,7 +74,7 @@ const Player_info = () => {
             <div className="col-md-3 text-center">
               <img
                 src={getImageUrl(player.image_path) || fallbackImg}
-                alt={player.name}
+                alt={player?.name || "Player photo"}
                 className="player-image img-fluid"
                 onError={(e) => (e.target.src = fallbackImg)}
               />
@@ -136,7 +136,7 @@ const Player_info = () => {
                           <img
                             src={teamLogos[team.trim()] || teamIcon}
                             className="team-logo1"
-                            alt={team}
+                            alt={`${team.trim()} logo`}
                           />
                           <div className="text-white small fw-bold">{team.trim()}</div>
                           </div>

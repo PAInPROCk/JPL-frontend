@@ -376,7 +376,7 @@ const Admin_auction = () => {
                   <div className="col-md-3 text-center">
                     <img
                       src={getImageUrl(player.image_path) || fallbackImg}
-                      alt={player.name}
+                      alt={player?.name || "Player in auction"}
                       className="player-image img-fluid"
                       onError={(e) => (e.target.src = fallbackImg)}
                     />

@@ -181,7 +181,7 @@ const AdminRegister = () => {
               <div className="col-md-3 text-center">
                 <img
                   src={preview || fallbackImg}
-                  alt="Player"
+                  alt={formData?.name ? `${formData.name} photo preview` : "Player photo preview"}
                   className="img-fluid rounded"
                   style={{ maxHeight: "200px", objectFit: "cover" }}
                 />

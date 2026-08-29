@@ -38,7 +38,7 @@ const Navbar = () => {
           <strong className="me-2">JPL</strong>
           <img
             src="/assets/images/cricket.png"
-            alt="Player"
+            alt="JPL Logo"
             width="37"
             height="37"
             className="me-1"

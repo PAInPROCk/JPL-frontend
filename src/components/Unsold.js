@@ -104,7 +104,7 @@ const Unsold = () => {
             <div className="unsold-img-wrapper">
               <img
                 src={getImageUrl(player.image_path) || fallbackImg}
-                alt={player.name}
+                alt={player?.name || "Unsold player photo"}
                 className="img-fluid rounded-circle border border-4"
                 onError={(e) => (e.target.src = fallbackImg)}
               />

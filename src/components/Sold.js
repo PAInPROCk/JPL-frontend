@@ -55,7 +55,7 @@ const Sold = () => {
                 <img
                   src={getImageUrl(player.image_path) || "/fallback_player.png"}
                   onError={(e) => (e.target.src = "/fallback_player.png")}
-                  alt={player.name}
+                  alt={player?.name || "Sold player photo"}
                   className="img-fluid rounded-circle border border-4 border-success mb-3 player-img"
                 />
                 <div className="sold-stamp">SOLD</div>
@@ -80,7 +80,7 @@ const Sold = () => {
               <img
                 src={getImageUrl(team.image_path) || fallBackImage}
                 onError={(e) => (e.target.src = fallBackImage)}
-                alt={team.team_name}
+                alt={team?.team_name || "Purchasing team logo"}
                 className="img-fluid rounded-circle border border-4 border-info mb-3 team-img"
               />
               <h2 className="fw-bold text-info">{team.team_name}</h2>

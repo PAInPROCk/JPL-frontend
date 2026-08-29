@@ -66,7 +66,7 @@ const Team_info = () => {
             <div className="col-md-3 text-center">
               <img
                 src={getImageUrl(team.image_path) || fallbackImg}
-                alt={team.name}
+                alt={team?.name || "Team logo"}
                 className="team-image img-fluid"
                 onError={(e) => (e.target.src = fallbackImg)}
               />
@@ -111,7 +111,7 @@ const Team_info = () => {
                           <div className="card shadow-sm text-center p-2 h-100 player-card-fixed">
                             <img
                               src={getImageUrl(p.image_path) || fallbackImg}
-                              alt={p.name}
+                              alt={p?.name || "Player photo"}
                               className="img-fluid rounded"
                               style={{ height: "120px", objectFit: "cover" }}
                               onError={(e) => (e.target.src = fallbackImg)}

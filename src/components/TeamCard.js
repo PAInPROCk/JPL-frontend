@@ -13,7 +13,7 @@ const TeamCard = ({ team }) => {
       <img
         src={ getImageUrl(team.image_path) || fallbackImg }
         onError={(e) => (e.target.src = fallbackImg)}
-        alt={team.img}
+        alt={team?.name || "Team logo"}
         className="img-fluid rounded-circle mb-2"
         style={{width: "150px", height: "150px", objectFit: "cover"}}
       />

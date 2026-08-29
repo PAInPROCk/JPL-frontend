@@ -25,13 +25,13 @@ const HomePage = () => {
         >
           <div className="carousel-inner">
             <div className="carousel-item active mt-5" data-bs-interval="2000">
-              <img src={jpl1} className="d-block w-100" alt="..." />
+              <img src={jpl1} className="d-block w-100" alt="JPL Tournament Banner 1" />
             </div>
             <div className="carousel-item mt-5">
-              <img src={jpl2} className="d-block w-100" alt="..." />
+              <img src={jpl2} className="d-block w-100" alt="JPL Tournament Banner 2" />
             </div>
             <div className="carousel-item mt-3">
-              <img src={jpl3} className="d-block w-100" alt="..." />
+              <img src={jpl3} className="d-block w-100" alt="JPL Tournament Banner 3" />
             </div>
           </div>
           <button

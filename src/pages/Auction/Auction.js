@@ -288,7 +288,7 @@ const Auction = () => {
               <div className="col-md-3 text-center">
                 <img
                   src={getImageUrl(auction.player.image_path) || fallbackImg}
-                  alt={auction.player.name}
+                  alt={auction?.player?.name || "Player in auction"}
                   className="player-image img-fluid"
                   onError={(e) => (e.target.src = fallbackImg)}
                 />
@@ -366,7 +366,7 @@ const Auction = () => {
                 </div>
                 <div className="p-3 mb-2 rounded bg-light shadow d-flex align-items-center">
                   <img src={user?.team_logo ? `${API_BASE_URL}/${user.team_logo}` : fallbackImg}
-                    alt="team logo"
+                    alt={user?.team_name ? `${user.team_name} logo` : "Team purse logo"}
                     width="50"
                     height="50"
                     className="me-2"/>

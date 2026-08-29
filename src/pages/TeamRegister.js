@@ -108,7 +108,7 @@ const TeamRegister = () => {
               <div className="col-md-3 text-center">
                 <img 
                   src={preview || fallbackImg}
-                  alt="Team"
+                  alt={formData?.name ? `${formData.name} logo preview` : "Team logo preview"}
                   className="img-fluid rounded"
                   style={{ maxHeight: "200px", objectFit: "cover"}}
                 />
