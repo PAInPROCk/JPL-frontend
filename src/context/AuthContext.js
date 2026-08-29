@@ -1,4 +1,4 @@
-import { createContext, use, useMemo, useCallback, useEffect, useState } from "react";
+import { createContext, useContext, useMemo, useCallback, useEffect, useState } from "react";
 import { api } from "../Config";
 import { connectSocket, disconnectSocket } from "../socket";
 
@@ -78,4 +78,4 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
-export const useAuth = () => use(AuthContext);
+export const useAuth = () => useContext(AuthContext);
