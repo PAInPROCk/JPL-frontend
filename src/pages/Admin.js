@@ -197,7 +197,7 @@ const Admin = () => {
                       <h6 style={{ fontWeight: 600 }}>Player Preview</h6>
                       <ul className="list-group">
                         {playerList.map((player, index) => (
-                          <li key={`${player.name}-${player.jerseyNo || index}`} className="list-group-item">
+                          <li key={player.id || `${player.name || 'player'}-${player.jerseyNo || player.jersey || index}-${index}`} className="list-group-item">
                             {player.name}
                           </li>
                         ))}
@@ -289,7 +289,7 @@ const Admin = () => {
                       <h6 style={{ fontWeight: 600 }}>Player Preview</h6>
                       <ul className="list-group">
                         {batchPlayerList.map((player, index) => (
-                          <li key={`${player.name}-${player.jerseyNo || index}`} className="list-group-item">
+                          <li key={player.id || `${player.name || 'player'}-${player.jerseyNo || player.jersey || index}-${index}`} className="list-group-item">
                             {player.name}
                           </li>
                         ))}

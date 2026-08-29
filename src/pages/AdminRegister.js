@@ -484,7 +484,7 @@ const AdminRegister = () => {
                         }`}
                       >
                         {(Array.isArray(teams) ? teams : []).map((team) => (
-                          <li key={team.id}>
+                          <li key={team.team_id || team.id}>
                             <div className="form-check">
                               <input
                                 className="form-check-input"

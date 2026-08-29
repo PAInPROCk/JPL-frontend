@@ -509,7 +509,7 @@ const Admin_auction = () => {
 
                       return (
                         <p
-                          key={`${note.team_name}-${note.bid_amount}-${note.bid_time}`}
+                          key={note.id || `${note.team_name || 'team'}-${note.bid_amount || 0}-${note.bid_time || i}-${i}`}
                           className={`${flashIndex === i ? "flash" : ""
                             } ${rankClass}`}
                         >
