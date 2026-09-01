@@ -1,5 +1,12 @@
 .home-bg{
-    background-image: url('/public/assets/images/stadium bg 4096x2867.jpg');
+    min-height: 100vh;
+    background-image: url('/public/assets/images/vecteezy_cricket-stadium_427062.jpg');
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .cc{
