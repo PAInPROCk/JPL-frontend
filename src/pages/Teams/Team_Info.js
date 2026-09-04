@@ -1,13 +1,16 @@
 import Navbar from "../../components/Navbar";
 import "./Team_Info.css";
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { fetchTeams, fetchTeamPlayers } from "./TeamData";
 import fallbackImg from "../../assets/images/football-team_16848377.png";
 import { getImageUrl } from "../../Utils/constants";
+import { useAuth } from "../../context/AuthContext";
 
 const Team_info = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const [team, setTeam] = useState(null);
   const [loading, setLoading] = useState(true);
   const [players, setPlayers] = useState([]);
@@ -73,6 +76,17 @@ const Team_info = () => {
             </div>
 
             <div className="col-md-9">
+              {user?.role === "admin" && (
+                <div className="d-flex justify-content-end mb-3">
+                  <button
+                    className="btn btn-warning fw-bold px-3 py-2 shadow-sm d-flex align-items-center gap-2"
+                    onClick={() => navigate(`/team_register?edit=${team.team_id}`, { state: { team } })}
+                    style={{ borderRadius: "8px" }}
+                  >
+                    ✏️ Edit Team Details
+                  </button>
+                </div>
+              )}
               <div className="row g-3">
                 <div className="col-md-6 info-box orange">
                   <div className="label">Team Name</div>

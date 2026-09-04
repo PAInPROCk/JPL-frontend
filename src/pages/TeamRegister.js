@@ -1,11 +1,18 @@
 import "./AdminRegister.css";
-import { useState } from "react";
-import fallbackImg from "../assets/images/football-team_16848377.png"
+import { useState, useEffect } from "react";
+import { useSearchParams, useLocation, useNavigate } from "react-router-dom";
+import fallbackImg from "../assets/images/football-team_16848377.png";
 import NavbarComponent from "../components/Navbar";
 import { api } from "../Config";
+import { getImageUrl } from "../Utils/constants";
+import { fetchTeamById, fetchTeams } from "./Teams/TeamData";
 
 const TeamRegister = () => {
-
+  const [searchParams] = useSearchParams();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const editTeamId = searchParams.get("edit");
+  const isEdit = Boolean(editTeamId);
 
   const [formData, setFormData] = useState({
     teamName: "",
@@ -22,6 +29,54 @@ const TeamRegister = () => {
 
   const [preview, setPreview] = useState(null);
   const [error, setError] = useState("");
+  const [loadingTeam, setLoadingTeam] = useState(isEdit);
+
+  useEffect(() => {
+    let ignore = false;
+    const loadTeamData = async () => {
+      if (!isEdit) return;
+
+      setLoadingTeam(true);
+      let teamData = location.state?.team;
+
+      if (!teamData) {
+        try {
+          teamData = await fetchTeamById(editTeamId);
+          if (!teamData) {
+            const allTeams = await fetchTeams();
+            teamData = allTeams.find((t) => t.team_id.toString() === editTeamId.toString());
+          }
+        } catch (err) {
+          console.error("Failed to load team details for editing:", err);
+        }
+      }
+
+      if (!ignore && teamData) {
+        setFormData({
+          teamName: teamData.name || teamData.teamName || "",
+          teamRank: teamData.team_rank || teamData.trank || teamData.Team_Rank || "",
+          totalBudget: teamData.total_budget || teamData.Total_Budget || "",
+          seasonBudget: teamData.season_budget || teamData.Season_Budget || teamData.current_budget || teamData.purse || "",
+          playersBought: teamData.players_bought || teamData.Players_Bought || "",
+          imagePath: teamData.image_path || "",
+          captain: teamData.captain || "",
+          mobile: teamData.mobile_no || teamData.mobile_No || teamData.mobile || "",
+          emailId: teamData.email_id || teamData.email_Id || teamData.email || "",
+          password: ""
+        });
+
+        if (teamData.image_path) {
+          setPreview(getImageUrl(teamData.image_path));
+        }
+        setLoadingTeam(false);
+      }
+    };
+
+    loadTeamData();
+    return () => {
+      ignore = true;
+    };
+  }, [editTeamId, isEdit, location.state]);
 
   const handleChange = (e) => {
 
@@ -66,27 +121,43 @@ const TeamRegister = () => {
 
     const data = new FormData();
     Object.keys(formData).forEach((key) => {
-  if (key === "image") {
-    if (formData.image) {
-      data.append("image", formData.image);
-    }
-  } else {
-    if (formData[key] !== "" && formData[key] !== null) {
-      data.append(key, formData[key]);
-    }
-  }
-});
+      if (key === "image") {
+        if (formData.image) {
+          data.append("image", formData.image);
+        }
+      } else {
+        // Skip blank password on edit so existing password isn't overwritten
+        if (isEdit && key === "password" && !formData.password) {
+          return;
+        }
+        if (formData[key] !== "" && formData[key] !== null) {
+          data.append(key, formData[key]);
+        }
+      }
+    });
 
     try {
-      const res = await api.post(
-        "/add-team",
-        data,
-        {
-          headers: { "Content-Type": "multipart/form-data" },
-        }
-      );
-      alert(res.data.message || "Team Added Successfully");
-      console.log("Upload Image:", res.data.image);
+      if (isEdit) {
+        const res = await api.put(
+          `/team/${editTeamId}`,
+          data,
+          {
+            headers: { "Content-Type": "multipart/form-data" },
+          }
+        );
+        alert(res.data.message || "Team Updated Successfully");
+        navigate(`/team_info/${editTeamId}`);
+      } else {
+        const res = await api.post(
+          "/add-team",
+          data,
+          {
+            headers: { "Content-Type": "multipart/form-data" },
+          }
+        );
+        alert(res.data.message || "Team Added Successfully");
+        navigate("/teams");
+      }
     } catch (err) {
       console.log(err.response?.data);
       alert(err.response?.data?.detail || "Something Went wrong");
@@ -103,6 +174,20 @@ const TeamRegister = () => {
             </div>
           )}
           <div className="container player-info-container shadow p-3  rounded register-rg">
+            <div className="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-secondary">
+              <h4 className="text-white m-0">
+                {isEdit ? `✏️ Edit Team: ${formData.teamName || "Existing Team"}` : "Register New Team"}
+              </h4>
+              {isEdit && (
+                <button
+                  type="button"
+                  className="btn btn-outline-light btn-sm px-3"
+                  onClick={() => navigate(`/team_info/${editTeamId}`)}
+                >
+                  ← Back to Team
+                </button>
+              )}
+            </div>
             <div className="row g-5">
               {/* Team Image */}
               <div className="col-md-3 text-center">
@@ -193,12 +278,12 @@ const TeamRegister = () => {
                        <input
                          id="password"
                          className="border-1"
-                         placeholder="Enter Team Password"
+                         placeholder={isEdit ? "Leave blank to keep current" : "Enter Team Password"}
                          type="password"
                          name="password"
                          value={formData.password}
                          onChange={handleChange}
-                         required
+                         required={!isEdit}
                        ></input>
                      </div>
                   </div>
@@ -259,13 +344,24 @@ const TeamRegister = () => {
                       ></input>
                     </div>
                   </div>*/}
-                  <button
-                    className="btn btn-primary btn-c"
-                    type="submit"
-                    onClick={handleSubmit}
-                  >
-                    Submit form
-                  </button>
+                  <div className="d-flex gap-2 mt-3 w-100">
+                    <button
+                      className={`btn ${isEdit ? "btn-warning" : "btn-primary"} flex-grow-1 btn-c fw-bold`}
+                      type="submit"
+                      onClick={handleSubmit}
+                    >
+                      {isEdit ? "💾 Update Team Details" : "Submit form"}
+                    </button>
+                    {isEdit && (
+                      <button
+                        type="button"
+                        className="btn btn-secondary btn-c fw-bold px-4"
+                        onClick={() => navigate(`/team_info/${editTeamId}`)}
+                      >
+                        Cancel
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>

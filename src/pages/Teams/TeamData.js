@@ -19,3 +19,13 @@ export const fetchTeamPlayers = async (id) => {
         return [];
     }
 };
+
+export const fetchTeamById = async (id) => {
+    try {
+        const response = await api.get(`/team/${id}`);
+        return response.data.team || null;
+    } catch (error) {
+        console.error("Error Fetching Team by ID", error);
+        return null;
+    }
+};
