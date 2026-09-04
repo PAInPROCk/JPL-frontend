@@ -1,4 +1,4 @@
-import { useParams, useSearchParams } from "react-router-dom";
+import { useParams, useSearchParams, useNavigate } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import "./Player_info.css";
 import { api } from "../../Config";
@@ -11,6 +11,7 @@ import warriorsLogo from "../../assets/teams/Team1.png";
 import kingsLogo from "../../assets/teams/Team3.png";
 import knightsLogo from "../../assets/teams/Team4.png";
 import { getImageUrl } from "../../Utils/constants";
+import { useAuth } from "../../context/AuthContext";
 
 const teamLogos = {
   "JPL Titan": titansLogo,
@@ -22,7 +23,9 @@ const teamLogos = {
 const Player_info = () => {
   const { id } = useParams();
   const [searcParams] = useSearchParams();
-  const role = searcParams.get("role")
+  const role = searcParams.get("role") || "player";
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const [player, setPlayer] = useState(null);
   const [loading, setLoading] = useState(true); 
 
@@ -82,6 +85,17 @@ const Player_info = () => {
 
             {/* Player Details */}
             <div className="col-md-9">
+              {user?.role === "admin" && (
+                <div className="d-flex justify-content-end mb-3">
+                  <button
+                    className="btn btn-warning fw-bold px-3 py-2 shadow-sm d-flex align-items-center gap-2"
+                    onClick={() => navigate(`/admin_register?edit=${player.id || id}`, { state: { player } })}
+                    style={{ borderRadius: "8px" }}
+                  >
+                    ✏️ Edit Player Details
+                  </button>
+                </div>
+              )}
               <div className="row g-3">
                 <div className="col-md-6 info-box green">
                   <div className="label">Player Name</div>

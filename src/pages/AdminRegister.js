@@ -1,8 +1,10 @@
 import "./AdminRegister.css";
 import { useReducer, useEffect } from "react";
+import { useSearchParams, useLocation, useNavigate } from "react-router-dom";
 import fallbackImg from "../assets/images/PlAyer.png";
 import NavbarComponent from "../components/Navbar";
 import { api } from "../Config";
+import { getImageUrl } from "../Utils/constants";
 
 const initialState = {
   formData: {
@@ -53,6 +55,12 @@ function adminRegisterReducer(state, action) {
 }
 
 const AdminRegister = () => {
+  const [searchParams] = useSearchParams();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const editPlayerId = searchParams.get("edit");
+  const isEdit = Boolean(editPlayerId);
+
   const [state, dispatch] = useReducer(adminRegisterReducer, initialState);
   const { formData, teams, preview, dropdownOpen, error } = state;
 
@@ -81,6 +89,92 @@ const AdminRegister = () => {
     };
     fetchTeams();
   }, []);
+
+  useEffect(() => {
+    let ignore = false;
+    const loadPlayerData = async () => {
+      if (!isEdit) return;
+
+      let playerData = location.state?.player;
+
+      if (!playerData) {
+        try {
+          const res = await api.get(`/players/${editPlayerId}?role=player`);
+          playerData = res.data?.data || res.data;
+        } catch (err) {
+          console.error("Failed to load player details for editing:", err);
+        }
+      }
+
+      if (!ignore && playerData) {
+        let pName = "";
+        let fName = "";
+        let sName = "";
+        if (playerData.name) {
+          const parts = playerData.name.trim().split(/\s+/);
+          if (parts.length === 1) {
+            pName = parts[0];
+          } else if (parts.length === 2) {
+            pName = parts[0];
+            sName = parts[1];
+          } else if (parts.length >= 3) {
+            pName = parts[0];
+            fName = parts.slice(1, -1).join(" ");
+            sName = parts[parts.length - 1];
+          }
+        }
+
+        let initialTeams = [];
+        if (Array.isArray(playerData.teams)) {
+          initialTeams = playerData.teams.map((t) => String(t.team_id || t.id || t));
+        } else if (playerData.team_ids) {
+          initialTeams = String(playerData.team_ids)
+            .split(",")
+            .map((t) => t.trim())
+            .filter(Boolean);
+        } else if (typeof playerData.teams === "string" && playerData.teams.trim()) {
+          initialTeams = playerData.teams
+            .split(",")
+            .map((t) => t.trim())
+            .filter(Boolean);
+        }
+
+        dispatch({
+          type: "SET_FORM_DATA",
+          value: {
+            playerName: playerData.playerName || pName || "",
+            fatherName: playerData.fatherName || fName || "",
+            surName: playerData.surName || sName || "",
+            jerseyNo: playerData.jersey ?? playerData.jerseyNo ?? "",
+            nickName: playerData.nickname || playerData.nickName || "",
+            category: playerData.category || "",
+            style: playerData.type || playerData.style || "",
+            totalRuns: playerData.total_runs ?? playerData.totalRuns ?? "",
+            highestRuns: playerData.highest_runs ?? playerData.highestRuns ?? "",
+            basePrice: playerData.base_price ?? playerData.basePrice ?? "",
+            wickets: playerData.wickets_taken ?? playerData.wickets ?? "",
+            outs: playerData.times_out ?? playerData.outs ?? "",
+            role: playerData.role || playerData.type || "Player",
+            mobile: playerData.mobile_no || playerData.mobile || "",
+            emailId: playerData.email_id || playerData.emailId || "",
+            age: playerData.age ?? "",
+            gender: playerData.gender || "",
+            image: null,
+            teams: initialTeams,
+          },
+        });
+
+        if (playerData.image_path) {
+          dispatch({ type: "SET_PREVIEW", value: getImageUrl(playerData.image_path) });
+        }
+      }
+    };
+
+    loadPlayerData();
+    return () => {
+      ignore = true;
+    };
+  }, [editPlayerId, isEdit, location.state]);
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
@@ -140,31 +234,47 @@ const AdminRegister = () => {
 
     const data = new FormData();
     Object.keys(formData).forEach((key) => {
-  if (key === "teams") {
-    formData.teams.forEach((teamId) =>
-      data.append("teams", Number(teamId))
-    );
-  } else if (key === "image") {
-    if (formData.image) {
-      data.append("image", formData.image);
-    }
-  } else {
-    if (formData[key] !== "" && formData[key] !== null) {
-      data.append(key, formData[key]);
-    }
-  }
-});
+      if (key === "teams") {
+        if (formData.teams.length === 0) {
+          data.append("teams", "");
+        } else {
+          formData.teams.forEach((teamId) =>
+            data.append("teams", Number(teamId))
+          );
+        }
+      } else if (key === "image") {
+        if (formData.image) {
+          data.append("image", formData.image);
+        }
+      } else {
+        if (formData[key] !== "" && formData[key] !== null && formData[key] !== undefined) {
+          data.append(key, formData[key]);
+        }
+      }
+    });
 
     try {
-      const res = await api.post("/add-player", data, {
-        headers: { "Content-Type": "multipart/form-data" },
-        withCredentials: true,
-      });
-      alert(res.data.message || "Player Added Successfully");
+      if (isEdit) {
+        const res = await api.put(`/players/${editPlayerId}`, data, {
+          headers: { "Content-Type": "multipart/form-data" },
+          withCredentials: true,
+        });
+        alert(res.data?.message || "Player Updated Successfully");
+        navigate(`/player_info/${editPlayerId}`);
+      } else {
+        const res = await api.post("/add-player", data, {
+          headers: { "Content-Type": "multipart/form-data" },
+          withCredentials: true,
+        });
+        alert(res.data?.message || "Player Added Successfully");
+        navigate("/players");
+      }
     } catch (err) {
+      console.error(err.response?.data);
       alert(err.response?.data?.detail || err.response?.data?.error || "Something Went Wrong");
     }
   };
+
   return (
     <>
       <div className="register-bg">
@@ -175,7 +285,23 @@ const AdminRegister = () => {
               {error}
             </div>
           )}
-          <div className="container player-info-container1 shadow p-3  rounded register-rg">
+          <div className="container player-info-container1 shadow p-3 rounded register-rg">
+            <div className="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-secondary">
+              <h4 className="text-white m-0">
+                {isEdit
+                  ? `✏️ Edit Player: ${[formData.playerName, formData.surName].filter(Boolean).join(" ") || "Existing Player"}`
+                  : "Register New Player"}
+              </h4>
+              {isEdit && (
+                <button
+                  type="button"
+                  className="btn btn-outline-light btn-sm px-3"
+                  onClick={() => navigate(`/player_info/${editPlayerId}`)}
+                >
+                  ← Back to Player
+                </button>
+              )}
+            </div>
             <div className="row g-5">
               {/* Player Image */}
               <div className="col-md-3 text-center">
@@ -508,13 +634,24 @@ const AdminRegister = () => {
                     </div>
                   </div>
 
-                  <button
-                    className="btn btn-primary btn-c"
-                    type="submit"
-                    onClick={handleSubmit}
-                  >
-                    Submit form
-                  </button>
+                  <div className="d-flex gap-2 mt-3 w-100">
+                    <button
+                      className={`btn ${isEdit ? "btn-warning" : "btn-primary"} flex-grow-1 btn-c fw-bold`}
+                      type="submit"
+                      onClick={handleSubmit}
+                    >
+                      {isEdit ? "💾 Update Player Details" : "Submit form"}
+                    </button>
+                    {isEdit && (
+                      <button
+                        type="button"
+                        className="btn btn-secondary btn-c fw-bold px-4"
+                        onClick={() => navigate(`/player_info/${editPlayerId}`)}
+                      >
+                        Cancel
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>

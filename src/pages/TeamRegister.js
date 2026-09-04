@@ -29,14 +29,11 @@ const TeamRegister = () => {
 
   const [preview, setPreview] = useState(null);
   const [error, setError] = useState("");
-  const [loadingTeam, setLoadingTeam] = useState(isEdit);
 
   useEffect(() => {
     let ignore = false;
     const loadTeamData = async () => {
       if (!isEdit) return;
-
-      setLoadingTeam(true);
       let teamData = location.state?.team;
 
       if (!teamData) {
@@ -68,7 +65,6 @@ const TeamRegister = () => {
         if (teamData.image_path) {
           setPreview(getImageUrl(teamData.image_path));
         }
-        setLoadingTeam(false);
       }
     };
 
