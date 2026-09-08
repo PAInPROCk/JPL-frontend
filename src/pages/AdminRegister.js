@@ -182,9 +182,7 @@ const AdminRegister = () => {
     if (name === "emailId") {
       dispatch({ type: "SET_ERROR", value: "" });
       const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!value) {
-        dispatch({ type: "SET_ERROR", value: "Please Enter Email Address" });
-      } else if (!emailPattern.test(value)) {
+      if (value && !emailPattern.test(value)) {
         dispatch({ type: "SET_ERROR", value: "Invalid Email Format" });
       }
     }
@@ -388,20 +386,21 @@ const AdminRegister = () => {
                     </div>
                   </div>
 
-                  {/*<div className="col-md-3 info-box green">
-                    <div className="label">Jersey No</div>
+                  <div className="col-md-3 info-box green">
+                    <label className="label" htmlFor="jerseyNo">Jersey No</label>
                     <div className="value p-1">
                       <input
                         className="border-1"
                         placeholder="Enter Jersey Number"
                         type="number"
+                        min="0"
                         name="jerseyNo"
+                        id="jerseyNo"
                         value={formData.jerseyNo}
                         onChange={handleChange}
-                        required
                       ></input>
                     </div>
-                  </div>*/}
+                  </div>
                   <div className="col-md-3 info-box green">
                     <label className="label" htmlFor="nickName">Nick Name</label>
                     <div className="value p-1">
@@ -411,7 +410,6 @@ const AdminRegister = () => {
                         placeholder="Enter Nick Name"
                         name="nickName"
                         id="nickName"
-                        pattern="[A-Z]"
                         value={formData.nickName}
                         onChange={handleChange}
                       ></input>
@@ -426,7 +424,6 @@ const AdminRegister = () => {
                         placeholder="Enter Mobile Number without +91"
                         name="mobile"
                         id="mobile"
-                        pattern="[0-9]"
                         value={formData.mobile}
                         onChange={handleChange}
                       ></input>
@@ -441,27 +438,27 @@ const AdminRegister = () => {
                         placeholder="Enter age of player"
                         name="age"
                         id="age"
-                        pattern="[0-9]"
-                        maxLength="2"
+                        min="1"
+                        max="99"
                         value={formData.age}
                         onChange={handleChange}
                       ></input>
                     </div>
                   </div>
-                  {/*<div className="col-md-3 info-box green">
-                    <div className="label">Email</div>
+                  <div className="col-md-3 info-box green">
+                    <label className="label" htmlFor="emailId">Email</label>
                     <div className="value p-1">
                       <input
                         className="border-1 ph1"
                         type="email"
                         placeholder="Enter Email Address"
                         name="emailId"
+                        id="emailId"
                         value={formData.emailId}
                         onChange={handleChange}
-                        required
                       ></input>
                     </div>
-                  </div>*/}
+                  </div>
                   <div className="col-md-3 info-box red">
                     <label className="label" htmlFor="role">Role</label>
                     <div className="value p-1">
@@ -477,7 +474,7 @@ const AdminRegister = () => {
                       ></input>
                     </div>
                   </div>
-                  <div className="col-md-6 info-box red">
+                  <div className="col-md-3 info-box red">
                     <label className="label" htmlFor="category">Player Category</label>
                     <div className="value p-1">
                       <input
@@ -485,9 +482,8 @@ const AdminRegister = () => {
                         type="text"
                         name="category"
                         id="category"
-                        maxLength="1"
-                        pattern="[A-Z]"
-                        placeholder="Enter Category (A,B,C,D,...)"
+                        maxLength="2"
+                        placeholder="Enter Category (A,B,C,D...)"
                         value={formData.category}
                         onChange={handleChange}
                         onInput={handleClickUpper}
@@ -495,7 +491,7 @@ const AdminRegister = () => {
                       ></input>
                     </div>
                   </div>
-                  <div className="col-md-6 info-box red">
+                  <div className="col-md-3 info-box red">
                     <label className="label" htmlFor="style">Style</label>
                     <div className="value p-1">
                       <input
@@ -503,7 +499,7 @@ const AdminRegister = () => {
                         type="text"
                         name="style"
                         id="style"
-                        placeholder="Enter Playing style (ex: Right Hand Spinner)"
+                        placeholder="Playing style (e.g. Right Hand Spinner)"
                         value={formData.style}
                         onChange={handleChange}
                         required
@@ -515,7 +511,8 @@ const AdminRegister = () => {
                     <div className="value p-1">
                       <input
                         className="border-1 ph1"
-                        type="text"
+                        type="number"
+                        min="0"
                         name="basePrice"
                         id="basePrice"
                         placeholder="Enter Base Price (in INR ₹)"
@@ -526,64 +523,8 @@ const AdminRegister = () => {
                     </div>
                   </div>
 
-                  {/* Stats */}
-                  {/*<div className="col-md-3 stat-box orange">
-                    <div className="label">Total Runs</div>
-                    <div className="value p-1">
-                      <input
-                        className="border-1 ph1"
-                        type="number"
-                        name="totalRuns"
-                        placeholder="Enter Total Runs made in Career"
-                        value={formData.totalRuns}
-                        onChange={handleChange}
-                      ></input>
-                    </div>
-                  </div>*/}
-                  {/*<div className="col-md-3 stat-box orange">
-                    <div className="label">Highest Runs</div>
-                    <div className="value p-1">
-                      <input
-                        className="border-1 ph1"
-                        type="number"
-                        name="highestRuns"
-                        placeholder="Enter Highest Runs made in a single match"
-                        value={formData.highestRuns}
-                        onChange={handleChange}
-                      ></input>
-                    </div>
-                  </div>*/}
-                  {/*<div className="col-md-3 stat-box orange">
-                    <div className="label">Wickets Taken</div>
-                    <div className="value p-1">
-                      <input
-                        className="border-1 ph1"
-                        type="number"
-                        name="wickets"
-                        pattern="[0-9]{3}"
-                        placeholder="Enter Wickets Taken by player"
-                        value={formData.wickets}
-                        onChange={handleChange}
-                      ></input>
-                    </div>
-                  </div>*/}
-                  {/*<div className="col-md-3 stat-box orange">
-                    <div className="label">Being Out</div>
-                    <div className="value p-1">
-                      <input
-                        className="border-1 ph1"
-                        type="number"
-                        name="outs"
-                        width="100%"
-                        placeholder="Enter number of times player has been out"
-                        value={formData.outs}
-                        onChange={handleChange}
-                      ></input>
-                    </div>
-                  </div>*/}
-
                   {/* Teams */}
-                  <div className="col-6 team-box">
+                  <div className="col-md-6 team-box">
                     <div className="label bg-primary text-white p-2 rounded mb-2">
                       Played for Teams
                     </div>
@@ -631,6 +572,68 @@ const AdminRegister = () => {
                           </li>
                         ))}
                       </ul>
+                    </div>
+                  </div>
+
+                  {/* Career Statistics */}
+                  <div className="col-md-3 stat-box orange">
+                    <label className="label" htmlFor="totalRuns">Total Runs</label>
+                    <div className="value p-1">
+                      <input
+                        className="border-1 ph1"
+                        type="number"
+                        min="0"
+                        name="totalRuns"
+                        id="totalRuns"
+                        placeholder="Career Total Runs"
+                        value={formData.totalRuns}
+                        onChange={handleChange}
+                      ></input>
+                    </div>
+                  </div>
+                  <div className="col-md-3 stat-box orange">
+                    <label className="label" htmlFor="highestRuns">Highest Runs</label>
+                    <div className="value p-1">
+                      <input
+                        className="border-1 ph1"
+                        type="number"
+                        min="0"
+                        name="highestRuns"
+                        id="highestRuns"
+                        placeholder="Highest Runs in Match"
+                        value={formData.highestRuns}
+                        onChange={handleChange}
+                      ></input>
+                    </div>
+                  </div>
+                  <div className="col-md-3 stat-box orange">
+                    <label className="label" htmlFor="wickets">Wickets Taken</label>
+                    <div className="value p-1">
+                      <input
+                        className="border-1 ph1"
+                        type="number"
+                        min="0"
+                        name="wickets"
+                        id="wickets"
+                        placeholder="Wickets Taken"
+                        value={formData.wickets}
+                        onChange={handleChange}
+                      ></input>
+                    </div>
+                  </div>
+                  <div className="col-md-3 stat-box orange">
+                    <label className="label" htmlFor="outs">Being Out</label>
+                    <div className="value p-1">
+                      <input
+                        className="border-1 ph1"
+                        type="number"
+                        min="0"
+                        name="outs"
+                        id="outs"
+                        placeholder="Times Out"
+                        value={formData.outs}
+                        onChange={handleChange}
+                      ></input>
                     </div>
                   </div>
 

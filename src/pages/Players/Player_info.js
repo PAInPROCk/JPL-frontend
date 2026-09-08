@@ -101,41 +101,45 @@ const Player_info = () => {
                   <div className="label">Player Name</div>
                   <div className="value">{player.name}</div>
                 </div>
-                {/*<div className="col-md-3 info-box green">
+                <div className="col-md-3 info-box green">
                   <div className="label">Jersey No</div>
-                  <div className="value">{player.jersey}</div>
-                </div>*/}
+                  <div className="value">{player.jersey ?? "--"}</div>
+                </div>
                 <div className="col-md-3 info-box green">
                   <div className="label">Nick Name</div>
                   <div className="value">{player.nickname || "--"}</div>
                 </div>
 
-                <div className="col-md-6 info-box red">
+                <div className="col-md-4 info-box red">
                   <div className="label">Player Category</div>
-                  <div className="value">{player.category}</div>
+                  <div className="value">{player.category || "--"}</div>
                 </div>
-                <div className="col-md-6 info-box red">
+                <div className="col-md-4 info-box red">
                   <div className="label">Style</div>
-                  <div className="value">{player.type}</div>
+                  <div className="value">{player.type || "--"}</div>
+                </div>
+                <div className="col-md-4 info-box red">
+                  <div className="label">Base Price</div>
+                  <div className="value">₹{Number(player.base_price || 0).toLocaleString("en-IN")}</div>
                 </div>
 
                 {/* Stats */}
-                {/*<div className="col-md-3 stat-box orange">
+                <div className="col-md-3 stat-box orange">
                   <div className="label">Total Runs</div>
-                  <div className="value">{player.total_runs}</div>
+                  <div className="value">{player.total_runs ?? 0}</div>
                 </div>
                 <div className="col-md-3 stat-box orange">
                   <div className="label">Highest Runs</div>
-                  <div className="value">{player.highest_runs}</div>
+                  <div className="value">{player.highest_runs ?? 0}</div>
                 </div>
                 <div className="col-md-3 stat-box orange">
                   <div className="label">Wickets Taken</div>
-                  <div className="value">{player.wickets_taken}</div>
+                  <div className="value">{player.wickets_taken ?? 0}</div>
                 </div>
                 <div className="col-md-3 stat-box orange">
                   <div className="label">Being Out</div>
-                  <div className="value">{player.times_out}</div>
-                </div>*/}
+                  <div className="value">{player.times_out ?? 0}</div>
+                </div>
 
                 {/* Teams */}
                 <div className="col-12 team-box">
